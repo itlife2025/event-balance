@@ -12,6 +12,9 @@ import { BalanceCard } from '../components/BalanceCard';
 import { UpcomingEvents, Event } from '../components/UpcomingEvents';
 import { RecentRecords, Record } from '../components/RecentRecords';
 import { BottomNavigation } from '../components/BottomNavigation';
+import { RegisterScreen } from './RegisterScreen';
+import { DetailScreen } from './DetailScreen';
+import { SettingsScreen } from './SettingsScreen';
 
 type TabKey = 'home' | 'list' | 'stats' | 'settings';
 
@@ -76,6 +79,9 @@ const sampleMonthlyData = [
 
 export const HomeScreen: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabKey>('home');
+  const [showRegisterScreen, setShowRegisterScreen] = useState(false);
+  const [showDetailScreen, setShowDetailScreen] = useState(false);
+  const [showSettingsScreen, setShowSettingsScreen] = useState(false);
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
 
@@ -93,39 +99,70 @@ export const HomeScreen: React.FC = () => {
 
   const handleTabPress = (tab: TabKey) => {
     setActiveTab(tab);
+    setShowRegisterScreen(false);
+    if (tab === 'list') {
+      setShowDetailScreen(true);
+    } else if (tab === 'settings') {
+      setShowSettingsScreen(true);
+    } else {
+      setShowDetailScreen(false);
+      setShowSettingsScreen(false);
+    }
   };
 
   const handleAddPress = () => {
-    // Add button pressed
+    setShowRegisterScreen(true);
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
-      <View style={[styles.container, isTablet && styles.containerTablet]}>
-        <Header onNotificationPress={handleNotificationPress} />
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={[
-            styles.scrollContent,
-            isTablet && styles.scrollContentTablet,
-          ]}
-          showsVerticalScrollIndicator={false}
-        >
-          <BalanceCard
-            sentAmount={850000}
-            receivedAmount={1200000}
-            monthlyData={sampleMonthlyData}
-          />
-          <UpcomingEvents events={sampleEvents} onEventPress={handleEventPress} />
-          <RecentRecords records={sampleRecords} onRecordPress={handleRecordPress} />
-        </ScrollView>
-        <BottomNavigation
-          activeTab={activeTab}
-          onTabPress={handleTabPress}
-          onAddPress={handleAddPress}
+      {showRegisterScreen ? (
+        <RegisterScreen
+          onClose={() => setShowRegisterScreen(false)}
+          onNavPress={handleTabPress}
+          onAddPress={() => setShowRegisterScreen(false)}
         />
-      </View>
+      ) : showDetailScreen ? (
+        <DetailScreen
+          onClose={() => {
+            setShowDetailScreen(false);
+            setActiveTab('home');
+          }}
+          onNavPress={handleTabPress}
+          onAddPress={() => setShowRegisterScreen(true)}
+        />
+      ) : showSettingsScreen ? (
+        <SettingsScreen
+          onNavPress={handleTabPress}
+          onAddPress={() => setShowRegisterScreen(true)}
+        />
+      ) : (
+        <View style={[styles.container, isTablet && styles.containerTablet]}>
+          <Header onNotificationPress={handleNotificationPress} />
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={[
+              styles.scrollContent,
+              isTablet && styles.scrollContentTablet,
+            ]}
+            showsVerticalScrollIndicator={false}
+          >
+            <BalanceCard
+              sentAmount={850000}
+              receivedAmount={1200000}
+              monthlyData={sampleMonthlyData}
+            />
+            <UpcomingEvents events={sampleEvents} onEventPress={handleEventPress} />
+            <RecentRecords records={sampleRecords} onRecordPress={handleRecordPress} />
+          </ScrollView>
+          <BottomNavigation
+            activeTab={activeTab}
+            onTabPress={handleTabPress}
+            onAddPress={handleAddPress}
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
