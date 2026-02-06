@@ -210,6 +210,57 @@ export const BellIcon: React.FC<IconProps> = ({ size = 24, color = '#6B7280' }) 
   </View>
 );
 
+// Gift Icon
+export const GiftIcon: React.FC<IconProps> = ({ size = 24, color = '#6366F1' }) => (
+  <View style={[styles.iconContainer, { width: size, height: size }]}>
+    <View style={{
+      width: size * 0.7,
+      height: size * 0.45,
+      backgroundColor: color,
+      borderRadius: 3,
+      position: 'absolute',
+      bottom: size * 0.05,
+    }} />
+    <View style={{
+      width: size * 0.8,
+      height: size * 0.25,
+      backgroundColor: color,
+      borderRadius: 3,
+      position: 'absolute',
+      top: size * 0.25,
+    }} />
+    <View style={{
+      width: size * 0.1,
+      height: size * 0.7,
+      backgroundColor: '#FFFFFF',
+      position: 'absolute',
+      bottom: size * 0.05,
+    }} />
+    <View style={{
+      width: size * 0.3,
+      height: size * 0.2,
+      borderWidth: size * 0.06,
+      borderColor: color,
+      backgroundColor: 'transparent',
+      borderRadius: size * 0.1,
+      position: 'absolute',
+      top: size * 0.02,
+      left: size * 0.05,
+    }} />
+    <View style={{
+      width: size * 0.3,
+      height: size * 0.2,
+      borderWidth: size * 0.06,
+      borderColor: color,
+      backgroundColor: 'transparent',
+      borderRadius: size * 0.1,
+      position: 'absolute',
+      top: size * 0.02,
+      right: size * 0.05,
+    }} />
+  </View>
+);
+
 // Chevron Right Icon (>)
 export const ChevronRightIcon: React.FC<IconProps> = ({ size = 24, color = '#9CA3AF' }) => (
   <View style={[styles.iconContainer, { width: size, height: size }]}>
