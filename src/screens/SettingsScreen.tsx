@@ -4,14 +4,11 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
-  StatusBar,
   TouchableOpacity,
   useWindowDimensions,
   Switch,
 } from 'react-native';
 import { ChevronRightIcon, BellIcon } from '../components/Icons';
-import { BottomNavigation } from '../components/BottomNavigation';
 
 type NavTabKey = 'home' | 'list' | 'stats' | 'settings';
 
@@ -29,18 +26,6 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
   const [notificationEnabled, setNotificationEnabled] = useState(true);
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
-
-  const handleNavPress = (tab: NavTabKey) => {
-    if (onNavPress) {
-      onNavPress(tab);
-    }
-  };
-
-  const handleAddButtonPress = () => {
-    if (onAddPress) {
-      onAddPress();
-    }
-  };
 
   const SettingItem = ({
     icon,
@@ -93,166 +78,152 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
-      <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <BellIcon size={isTablet ? 28 : 24} color="#6B7280" />
-          <Text style={[styles.headerTitle, isTablet && styles.headerTitleTablet]}>
-            설정
-          </Text>
-          <View style={{ width: 30 }} />
-        </View>
-
-        {/* Content */}
-        <View style={styles.contentWrapper}>
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={[
-              styles.scrollContent,
-              isTablet && styles.scrollContentTablet,
-            ]}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Profile Section */}
-            <View style={[styles.section, isTablet && styles.sectionTablet]}>
-              <TouchableOpacity style={[styles.profileCard, isTablet && styles.profileCardTablet]}>
-                <View style={[styles.profileAvatar, isTablet && styles.profileAvatarTablet]}>
-                  <Text style={styles.profileInitial}>김</Text>
-                </View>
-                <View style={styles.profileInfo}>
-                  <Text style={[styles.profileName, isTablet && styles.profileNameTablet]}>
-                    김민수
-                  </Text>
-                  <Text style={[styles.profileSub, isTablet && styles.profileSubTablet]}>
-                    프로필 수정
-                  </Text>
-                </View>
-                <ChevronRightIcon size={isTablet ? 24 : 20} color="#D1D5DB" />
-              </TouchableOpacity>
-            </View>
-
-            {/* Notification Section */}
-            <View style={[styles.section, isTablet && styles.sectionTablet]}>
-              <Text style={[styles.sectionTitle, isTablet && styles.sectionTitleTablet]}>
-                알림 설정
-              </Text>
-              <SettingItem
-                icon={<BellIcon size={isTablet ? 22 : 20} color="#6366F1" />}
-                label="알림 설정"
-                isToggle={true}
-                toggleValue={notificationEnabled}
-                onToggleChange={setNotificationEnabled}
-              />
-              <SettingItem
-                icon={
-                  <Text style={styles.sectionIcon}>🌐</Text>
-                }
-                label="알림 시점"
-                value="D-1, 당일"
-              />
-              <SettingItem
-                icon={
-                  <Text style={styles.sectionIcon}>🕐</Text>
-                }
-                label="알림 시간"
-                value="오전 9시"
-              />
-            </View>
-
-            {/* App Settings Section */}
-            <View style={[styles.section, isTablet && styles.sectionTablet]}>
-              <Text style={[styles.sectionTitle, isTablet && styles.sectionTitleTablet]}>
-                앱 설정
-              </Text>
-              <SettingItem
-                icon={
-                  <Text style={styles.sectionIcon}>🔊</Text>
-                }
-                label="설정"
-              />
-              <SettingItem
-                icon={
-                  <Text style={styles.sectionIcon}>💱</Text>
-                }
-                label="통화 단위"
-                value="원 ( ₩ )"
-              />
-              <SettingItem
-                icon={
-                  <Text style={styles.sectionIcon}>💰</Text>
-                }
-                label="금액 포시"
-                value="+ / -, 철리"
-              />
-              <SettingItem
-                icon={
-                  <Text style={styles.sectionIcon}>🌙</Text>
-                }
-                label="다크모드"
-                isToggle={true}
-                toggleValue={darkModeEnabled}
-                onToggleChange={setDarkModeEnabled}
-              />
-            </View>
-
-            {/* Data Section */}
-            <View style={[styles.section, isTablet && styles.sectionTablet]}>
-              <Text style={[styles.sectionTitle, isTablet && styles.sectionTitleTablet]}>
-                데이터
-              </Text>
-              <SettingItem
-                icon={
-                  <Text style={styles.sectionIcon}>☁️</Text>
-                }
-                label="데이터"
-              />
-              <SettingItem
-                icon={
-                  <Text style={styles.sectionIcon}>💾</Text>
-                }
-                label="데이터 백업하기"
-              />
-            </View>
-
-            {/* Info Section */}
-            <View style={[styles.section, isTablet && styles.sectionTablet]}>
-              <SettingItem
-                icon={
-                  <Text style={styles.sectionIcon}>ℹ️</Text>
-                }
-                label="앱 정보"
-              />
-            </View>
-
-            {/* Reset Button */}
-            <View style={[styles.section, { marginBottom: 100 }, isTablet && styles.sectionTablet]}>
-              <TouchableOpacity style={[styles.resetButton, isTablet && styles.resetButtonTablet]}>
-                <Text style={[styles.resetButtonText, isTablet && styles.resetButtonTextTablet]}>
-                  초기화
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </View>
-
-        {/* Bottom Navigation */}
-        <BottomNavigation
-          activeTab="settings"
-          onTabPress={handleNavPress}
-          onAddPress={handleAddButtonPress}
-        />
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <BellIcon size={isTablet ? 28 : 24} color="#6B7280" />
+        <Text style={[styles.headerTitle, isTablet && styles.headerTitleTablet]}>
+          설정
+        </Text>
+        <View style={{ width: 30 }} />
       </View>
-    </SafeAreaView>
+
+      {/* Content */}
+      <View style={styles.contentWrapper}>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={[
+            styles.scrollContent,
+            isTablet && styles.scrollContentTablet,
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Profile Section */}
+          <View style={[styles.section, isTablet && styles.sectionTablet]}>
+            <TouchableOpacity style={[styles.profileCard, isTablet && styles.profileCardTablet]}>
+              <View style={[styles.profileAvatar, isTablet && styles.profileAvatarTablet]}>
+                <Text style={styles.profileInitial}>김</Text>
+              </View>
+              <View style={styles.profileInfo}>
+                <Text style={[styles.profileName, isTablet && styles.profileNameTablet]}>
+                  김민수
+                </Text>
+                <Text style={[styles.profileSub, isTablet && styles.profileSubTablet]}>
+                  프로필 수정
+                </Text>
+              </View>
+              <ChevronRightIcon size={isTablet ? 24 : 20} color="#D1D5DB" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Notification Section */}
+          <View style={[styles.section, isTablet && styles.sectionTablet]}>
+            <Text style={[styles.sectionTitle, isTablet && styles.sectionTitleTablet]}>
+              알림 설정
+            </Text>
+            <SettingItem
+              icon={<BellIcon size={isTablet ? 22 : 20} color="#6366F1" />}
+              label="알림 설정"
+              isToggle={true}
+              toggleValue={notificationEnabled}
+              onToggleChange={setNotificationEnabled}
+            />
+            <SettingItem
+              icon={
+                <Text style={styles.sectionIcon}>🌐</Text>
+              }
+              label="알림 시점"
+              value="D-1, 당일"
+            />
+            <SettingItem
+              icon={
+                <Text style={styles.sectionIcon}>🕐</Text>
+              }
+              label="알림 시간"
+              value="오전 9시"
+            />
+          </View>
+
+          {/* App Settings Section */}
+          <View style={[styles.section, isTablet && styles.sectionTablet]}>
+            <Text style={[styles.sectionTitle, isTablet && styles.sectionTitleTablet]}>
+              앱 설정
+            </Text>
+            <SettingItem
+              icon={
+                <Text style={styles.sectionIcon}>🔊</Text>
+              }
+              label="설정"
+            />
+            <SettingItem
+              icon={
+                <Text style={styles.sectionIcon}>💱</Text>
+              }
+              label="통화 단위"
+              value="원 ( ₩ )"
+            />
+            <SettingItem
+              icon={
+                <Text style={styles.sectionIcon}>💰</Text>
+              }
+              label="금액 표시"
+              value="+ / -, 천단위"
+            />
+            <SettingItem
+              icon={
+                <Text style={styles.sectionIcon}>🌙</Text>
+              }
+              label="다크모드"
+              isToggle={true}
+              toggleValue={darkModeEnabled}
+              onToggleChange={setDarkModeEnabled}
+            />
+          </View>
+
+          {/* Data Section */}
+          <View style={[styles.section, isTablet && styles.sectionTablet]}>
+            <Text style={[styles.sectionTitle, isTablet && styles.sectionTitleTablet]}>
+              데이터
+            </Text>
+            <SettingItem
+              icon={
+                <Text style={styles.sectionIcon}>☁️</Text>
+              }
+              label="데이터"
+            />
+            <SettingItem
+              icon={
+                <Text style={styles.sectionIcon}>💾</Text>
+              }
+              label="데이터 백업하기"
+            />
+          </View>
+
+          {/* Info Section */}
+          <View style={[styles.section, isTablet && styles.sectionTablet]}>
+            <SettingItem
+              icon={
+                <Text style={styles.sectionIcon}>ℹ️</Text>
+              }
+              label="앱 정보"
+            />
+          </View>
+
+          {/* Reset Button */}
+          <View style={[styles.section, { marginBottom: 100 }, isTablet && styles.sectionTablet]}>
+            <TouchableOpacity style={[styles.resetButton, isTablet && styles.resetButtonTablet]}>
+              <Text style={[styles.resetButtonText, isTablet && styles.resetButtonTextTablet]}>
+                초기화
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
@@ -284,7 +255,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 16,
     paddingVertical: 16,
-    paddingBottom: 80,
+    paddingBottom: 20,
   },
   scrollContentTablet: {
     paddingHorizontal: 32,

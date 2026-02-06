@@ -4,18 +4,15 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
-  StatusBar,
   TouchableOpacity,
   TextInput,
   useWindowDimensions,
 } from 'react-native';
 import { ChevronRightIcon, CalendarIcon } from '../components/Icons';
-import { BottomNavigation } from '../components/BottomNavigation';
 
 type EventType = 'wedding' | 'funeral' | 'gift' | 'celebration';
 type TabType = 'pay' | 'receive';
-type NavTabKey = 'home' | 'list' | 'stats' | 'settings';
+type NavTabKey = 'home' | 'list' | 'register' | 'stats' | 'settings';
 
 interface RegisterScreenProps {
   onClose?: () => void;
@@ -25,8 +22,6 @@ interface RegisterScreenProps {
 
 export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   onClose,
-  onNavPress,
-  onAddPress,
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -62,21 +57,9 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
     });
   };
 
-  const handleNavPress = (tab: NavTabKey) => {
-    if (onNavPress) {
-      onNavPress(tab);
-    }
-  };
-
-  const handleAddButtonPress = () => {
-    // RegisterScreen에서 + 버튼은 아무것도 하지 않음
-  };
-
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
-      <View style={styles.container}>
-        {/* Header */}
+    <View style={styles.container}>
+      {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
             <Text style={styles.backButton}>{'<'}</Text>
@@ -201,11 +184,19 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                 {quickAmounts.map((quickAmount, index) => (
                   <TouchableOpacity
                     key={index}
-                    style={[styles.quickAmountButton, isTablet && styles.quickAmountButtonTablet]}
+                    style={[
+                      styles.quickAmountButton,
+                      isTablet && styles.quickAmountButtonTablet,
+                    ]}
                     onPress={() => handleQuickAmount(quickAmount)}
                     activeOpacity={0.7}
                   >
-                    <Text style={[styles.quickAmountText, isTablet && styles.quickAmountTextTablet]}>
+                    <Text
+                      style={[
+                        styles.quickAmountText,
+                        isTablet && styles.quickAmountTextTablet,
+                      ]}
+                    >
                       +{quickAmount}만
                     </Text>
                   </TouchableOpacity>
@@ -242,45 +233,29 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               />
             </View>
 
-            {/* Spacer for Save Button */}
-            <View style={styles.spacer} />
-          </ScrollView>
-
           {/* Save Button */}
-          <View style={[styles.saveButtonContainer, isTablet && styles.saveButtonContainerTablet]}>
+          <View style={[styles.section, { marginBottom: 40 }, isTablet && styles.sectionTablet]}>
             <TouchableOpacity
               style={[styles.saveButton, isTablet && styles.saveButtonTablet]}
               onPress={handleSave}
-              activeOpacity={0.8}
+              activeOpacity={0.7}
             >
               <Text style={[styles.saveButtonText, isTablet && styles.saveButtonTextTablet]}>
                 저장하기
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
-
-        {/* Bottom Navigation */}
-        <BottomNavigation
-          activeTab="home"
-          onTabPress={handleNavPress}
-          onAddPress={handleAddButtonPress}
-        />
+        </ScrollView>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
     flexDirection: 'column',
-    paddingBottom: 120,
   },
   header: {
     flexDirection: 'row',
@@ -541,42 +516,42 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     minHeight: 100,
   },
-  spacer: {
-    height: 20,
-  },
-  saveButtonContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+  section: {
+    marginBottom: 20,
     backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  saveButtonContainerTablet: {
-    paddingHorizontal: 32,
-    paddingVertical: 14,
+  sectionTablet: {
+    marginBottom: 24,
+    borderRadius: 14,
   },
   saveButton: {
+    marginHorizontal: 12,
+    marginVertical: 8,
+    paddingVertical: 12,
     backgroundColor: '#6366F1',
     borderRadius: 10,
-    paddingVertical: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 8,
   },
   saveButtonTablet: {
+    marginHorizontal: 14,
+    marginVertical: 10,
     paddingVertical: 14,
     borderRadius: 12,
   },
   saveButtonText: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
     color: '#FFFFFF',
   },
   saveButtonTextTablet: {
-    fontSize: 16,
+    fontSize: 15,
   },
 });

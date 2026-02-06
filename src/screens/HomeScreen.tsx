@@ -18,7 +18,7 @@ import { SettingsScreen } from './SettingsScreen';
 import { ListScreen } from './ListScreen';
 import { StatsScreen } from './StatsScreen';
 
-type TabKey = 'home' | 'list' | 'stats' | 'settings';
+type TabKey = 'home' | 'list' | 'register' | 'stats' | 'settings';
 
 const sampleEvents: Event[] = [
   {
@@ -81,11 +81,8 @@ const sampleMonthlyData = [
 
 export const HomeScreen: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabKey>('home');
-  const [showRegisterScreen, setShowRegisterScreen] = useState(false);
   const [showDetailScreen, setShowDetailScreen] = useState(false);
   const [showSettingsScreen, setShowSettingsScreen] = useState(false);
-  const [showListScreen, setShowListScreen] = useState(false);
-  const [showStatsScreen, setShowStatsScreen] = useState(false);
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
 
@@ -103,85 +100,110 @@ export const HomeScreen: React.FC = () => {
 
   const handleTabPress = (tab: TabKey) => {
     setActiveTab(tab);
-    setShowRegisterScreen(false);
-    setShowListScreen(false);
     setShowDetailScreen(false);
-    setShowSettingsScreen(false);
-    setShowStatsScreen(false);
-    if (tab === 'list') {
-      setShowListScreen(true);
-    } else if (tab === 'settings') {
-      setShowSettingsScreen(true);
-    } else if (tab === 'stats') {
-      setShowStatsScreen(true);
-    }
   };
 
   const handleAddPress = () => {
-    setShowRegisterScreen(true);
+    setActiveTab('register');
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'register':
+        return (
+          <RegisterScreen
+            onClose={() => setActiveTab('home')}
+            onNavPress={handleTabPress}
+          />
+        );
+      case 'settings':
+        return (
+          <SettingsScreen
+            onNavPress={handleTabPress}
+            onAddPress={handleAddPress}
+          />
+        );
+      case 'stats':
+        return (
+          <StatsScreen
+          // onNavPress={handleTabPress}
+          // onAddPress={handleAddPress}
+          />
+        );
+      case 'list':
+        return (
+          <View style={[styles.container, isTablet && styles.containerTablet]}>
+            <Header onNotificationPress={handleNotificationPress} />
+            <ScrollView
+              style={styles.scrollView}
+              contentContainerStyle={[
+                styles.scrollContent,
+                isTablet && styles.scrollContentTablet,
+              ]}
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.contentWrapper}>
+                <ListScreen onTransactionPress={() => setShowDetailScreen(true)} />
+              </View>
+            </ScrollView>
+          </View>
+        );
+      case 'home':
+      default:
+        // 기본 홈 화면 컨텐츠
+        return (
+          <View style={[styles.container, isTablet && styles.containerTablet]}>
+            <Header onNotificationPress={handleNotificationPress} />
+            <ScrollView
+              style={styles.scrollView}
+              contentContainerStyle={[
+                styles.scrollContent,
+                isTablet && styles.scrollContentTablet,
+              ]}
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.contentWrapper}>
+                <BalanceCard
+                  sentAmount={850000}
+                  receivedAmount={1200000}
+                  monthlyData={sampleMonthlyData}
+                />
+                <UpcomingEvents events={sampleEvents} onEventPress={handleEventPress} />
+                <RecentRecords records={sampleRecords} onRecordPress={handleRecordPress} />
+              </View>
+            </ScrollView>
+          </View>
+        );
+    }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
-      {showRegisterScreen ? (
-        <RegisterScreen
-          onClose={() => setShowRegisterScreen(false)}
-          onNavPress={handleTabPress}
-          onAddPress={() => setShowRegisterScreen(false)}
-        />
-      ) : showDetailScreen ? (
+      {showDetailScreen ? (
         <DetailScreen
           onClose={() => {
             setShowDetailScreen(false);
             setActiveTab('home');
           }}
           onNavPress={handleTabPress}
-          onAddPress={() => setShowRegisterScreen(true)}
-        />
-      ) : showSettingsScreen ? (
-        <SettingsScreen
-          onNavPress={handleTabPress}
-          onAddPress={() => setShowRegisterScreen(true)}
-        />
-      ) : showStatsScreen ? (
-        <StatsScreen
-          onNavPress={handleTabPress}
-          onAddPress={() => setShowRegisterScreen(true)}
+          onAddPress={() => setActiveTab('register')}
         />
       ) : (
-        <View style={[styles.container, isTablet && styles.containerTablet]}>
-          <Header onNotificationPress={handleNotificationPress} />
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={styles.contentWrapper}>
-              {showListScreen ? (
-                <ListScreen onTransactionPress={() => {
-                  setShowDetailScreen(true);
-                  setShowListScreen(false);
-                }} />
-              ) : (
-                <>
-                  <BalanceCard
-                    sentAmount={850000}
-                    receivedAmount={1200000}
-                    monthlyData={sampleMonthlyData}
-                  />
-                  <UpcomingEvents events={sampleEvents} onEventPress={handleEventPress} />
-                  <RecentRecords records={sampleRecords} onRecordPress={handleRecordPress} />
-                </>
-              )}
-            </View>
-          </ScrollView>
+        <>
+          {/* Main Content Area */}
+          <View style={{ flex: 1, paddingBottom: 60 }}>
+            {renderContent()}
+          </View>
+
+          {/* Global Bottom Navigation */}
+          {/* Register 화면 등 네비게이션이 필요한 모든 화면에 공통 적용 */}
           <BottomNavigation
             activeTab={activeTab}
             onTabPress={handleTabPress}
             onAddPress={handleAddPress}
           />
-        </View>
+        </>
       )}
     </SafeAreaView>
   );
@@ -201,12 +223,15 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    alignSelf: 'stretch',
   },
   scrollContent: {
     paddingTop: 8,
     paddingBottom: 20,
-    alignItems: 'center',
+  },
+  scrollContentTablet: {
+    paddingTop: 16,
+    maxWidth: 800,
+    width: '100%',
   },
   contentWrapper: {
     maxWidth: 800,

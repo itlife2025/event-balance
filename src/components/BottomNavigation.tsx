@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { HomeIcon, ChartIcon, ListIcon, SettingsIcon, PlusIcon } from './Icons';
 
-type TabKey = 'home' | 'list' | 'stats' | 'settings';
+type TabKey = 'home' | 'list' | 'register' | 'stats' | 'settings';
 
 interface BottomNavigationProps {
   activeTab?: TabKey;
@@ -59,9 +59,13 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
 
         <View style={styles.addButtonContainer}>
           <TouchableOpacity
-            style={[styles.addButton, isTablet && styles.addButtonTablet]}
             onPress={onAddPress}
             activeOpacity={0.8}
+            style={[
+              styles.addButton,
+              isTablet && styles.addButtonTablet,
+              activeTab === 'register' && styles.addButtonActive
+            ]}
           >
             <PlusIcon size={isTablet ? 28 : 24} color="#FFFFFF" />
           </TouchableOpacity>
@@ -158,5 +162,9 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     marginTop: -30,
+  },
+  addButtonActive: {
+    backgroundColor: '#4338CA', // Darker indigo for active state
+    transform: [{ scale: 1.05 }],
   },
 });
