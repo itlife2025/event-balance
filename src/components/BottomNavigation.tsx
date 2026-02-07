@@ -1,12 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { NavTabKey } from '../types/navigation';
 import { HomeIcon, ChartIcon, ListIcon, SettingsIcon, PlusIcon } from './Icons';
 
-type TabKey = 'home' | 'list' | 'register' | 'stats' | 'settings';
-
 interface BottomNavigationProps {
-  activeTab?: TabKey;
-  onTabPress?: (tab: TabKey) => void;
+  activeTab?: NavTabKey;
+  onTabPress?: (tab: NavTabKey) => void;
   onAddPress?: () => void;
 }
 
@@ -19,7 +18,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   const isTablet = width >= 768;
 
   const renderTab = (
-    key: TabKey,
+    key: NavTabKey,
     label: string,
     Icon: React.FC<{ size: number; color: string }>
   ) => {

@@ -9,15 +9,14 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { ChevronRightIcon, CalendarIcon } from '../components/Icons';
+import { Header } from '../components/Header';
+
 
 type EventType = 'wedding' | 'funeral' | 'gift' | 'celebration';
 type TabType = 'pay' | 'receive';
-type NavTabKey = 'home' | 'list' | 'register' | 'stats' | 'settings';
 
 interface RegisterScreenProps {
   onClose?: () => void;
-  onNavPress?: (tab: NavTabKey) => void;
-  onAddPress?: () => void;
 }
 
 export const RegisterScreen: React.FC<RegisterScreenProps> = ({
@@ -60,178 +59,170 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   return (
     <View style={styles.container}>
       {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
-            <Text style={styles.backButton}>{'<'}</Text>
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, isTablet && styles.headerTitleTablet]}>
-            내역 추가
-          </Text>
-          <View style={{ width: 30 }} />
-        </View>
+      <Header title="내역 추가" />
 
-        {/* Content Area */}
-        <View style={styles.contentArea}>
-          {/* ScrollView */}
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={[
-              styles.scrollContent,
-              isTablet && styles.scrollContentTablet,
-            ]}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Tab Buttons */}
-            <View style={[styles.tabContainer, isTablet && styles.tabContainerTablet]}>
-              <TouchableOpacity
+      {/* Content Area */}
+      <View style={styles.contentArea}>
+        {/* ScrollView */}
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={[
+            styles.scrollContent,
+            isTablet && styles.scrollContentTablet,
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Tab Buttons */}
+          <View style={[styles.tabContainer, isTablet && styles.tabContainerTablet]}>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                activeTab === 'pay' && styles.tabButtonActive,
+              ]}
+              onPress={() => setActiveTab('pay')}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.tabIcon}>🎁</Text>
+              <Text
                 style={[
-                  styles.tabButton,
-                  activeTab === 'pay' && styles.tabButtonActive,
+                  styles.tabLabel,
+                  activeTab === 'pay' && styles.tabLabelActive,
                 ]}
-                onPress={() => setActiveTab('pay')}
-                activeOpacity={0.7}
               >
-                <Text style={styles.tabIcon}>🎁</Text>
-                <Text
-                  style={[
-                    styles.tabLabel,
-                    activeTab === 'pay' && styles.tabLabelActive,
-                  ]}
-                >
-                  받기
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
+                받기
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                activeTab === 'receive' && styles.tabButtonActive,
+              ]}
+              onPress={() => setActiveTab('receive')}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.tabIcon}>🌸</Text>
+              <Text
                 style={[
-                  styles.tabButton,
-                  activeTab === 'receive' && styles.tabButtonActive,
+                  styles.tabLabel,
+                  activeTab === 'receive' && styles.tabLabelActive,
                 ]}
-                onPress={() => setActiveTab('receive')}
-                activeOpacity={0.7}
               >
-                <Text style={styles.tabIcon}>🌸</Text>
-                <Text
+                보내기
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Search Bar */}
+          <View style={[styles.searchContainer, isTablet && styles.searchContainerTablet]}>
+            <Text style={styles.searchIcon}>🔍</Text>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="이름을 입력하세요"
+              placeholderTextColor="#D1D5DB"
+              value={eventName}
+              onChangeText={setEventName}
+            />
+          </View>
+
+          {/* Event Type Selection */}
+          <View style={[styles.sectionContainer, isTablet && styles.sectionContainerTablet]}>
+            <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet]}>
+              종류
+            </Text>
+            <View style={styles.typeButtonsContainer}>
+              {eventTypes.map((type) => (
+                <TouchableOpacity
+                  key={type.key}
                   style={[
-                    styles.tabLabel,
-                    activeTab === 'receive' && styles.tabLabelActive,
+                    styles.typeButton,
+                    selectedType === type.key && styles.typeButtonActive,
                   ]}
+                  onPress={() => setSelectedType(type.key as EventType)}
+                  activeOpacity={0.7}
                 >
-                  보내기
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Search Bar */}
-            <View style={[styles.searchContainer, isTablet && styles.searchContainerTablet]}>
-              <Text style={styles.searchIcon}>🔍</Text>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="이름을 입력하세요"
-                placeholderTextColor="#D1D5DB"
-                value={eventName}
-                onChangeText={setEventName}
-              />
-            </View>
-
-            {/* Event Type Selection */}
-            <View style={[styles.sectionContainer, isTablet && styles.sectionContainerTablet]}>
-              <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet]}>
-                종류
-              </Text>
-              <View style={styles.typeButtonsContainer}>
-                {eventTypes.map((type) => (
-                  <TouchableOpacity
-                    key={type.key}
+                  <Text
                     style={[
-                      styles.typeButton,
-                      selectedType === type.key && styles.typeButtonActive,
+                      styles.typeButtonText,
+                      selectedType === type.key && styles.typeButtonTextActive,
                     ]}
-                    onPress={() => setSelectedType(type.key as EventType)}
-                    activeOpacity={0.7}
                   >
-                    <Text
-                      style={[
-                        styles.typeButtonText,
-                        selectedType === type.key && styles.typeButtonTextActive,
-                      ]}
-                    >
-                      {type.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
+                    {type.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
+          </View>
 
-            {/* Date */}
-            <View style={[styles.sectionContainer, isTablet && styles.sectionContainerTablet]}>
-              <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet]}>
-                날짜
+          {/* Date */}
+          <View style={[styles.sectionContainer, isTablet && styles.sectionContainerTablet]}>
+            <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet]}>
+              날짜
+            </Text>
+            <TouchableOpacity style={[styles.inputBox, isTablet && styles.inputBoxTablet]}>
+              <Text style={[styles.inputText, isTablet && styles.inputTextTablet]}>
+                {date}
               </Text>
-              <TouchableOpacity style={[styles.inputBox, isTablet && styles.inputBoxTablet]}>
-                <Text style={[styles.inputText, isTablet && styles.inputTextTablet]}>
-                  {date}
-                </Text>
-                <CalendarIcon size={isTablet ? 20 : 18} color="#6B7280" />
-              </TouchableOpacity>
-            </View>
+              <CalendarIcon size={isTablet ? 20 : 18} color="#6B7280" />
+            </TouchableOpacity>
+          </View>
 
-            {/* Amount */}
-            <View style={[styles.sectionContainer, isTablet && styles.sectionContainerTablet]}>
-              <Text style={[styles.amountDisplay, isTablet && styles.amountDisplayTablet]}>
-                ₩ {amount} 만원
-              </Text>
-              <View style={styles.quickAmountContainer}>
-                {quickAmounts.map((quickAmount, index) => (
-                  <TouchableOpacity
-                    key={index}
+          {/* Amount */}
+          <View style={[styles.sectionContainer, isTablet && styles.sectionContainerTablet]}>
+            <Text style={[styles.amountDisplay, isTablet && styles.amountDisplayTablet]}>
+              ₩ {amount} 만원
+            </Text>
+            <View style={styles.quickAmountContainer}>
+              {quickAmounts.map((quickAmount, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.quickAmountButton,
+                    isTablet && styles.quickAmountButtonTablet,
+                  ]}
+                  onPress={() => handleQuickAmount(quickAmount)}
+                  activeOpacity={0.7}
+                >
+                  <Text
                     style={[
-                      styles.quickAmountButton,
-                      isTablet && styles.quickAmountButtonTablet,
+                      styles.quickAmountText,
+                      isTablet && styles.quickAmountTextTablet,
                     ]}
-                    onPress={() => handleQuickAmount(quickAmount)}
-                    activeOpacity={0.7}
                   >
-                    <Text
-                      style={[
-                        styles.quickAmountText,
-                        isTablet && styles.quickAmountTextTablet,
-                      ]}
-                    >
-                      +{quickAmount}만
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
+                    +{quickAmount}만
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
+          </View>
 
-            {/* Relation */}
-            <View style={[styles.sectionContainer, isTablet && styles.sectionContainerTablet]}>
-              <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet]}>
-                관계
+          {/* Relation */}
+          <View style={[styles.sectionContainer, isTablet && styles.sectionContainerTablet]}>
+            <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet]}>
+              관계
+            </Text>
+            <TouchableOpacity style={[styles.inputBox, isTablet && styles.inputBoxTablet]}>
+              <Text style={[styles.placeholderText, isTablet && styles.inputTextTablet]}>
+                친구 / 직장 / 가족...
               </Text>
-              <TouchableOpacity style={[styles.inputBox, isTablet && styles.inputBoxTablet]}>
-                <Text style={[styles.placeholderText, isTablet && styles.inputTextTablet]}>
-                  친구 / 직장 / 가족...
-                </Text>
-                <ChevronRightIcon size={isTablet ? 20 : 18} color="#9CA3AF" />
-              </TouchableOpacity>
-            </View>
+              <ChevronRightIcon size={isTablet ? 20 : 18} color="#9CA3AF" />
+            </TouchableOpacity>
+          </View>
 
-            {/* Memo */}
-            <View style={[styles.sectionContainer, isTablet && styles.sectionContainerTablet]}>
-              <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet]}>
-                메모를 남겨보세요
-              </Text>
-              <TextInput
-                style={[styles.memoInput, isTablet && styles.memoInputTablet]}
-                placeholder="메모를 남겨보세요"
-                placeholderTextColor="#D1D5DB"
-                multiline
-                numberOfLines={3}
-                value={memo}
-                onChangeText={setMemo}
-              />
-            </View>
+          {/* Memo */}
+          <View style={[styles.sectionContainer, isTablet && styles.sectionContainerTablet]}>
+            <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet]}>
+              메모를 남겨보세요
+            </Text>
+            <TextInput
+              style={[styles.memoInput, isTablet && styles.memoInputTablet]}
+              placeholder="메모를 남겨보세요"
+              placeholderTextColor="#D1D5DB"
+              multiline
+              numberOfLines={3}
+              value={memo}
+              onChangeText={setMemo}
+            />
+          </View>
 
           {/* Save Button */}
           <View style={[styles.section, { marginBottom: 40 }, isTablet && styles.sectionTablet]}>
@@ -256,31 +247,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F9FAFB',
     flexDirection: 'column',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  backButton: {
-    fontSize: 24,
-    color: '#6B7280',
-    fontWeight: '500',
-    width: 30,
-    textAlign: 'center',
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
-  },
-  headerTitleTablet: {
-    fontSize: 18,
   },
   contentArea: {
     flex: 1,

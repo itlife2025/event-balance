@@ -12,8 +12,8 @@ import {
 import { Header } from '../components/Header';
 import { BottomNavigation } from '../components/BottomNavigation';
 import { WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
+import { NavTabKey } from '../types/navigation';
 
-type TabKey = 'home' | 'list' | 'stats' | 'settings';
 type PeriodFilter = 'month' | 'year' | 'all';
 type AmountTab = 'sent' | 'received';
 type EventType = 'wedding' | 'funeral' | 'birthday';
@@ -35,7 +35,7 @@ interface DetailItem {
 }
 
 interface StatsScreenProps {
-  onNavPress?: (tab: TabKey) => void;
+  onNavPress?: (tab: NavTabKey) => void;
   onAddPress?: () => void;
 }
 
@@ -95,7 +95,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
   const chartSize = isTablet ? 180 : 150;
   const strokeWidth = isTablet ? 28 : 24;
 
-  const handleNavPress = (tab: TabKey) => {
+  const handleNavPress = (tab: NavTabKey) => {
     onNavPress?.(tab);
   };
 
@@ -155,243 +155,239 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
         <Header title="경조사비 통계" />
         <ScrollView
           style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            isTablet && styles.scrollContentTablet,
+          ]}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.contentWrapper}>
-            {/* Summary Cards - Selectable Tabs */}
-            <View style={[styles.summaryContainer, isTablet && styles.summaryContainerTablet]}>
-              <TouchableOpacity
-                style={[
-                  styles.summaryCard,
-                  amountTab === 'sent' && styles.summaryCardActiveSent,
-                ]}
-                onPress={() => setAmountTab('sent')}
-                activeOpacity={0.7}
+          {/* Summary Cards - Selectable Tabs */}
+          <View style={[styles.summaryContainer, isTablet && styles.summaryContainerTablet]}>
+            <TouchableOpacity
+              style={[
+                styles.summaryCard,
+                amountTab === 'sent' && styles.summaryCardActiveSent,
+              ]}
+              onPress={() => setAmountTab('sent')}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.summaryLabel}>보낸 금액</Text>
+              <Text
+                style={[styles.summaryAmount, styles.sentAmountText]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
               >
-                <Text style={styles.summaryLabel}>보낸 금액</Text>
-                <Text
-                  style={[styles.summaryAmount, styles.sentAmountText]}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                >
-                  ₩{sentAmount.toLocaleString()}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.summaryCard,
-                  amountTab === 'received' && styles.summaryCardActiveReceived,
-                ]}
-                onPress={() => setAmountTab('received')}
-                activeOpacity={0.7}
+                ₩{sentAmount.toLocaleString()}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.summaryCard,
+                amountTab === 'received' && styles.summaryCardActiveReceived,
+              ]}
+              onPress={() => setAmountTab('received')}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.summaryLabel}>받은 금액</Text>
+              <Text
+                style={[styles.summaryAmount, styles.receivedAmountText]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
               >
-                <Text style={styles.summaryLabel}>받은 금액</Text>
-                <Text
-                  style={[styles.summaryAmount, styles.receivedAmountText]}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                >
-                  ₩{receivedAmount.toLocaleString()}
-                </Text>
-              </TouchableOpacity>
-            </View>
+                ₩{receivedAmount.toLocaleString()}
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-            {/* Period Filter Tabs */}
-            <View style={[styles.filterContainer, isTablet && styles.filterContainerTablet]}>
-              {periods.map((period) => (
-                <TouchableOpacity
-                  key={period.key}
+          {/* Period Filter Tabs */}
+          <View style={[styles.filterContainer, isTablet && styles.filterContainerTablet]}>
+            {periods.map((period) => (
+              <TouchableOpacity
+                key={period.key}
+                style={[
+                  styles.filterTab,
+                  activePeriod === period.key && styles.filterTabActive,
+                  activePeriod === period.key && { borderBottomColor: currentColor },
+                ]}
+                onPress={() => setActivePeriod(period.key)}
+                activeOpacity={0.7}
+              >
+                <Text
                   style={[
-                    styles.filterTab,
-                    activePeriod === period.key && styles.filterTabActive,
-                    activePeriod === period.key && { borderBottomColor: currentColor },
+                    styles.filterTabText,
+                    activePeriod === period.key && styles.filterTabTextActive,
                   ]}
-                  onPress={() => setActivePeriod(period.key)}
-                  activeOpacity={0.7}
                 >
-                  <Text
-                    style={[
-                      styles.filterTabText,
-                      activePeriod === period.key && styles.filterTabTextActive,
-                    ]}
-                  >
-                    {period.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                  {period.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Combined Card */}
+          <View style={[styles.combinedCard, isTablet && styles.combinedCardTablet]}>
+            {/* Date Selector */}
+            <View style={styles.dateSelectorContainer}>
+              <TouchableOpacity style={styles.dateSelector} activeOpacity={0.7}>
+                <Text style={[styles.dateSelectorText, isTablet && styles.dateSelectorTextTablet]}>
+                  2026년 1월
+                </Text>
+                <Text style={styles.dateSelectorArrow}>{'∨'}</Text>
+              </TouchableOpacity>
             </View>
 
-            {/* Combined Card */}
-            <View style={[styles.combinedCard, isTablet && styles.combinedCardTablet]}>
-              {/* Date Selector */}
-              <View style={styles.dateSelectorContainer}>
-                <TouchableOpacity style={styles.dateSelector} activeOpacity={0.7}>
-                  <Text style={[styles.dateSelectorText, isTablet && styles.dateSelectorTextTablet]}>
-                    2026년 1월
-                  </Text>
-                  <Text style={styles.dateSelectorArrow}>{'∨'}</Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* Chart Row */}
-              <View style={styles.chartRow}>
-                {/* Donut Chart */}
-                <View style={[styles.donutContainer, { width: chartSize, height: chartSize }]}>
-                  {/* Background circle */}
-                  <View
-                    style={[
-                      styles.donutBg,
-                      {
-                        width: chartSize,
-                        height: chartSize,
-                        borderRadius: chartSize / 2,
-                        borderWidth: strokeWidth,
-                      },
-                    ]}
-                  />
-                  {/* Donut segments */}
-                  {renderDonutLayers()}
-                  {/* Center text */}
-                  <View style={styles.donutCenter}>
-                    <Text
-                      style={[styles.donutCenterAmount, isTablet && styles.donutCenterAmountTablet]}
-                      numberOfLines={1}
-                      adjustsFontSizeToFit
-                    >
-                      ₩{currentTotal.toLocaleString()}
-                    </Text>
-                    <Text style={[styles.donutCenterLabel, isTablet && styles.donutCenterLabelTablet]}>
-                      {amountTab === 'sent' ? '보낸 금액' : '받은 금액'}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Legend */}
-                <View style={styles.chartLegend}>
-                  <Text style={[styles.legendTitle, isTablet && styles.legendTitleTablet]}>
-                    {currentLabel}
-                  </Text>
+            {/* Chart Row */}
+            <View style={styles.chartRow}>
+              {/* Donut Chart */}
+              <View style={[styles.donutContainer, { width: chartSize, height: chartSize }]}>
+                {/* Background circle */}
+                <View
+                  style={[
+                    styles.donutBg,
+                    {
+                      width: chartSize,
+                      height: chartSize,
+                      borderRadius: chartSize / 2,
+                      borderWidth: strokeWidth,
+                    },
+                  ]}
+                />
+                {/* Donut segments */}
+                {renderDonutLayers()}
+                {/* Center text */}
+                <View style={styles.donutCenter}>
                   <Text
-                    style={[
-                      styles.legendAmount,
-                      isTablet && styles.legendAmountTablet,
-                      { color: currentColor },
-                    ]}
+                    style={[styles.donutCenterAmount, isTablet && styles.donutCenterAmountTablet]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
                   >
                     ₩{currentTotal.toLocaleString()}
                   </Text>
-                  <Text style={[styles.legendSubLabel, isTablet && styles.legendSubLabelTablet]}>
-                    총 경조사비
+                  <Text style={[styles.donutCenterLabel, isTablet && styles.donutCenterLabelTablet]}>
+                    {amountTab === 'sent' ? '보낸 금액' : '받은 금액'}
                   </Text>
-
-                  {currentCategories.map((cat, index) => (
-                    <View key={index} style={styles.legendItem}>
-                      <View style={styles.legendDotRow}>
-                        <View
-                          style={[styles.legendDot, { backgroundColor: cat.chartColor }]}
-                        />
-                        <Text
-                          style={[
-                            styles.legendCategoryName,
-                            isTablet && styles.legendCategoryNameTablet,
-                          ]}
-                        >
-                          {cat.label}
-                        </Text>
-                        <Text
-                          style={[
-                            styles.legendCategoryAmount,
-                            isTablet && styles.legendCategoryAmountTablet,
-                            { color: cat.chartColor },
-                          ]}
-                        >
-                          ₩{cat.amount.toLocaleString()}
-                        </Text>
-                      </View>
-                      <View style={styles.legendBarRow}>
-                        <View style={styles.legendBarBg}>
-                          <View
-                            style={[
-                              styles.legendBarFill,
-                              {
-                                width: `${(cat.amount / currentTotal) * 100}%`,
-                                backgroundColor: cat.chartColor,
-                              },
-                            ]}
-                          />
-                        </View>
-                        <Text style={styles.legendCount}>({cat.count}회)</Text>
-                      </View>
-                    </View>
-                  ))}
                 </View>
               </View>
 
-              {/* Divider */}
-              <View style={styles.sectionDivider} />
-
-              {/* Detail List */}
-              <Text style={[styles.sectionTitle, isTablet && styles.sectionTitleTablet]}>
-                {currentLabel}
-              </Text>
-
-              {currentDetails.map((item, index) => (
-                <View
-                  key={item.id}
+              {/* Legend */}
+              <View style={styles.chartLegend}>
+                <Text style={[styles.legendTitle, isTablet && styles.legendTitleTablet]}>
+                  {currentLabel}
+                </Text>
+                <Text
                   style={[
-                    styles.detailItem,
-                    index < currentDetails.length - 1 && styles.detailItemBorder,
+                    styles.legendAmount,
+                    isTablet && styles.legendAmountTablet,
+                    { color: currentColor },
                   ]}
                 >
-                  <View style={styles.detailItemLeft}>
-                    <View
-                      style={[
-                        styles.detailItemIcon,
-                        isTablet && styles.detailItemIconTablet,
-                        { backgroundColor: getCategoryIconBg(item.type) },
-                      ]}
-                    >
-                      {getCategoryIcon(item.type)}
+                  ₩{currentTotal.toLocaleString()}
+                </Text>
+                <Text style={[styles.legendSubLabel, isTablet && styles.legendSubLabelTablet]}>
+                  총 경조사비
+                </Text>
+
+                {currentCategories.map((cat, index) => (
+                  <View key={index} style={styles.legendItem}>
+                    <View style={styles.legendDotRow}>
+                      <View
+                        style={[styles.legendDot, { backgroundColor: cat.chartColor }]}
+                      />
+                      <Text
+                        style={[
+                          styles.legendCategoryName,
+                          isTablet && styles.legendCategoryNameTablet,
+                        ]}
+                      >
+                        {cat.label}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.legendCategoryAmount,
+                          isTablet && styles.legendCategoryAmountTablet,
+                          { color: cat.chartColor },
+                        ]}
+                      >
+                        ₩{cat.amount.toLocaleString()}
+                      </Text>
                     </View>
-                    <View style={styles.detailItemInfo}>
-                      <Text
-                        style={[
-                          styles.detailItemLabel,
-                          isTablet && styles.detailItemLabelTablet,
-                        ]}
-                      >
-                        {item.eventName}
-                      </Text>
-                      <Text
-                        style={[
-                          styles.detailItemDate,
-                          isTablet && styles.detailItemDateTablet,
-                        ]}
-                      >
-                        {item.date}
-                      </Text>
+                    <View style={styles.legendBarRow}>
+                      <View style={styles.legendBarBg}>
+                        <View
+                          style={[
+                            styles.legendBarFill,
+                            {
+                              width: `${(cat.amount / currentTotal) * 100}%`,
+                              backgroundColor: cat.chartColor,
+                            },
+                          ]}
+                        />
+                      </View>
+                      <Text style={styles.legendCount}>({cat.count}회)</Text>
                     </View>
                   </View>
-                  <Text
+                ))}
+              </View>
+            </View>
+
+            {/* Divider */}
+            <View style={styles.sectionDivider} />
+
+            {/* Detail List */}
+            <Text style={[styles.sectionTitle, isTablet && styles.sectionTitleTablet]}>
+              {currentLabel}
+            </Text>
+
+            {currentDetails.map((item, index) => (
+              <View
+                key={item.id}
+                style={[
+                  styles.detailItem,
+                  index < currentDetails.length - 1 && styles.detailItemBorder,
+                ]}
+              >
+                <View style={styles.detailItemLeft}>
+                  <View
                     style={[
-                      styles.detailItemAmount,
-                      isTablet && styles.detailItemAmountTablet,
-                      { color: '#000000' },
+                      styles.detailItemIcon,
+                      isTablet && styles.detailItemIconTablet,
+                      { backgroundColor: getCategoryIconBg(item.type) },
                     ]}
                   >
-                    ₩{item.amount.toLocaleString()}
-                  </Text>
+                    {getCategoryIcon(item.type)}
+                  </View>
+                  <View style={styles.detailItemInfo}>
+                    <Text
+                      style={[
+                        styles.detailItemLabel,
+                        isTablet && styles.detailItemLabelTablet,
+                      ]}
+                    >
+                      {item.eventName}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.detailItemDate,
+                        isTablet && styles.detailItemDateTablet,
+                      ]}
+                    >
+                      {item.date}
+                    </Text>
+                  </View>
                 </View>
-              ))}
-            </View>
+                <Text
+                  style={[
+                    styles.detailItemAmount,
+                    isTablet && styles.detailItemAmountTablet,
+                    { color: '#000000' },
+                  ]}
+                >
+                  ₩{item.amount.toLocaleString()}
+                </Text>
+              </View>
+            ))}
           </View>
         </ScrollView>
-        <BottomNavigation
-          activeTab="stats"
-          onTabPress={handleNavPress}
-          onAddPress={handleAddPress}
-        />
       </View>
     </SafeAreaView>
   );
@@ -414,14 +410,15 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
   },
   scrollContent: {
-    paddingTop: 8,
+    paddingTop: 16,
     paddingBottom: 100,
-    alignItems: 'center',
-  },
-  contentWrapper: {
-    maxWidth: 800,
-    width: '100%',
     paddingHorizontal: 16,
+  },
+  scrollContentTablet: {
+    paddingHorizontal: 32,
+    maxWidth: 800,
+    alignSelf: 'center',
+    width: '100%',
   },
 
   // Summary Cards

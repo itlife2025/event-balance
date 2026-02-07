@@ -18,7 +18,7 @@ import { SettingsScreen } from './SettingsScreen';
 import { ListScreen } from './ListScreen';
 import { StatsScreen } from './StatsScreen';
 
-type TabKey = 'home' | 'list' | 'register' | 'stats' | 'settings';
+import { NavTabKey } from '../types/navigation';
 
 const sampleEvents: Event[] = [
   {
@@ -80,7 +80,7 @@ const sampleMonthlyData = [
 ];
 
 export const HomeScreen: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabKey>('home');
+  const [activeTab, setActiveTab] = useState<NavTabKey>('home');
   const [showDetailScreen, setShowDetailScreen] = useState(false);
   const [showSettingsScreen, setShowSettingsScreen] = useState(false);
   const { width } = useWindowDimensions();
@@ -98,7 +98,7 @@ export const HomeScreen: React.FC = () => {
     // Record pressed
   };
 
-  const handleTabPress = (tab: TabKey) => {
+  const handleTabPress = (tab: NavTabKey) => {
     setActiveTab(tab);
     setShowDetailScreen(false);
   };
@@ -113,40 +113,21 @@ export const HomeScreen: React.FC = () => {
         return (
           <RegisterScreen
             onClose={() => setActiveTab('home')}
-            onNavPress={handleTabPress}
           />
         );
       case 'settings':
         return (
-          <SettingsScreen
-            onNavPress={handleTabPress}
-            onAddPress={handleAddPress}
-          />
+          <SettingsScreen />
         );
       case 'stats':
         return (
-          <StatsScreen
-          // onNavPress={handleTabPress}
-          // onAddPress={handleAddPress}
-          />
+          <StatsScreen />
         );
       case 'list':
         return (
-          <View style={[styles.container, isTablet && styles.containerTablet]}>
-            <Header onNotificationPress={handleNotificationPress} />
-            <ScrollView
-              style={styles.scrollView}
-              contentContainerStyle={[
-                styles.scrollContent,
-                isTablet && styles.scrollContentTablet,
-              ]}
-              showsVerticalScrollIndicator={false}
-            >
-              <View style={styles.contentWrapper}>
-                <ListScreen onTransactionPress={() => setShowDetailScreen(true)} />
-              </View>
-            </ScrollView>
-          </View>
+          <ListScreen
+            onTransactionPress={() => setShowDetailScreen(true)}
+          />
         );
       case 'home':
       default:
@@ -162,15 +143,13 @@ export const HomeScreen: React.FC = () => {
               ]}
               showsVerticalScrollIndicator={false}
             >
-              <View style={styles.contentWrapper}>
-                <BalanceCard
-                  sentAmount={850000}
-                  receivedAmount={1200000}
-                  monthlyData={sampleMonthlyData}
-                />
-                <UpcomingEvents events={sampleEvents} onEventPress={handleEventPress} />
-                <RecentRecords records={sampleRecords} onRecordPress={handleRecordPress} />
-              </View>
+              <BalanceCard
+                sentAmount={850000}
+                receivedAmount={1200000}
+                monthlyData={sampleMonthlyData}
+              />
+              <UpcomingEvents events={sampleEvents} onEventPress={handleEventPress} />
+              <RecentRecords records={sampleRecords} onRecordPress={handleRecordPress} />
             </ScrollView>
           </View>
         );
@@ -186,8 +165,6 @@ export const HomeScreen: React.FC = () => {
             setShowDetailScreen(false);
             setActiveTab('home');
           }}
-          onNavPress={handleTabPress}
-          onAddPress={() => setActiveTab('register')}
         />
       ) : (
         <>
@@ -230,10 +207,6 @@ const styles = StyleSheet.create({
   },
   scrollContentTablet: {
     paddingTop: 16,
-    maxWidth: 800,
-    width: '100%',
-  },
-  contentWrapper: {
     maxWidth: 800,
     width: '100%',
   },

@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   useWindowDimensions,
+  ScrollView,
 } from 'react-native';
 import { WeddingIcon, FuneralIcon } from '../components/Icons';
 import { EventType } from '../components/UpcomingEvents';
@@ -27,11 +28,20 @@ const sampleTransactions: Transaction[] = [
   { id: '4', name: '회사 동문 돌잔치', type: 'wedding', date: '2022.09.18', amount: 50000, isSent: true },
 ];
 
+import { Header } from '../components/Header';
+import { NavTabKey } from '../types/navigation';
+
 interface ListScreenProps {
   onTransactionPress?: (transaction: Transaction) => void;
+  onNavPress?: (tab: NavTabKey) => void;
+  onAddPress?: () => void;
 }
 
-export const ListScreen: React.FC<ListScreenProps> = ({ onTransactionPress }) => {
+export const ListScreen: React.FC<ListScreenProps> = ({
+  onTransactionPress,
+  onNavPress,
+  onAddPress
+}) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
   const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
@@ -52,99 +62,122 @@ export const ListScreen: React.FC<ListScreenProps> = ({ onTransactionPress }) =>
   ];
 
   return (
-    <View style={[styles.container, isTablet && styles.containerTablet]}>
-      {/* Summary Cards */}
-      <View style={[styles.summaryContainer, isTablet && styles.summaryContainerTablet]}>
-        <View style={[styles.summaryCard, styles.sentCard]}>
-          <Text style={styles.summaryLabel}>보낸 금액</Text>
-          <Text style={[styles.summaryAmount, styles.sentAmountText]} numberOfLines={1} adjustsFontSizeToFit>
-            ₩{sentAmount.toLocaleString()}
-          </Text>
-        </View>
-        <View style={[styles.summaryCard, styles.receivedCard]}>
-          <Text style={styles.summaryLabel}>받은 금액</Text>
-          <Text style={[styles.summaryAmount, styles.receivedAmount]} numberOfLines={1} adjustsFontSizeToFit>
-            ₩{receivedAmount.toLocaleString()}
-          </Text>
-        </View>
-      </View>
-
-      {/* Filter Tabs */}
-      <View style={[styles.filterContainer, isTablet && styles.filterContainerTablet]}>
-        {filters.map((filter) => (
-          <TouchableOpacity
-            key={filter.key}
-            style={[
-              styles.filterTab,
-              activeFilter === filter.key && styles.filterTabActive,
-            ]}
-            onPress={() => setActiveFilter(filter.key)}
-            activeOpacity={0.7}
-          >
-            <Text
-              style={[
-                styles.filterTabText,
-                activeFilter === filter.key && styles.filterTabTextActive,
-              ]}
-            >
-              {filter.label}
+    <View style={[styles.container]}>
+      <Header title="내역 리스트" />
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.scrollContent,
+          isTablet && styles.scrollContentTablet,
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Summary Cards */}
+        <View style={[styles.summaryContainer, isTablet && styles.summaryContainerTablet]}>
+          <View style={[styles.summaryCard, styles.sentCard]}>
+            <Text style={styles.summaryLabel}>보낸 금액</Text>
+            <Text style={[styles.summaryAmount, styles.sentAmountText]} numberOfLines={1} adjustsFontSizeToFit>
+              ₩{sentAmount.toLocaleString()}
             </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+          </View>
+          <View style={[styles.summaryCard, styles.receivedCard]}>
+            <Text style={styles.summaryLabel}>받은 금액</Text>
+            <Text style={[styles.summaryAmount, styles.receivedAmount]} numberOfLines={1} adjustsFontSizeToFit>
+              ₩{receivedAmount.toLocaleString()}
+            </Text>
+          </View>
+        </View>
 
-      {/* Transaction List */}
-      <View style={[styles.transactionList, isTablet && styles.transactionListTablet]}>
-        {filteredTransactions.map((transaction, index) => (
-          <TouchableOpacity
-            key={transaction.id}
-            style={[
-              styles.transactionItem,
-              isTablet && styles.transactionItemTablet,
-              index < filteredTransactions.length - 1 && styles.transactionItemBorder,
-            ]}
-            onPress={() => onTransactionPress?.(transaction)}
-            activeOpacity={0.7}
-          >
-            <View
+        {/* Filter Tabs */}
+        <View style={[styles.filterContainer, isTablet && styles.filterContainerTablet]}>
+          {filters.map((filter) => (
+            <TouchableOpacity
+              key={filter.key}
               style={[
-                styles.transactionIcon,
-                isTablet && styles.transactionIconTablet,
-                { backgroundColor: transaction.type === 'wedding' ? '#FDF2F8' : '#EFF6FF' },
+                styles.filterTab,
+                activeFilter === filter.key && styles.filterTabActive,
               ]}
+              onPress={() => setActiveFilter(filter.key)}
+              activeOpacity={0.7}
             >
-              {transaction.type === 'wedding' ? (
-                <WeddingIcon size={isTablet ? 24 : 20} color="#EC4899" />
-              ) : (
-                <FuneralIcon size={isTablet ? 24 : 20} color="#3B82F6" />
-              )}
-            </View>
-            <View style={styles.transactionInfo}>
               <Text
-                style={[styles.transactionName, isTablet && styles.transactionNameTablet]}
-                numberOfLines={1}
+                style={[
+                  styles.filterTabText,
+                  activeFilter === filter.key && styles.filterTabTextActive,
+                ]}
               >
-                {transaction.name}
+                {filter.label}
               </Text>
-              <Text style={[styles.transactionDate, isTablet && styles.transactionDateTablet]}>
-                {transaction.date}
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Transaction List */}
+        <View style={[styles.transactionList, isTablet && styles.transactionListTablet]}>
+          {filteredTransactions.map((transaction, index) => (
+            <TouchableOpacity
+              key={transaction.id}
+              style={[
+                styles.transactionItem,
+                isTablet && styles.transactionItemTablet,
+                index < filteredTransactions.length - 1 && styles.transactionItemBorder,
+              ]}
+              onPress={() => onTransactionPress?.(transaction)}
+              activeOpacity={0.7}
+            >
+              <View
+                style={[
+                  styles.transactionIcon,
+                  isTablet && styles.transactionIconTablet,
+                  { backgroundColor: transaction.type === 'wedding' ? '#FDF2F8' : '#EFF6FF' },
+                ]}
+              >
+                {transaction.type === 'wedding' ? (
+                  <WeddingIcon size={isTablet ? 24 : 20} color="#EC4899" />
+                ) : (
+                  <FuneralIcon size={isTablet ? 24 : 20} color="#3B82F6" />
+                )}
+              </View>
+              <View style={styles.transactionInfo}>
+                <Text
+                  style={[styles.transactionName, isTablet && styles.transactionNameTablet]}
+                  numberOfLines={1}
+                >
+                  {transaction.name}
+                </Text>
+                <Text style={[styles.transactionDate, isTablet && styles.transactionDateTablet]}>
+                  {transaction.date}
+                </Text>
+              </View>
+              <Text style={[styles.transactionAmount, isTablet && styles.transactionAmountTablet]}>
+                {transaction.isSent ? '-' : '+'}₩{transaction.amount.toLocaleString()}
               </Text>
-            </View>
-            <Text style={[styles.transactionAmount, isTablet && styles.transactionAmountTablet]}>
-              {transaction.isSent ? '-' : '+'}₩{transaction.amount.toLocaleString()}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
+    flex: 1,
+    backgroundColor: '#F9FAFB',
   },
   containerTablet: {
+    alignItems: 'center',
+  },
+  scrollView: {
+    flex: 1,
+    width: '100%',
+  },
+  scrollContent: {
+    paddingTop: 16,
+    paddingBottom: 100,
+    paddingHorizontal: 16,
+  },
+  scrollContentTablet: {
     paddingHorizontal: 32,
     maxWidth: 800,
     alignSelf: 'center',

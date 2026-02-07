@@ -9,18 +9,12 @@ import {
   Switch,
 } from 'react-native';
 import { ChevronRightIcon, BellIcon } from '../components/Icons';
+import { Header } from '../components/Header';
 
-type NavTabKey = 'home' | 'list' | 'stats' | 'settings';
 
-interface SettingsScreenProps {
-  onNavPress?: (tab: NavTabKey) => void;
-  onAddPress?: () => void;
-}
+interface SettingsScreenProps { }
 
-export const SettingsScreen: React.FC<SettingsScreenProps> = ({
-  onNavPress,
-  onAddPress,
-}) => {
+export const SettingsScreen: React.FC<SettingsScreenProps> = () => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
 
@@ -80,13 +74,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <BellIcon size={isTablet ? 28 : 24} color="#6B7280" />
-        <Text style={[styles.headerTitle, isTablet && styles.headerTitleTablet]}>
-          설정
-        </Text>
-        <View style={{ width: 30 }} />
-      </View>
+      <Header title="설정" />
 
       {/* Content */}
       <View style={styles.contentWrapper}>
@@ -227,24 +215,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
-  },
-  headerTitleTablet: {
-    fontSize: 18,
   },
   contentWrapper: {
     flex: 1,

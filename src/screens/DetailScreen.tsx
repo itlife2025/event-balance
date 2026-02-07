@@ -11,10 +11,10 @@ import {
   Image,
 } from 'react-native';
 import { ChevronRightIcon, WeddingIcon, FuneralIcon } from '../components/Icons';
-import { BottomNavigation } from '../components/BottomNavigation';
+import { Header } from '../components/Header';
+
 
 type EventType = 'wedding' | 'funeral';
-type NavTabKey = 'home' | 'list' | 'stats' | 'settings';
 
 interface HistoryRecord {
   id: string;
@@ -27,14 +27,10 @@ interface HistoryRecord {
 
 interface DetailScreenProps {
   onClose?: () => void;
-  onNavPress?: (tab: NavTabKey) => void;
-  onAddPress?: () => void;
 }
 
 export const DetailScreen: React.FC<DetailScreenProps> = ({
   onClose,
-  onNavPress,
-  onAddPress,
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -81,17 +77,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
     },
   ];
 
-  const handleNavPress = (tab: NavTabKey) => {
-    if (onNavPress) {
-      onNavPress(tab);
-    }
-  };
 
-  const handleAddButtonPress = () => {
-    if (onAddPress) {
-      onAddPress();
-    }
-  };
 
   const getEventIcon = (type: EventType) => {
     if (type === 'wedding') {
@@ -113,19 +99,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
       <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
       <View style={styles.container}>
         {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
-            <Text style={styles.backButton}>{'<'}</Text>
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, isTablet && styles.headerTitleTablet]}>
-            {personName}
-          </Text>
-          <TouchableOpacity onPress={() => {}} activeOpacity={0.7}>
-            <Text style={[styles.editButton, isTablet && styles.editButtonTablet]}>
-              편집
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <Header title={personName} />
 
         {/* Content */}
         <View style={styles.contentWrapper}>
@@ -266,12 +240,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
           </ScrollView>
         </View>
 
-        {/* Bottom Navigation */}
-        <BottomNavigation
-          activeTab="home"
-          onTabPress={handleNavPress}
-          onAddPress={handleAddButtonPress}
-        />
+
       </View>
     </SafeAreaView>
   );
@@ -285,41 +254,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  backButton: {
-    fontSize: 24,
-    color: '#6B7280',
-    fontWeight: '500',
-    width: 30,
-    textAlign: 'center',
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
-  },
-  headerTitleTablet: {
-    fontSize: 18,
-  },
-  editButton: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#6366F1',
-    width: 30,
-    textAlign: 'center',
-  },
-  editButtonTablet: {
-    fontSize: 14,
   },
   contentWrapper: {
     flex: 1,
