@@ -1,0 +1,42 @@
+[
+  {
+    "name": "김서영",
+    "type": "기타",
+    "date": "2026-03-14",
+    "amount": 0,
+    "amountType": "send",
+    "relationship": "친구",
+    "eventRole": "host",
+    "memo": "집들이 모임 주최"
+  },
+  {
+    "name": "박진우",
+    "type": "결혼",
+    "date": "2026-04-18",
+    "amount": 100000,
+    "amountType": "send",
+    "relationship": "직장",
+    "eventRole": "attend",
+    "memo": ""
+  },
+  {
+    "name": "이소민",
+    "type": "기타",
+    "date": "2026-05-02",
+    "amount": 50000,
+    "amountType": "send",
+    "relationship": "지인",
+    "eventRole": "attend",
+    "memo": "출판 기념회 참석"
+  },
+  {
+    "name": "최현수",
+    "type": "돌",
+    "date": "2026-06-21",
+    "amount": 70000,
+    "amountType": "send",
+    "relationship": "친구",
+    "eventRole": "attend",
+    "memo": ""
+  }
+]

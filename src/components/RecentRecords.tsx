@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
-import { ListIcon, WeddingIcon, FuneralIcon, ChevronRightIcon } from './Icons';
+import { ListIcon, WeddingIcon, FuneralIcon, GiftIcon, ChevronRightIcon } from './Icons';
 import { EventType } from './UpcomingEvents';
 
 export interface Record {
@@ -50,14 +50,27 @@ export const RecentRecords: React.FC<RecentRecordsProps> = ({
   };
 
   const getRecordIcon = (type: EventType) => {
-    if (type === 'wedding') {
-      return <WeddingIcon size={isTablet ? 24 : 20} color="#EC4899" />;
-    }
-    return <FuneralIcon size={isTablet ? 24 : 20} color="#3B82F6" />;
+    if (type === 'wedding') return <WeddingIcon size={isTablet ? 24 : 20} color="#EC4899" />;
+    if (type === 'funeral') return <FuneralIcon size={isTablet ? 24 : 20} color="#3B82F6" />;
+    if (type === 'birthday') return <GiftIcon size={isTablet ? 24 : 20} color="#F59E0B" />;
+    if (type === 'firstBirthday') return <GiftIcon size={isTablet ? 24 : 20} color="#F59E0B" />;
+    return <GiftIcon size={isTablet ? 24 : 20} color="#8B5CF6" />;
   };
 
   const getIconBgColor = (type: EventType) => {
-    return type === 'wedding' ? '#FDF2F8' : '#EFF6FF';
+    if (type === 'wedding') return '#FDF2F8';
+    if (type === 'funeral') return '#EFF6FF';
+    if (type === 'birthday') return '#FFFBEB';
+    if (type === 'firstBirthday') return '#FFFBEB';
+    return '#F5F3FF';
+  };
+
+  const getEventTypeLabel = (type: EventType) => {
+    if (type === 'wedding') return '결혼';
+    if (type === 'funeral') return '장례';
+    if (type === 'birthday') return '생일';
+    if (type === 'firstBirthday') return '돌잔치';
+    return '기타';
   };
 
   return (
@@ -99,7 +112,7 @@ export const RecentRecords: React.FC<RecentRecordsProps> = ({
             </View>
             <View style={styles.recordInfo}>
               <Text style={[styles.recordName, isTablet && styles.recordNameTablet]}>
-                {record.name}
+                {record.name} {getEventTypeLabel(record.type)}
               </Text>
               <Text style={[styles.recordDate, isTablet && styles.recordDateTablet]}>
                 {record.date}

@@ -11,10 +11,11 @@ import {
   CalendarIcon,
   WeddingIcon,
   FuneralIcon,
+  GiftIcon,
   ChevronRightIcon,
 } from './Icons';
 
-export type EventType = 'wedding' | 'funeral';
+export type EventType = 'wedding' | 'funeral' | 'birthday' | 'firstBirthday' | 'other';
 
 export interface Event {
   id: string;
@@ -70,25 +71,27 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
   const isTablet = width >= 768;
 
   const getEventIcon = (type: EventType) => {
-    if (type === 'wedding') {
-      return <WeddingIcon size={isTablet ? 28 : 24} color="#EC4899" />;
-    }
-    return <FuneralIcon size={isTablet ? 28 : 24} color="#3B82F6" />;
+    if (type === 'wedding') return <WeddingIcon size={isTablet ? 28 : 24} color="#EC4899" />;
+    if (type === 'funeral') return <FuneralIcon size={isTablet ? 28 : 24} color="#3B82F6" />;
+    if (type === 'birthday') return <GiftIcon size={isTablet ? 28 : 24} color="#F59E0B" />;
+    if (type === 'firstBirthday') return <GiftIcon size={isTablet ? 28 : 24} color="#F59E0B" />;
+    return <GiftIcon size={isTablet ? 28 : 24} color="#8B5CF6" />;
   };
 
   const getEventStyle = (type: EventType) => {
-    if (type === 'wedding') {
-      return {
-        iconBg: '#FDF2F8',
-        badgeBg: '#FDF2F8',
-        badgeText: '#EC4899',
-      };
-    }
-    return {
-      iconBg: '#EFF6FF',
-      badgeBg: '#EFF6FF',
-      badgeText: '#3B82F6',
-    };
+    if (type === 'wedding') return { iconBg: '#FDF2F8' };
+    if (type === 'funeral') return { iconBg: '#EFF6FF' };
+    if (type === 'birthday') return { iconBg: '#FFFBEB' };
+    if (type === 'firstBirthday') return { iconBg: '#FFFBEB' };
+    return { iconBg: '#F5F3FF' };
+  };
+
+  const getEventTypeLabel = (type: EventType) => {
+    if (type === 'wedding') return '결혼';
+    if (type === 'funeral') return '장례';
+    if (type === 'birthday') return '생일';
+    if (type === 'firstBirthday') return '돌잔치';
+    return '기타';
   };
 
   return (
@@ -139,7 +142,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
                     style={[styles.eventName, isTablet && styles.eventNameTablet]}
                     numberOfLines={1}
                   >
-                    {event.name}
+                    {event.name} {getEventTypeLabel(event.type)}
                   </Text>
                   <Text
                     style={[styles.eventDate, isTablet && styles.eventDateTablet]}
@@ -150,14 +153,13 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
                     style={[
                       styles.badge,
                       isTablet && styles.badgeTablet,
-                      { backgroundColor: eventStyle.badgeBg },
+                      { backgroundColor: eventStyle.iconBg },
                     ]}
                   >
                     <Text
                       style={[
                         styles.badgeText,
                         isTablet && styles.badgeTextTablet,
-                        { color: eventStyle.badgeText },
                       ]}
                     >
                       D-{event.daysLeft}
