@@ -10,7 +10,6 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { Header } from '../components/Header';
-import { BottomNavigation } from '../components/BottomNavigation';
 import { WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
 import { NavTabKey } from '../types/navigation';
 
@@ -52,7 +51,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
   const sentCategories: CategoryData[] = [
     { label: '생일', type: 'birthday', amount: 200000, count: 2, chartColor: '#F6B3AE' },
     { label: '결혼식', type: 'wedding', amount: 100000, count: 1, chartColor: '#AEE3D2' },
-    { label: '조의금', type: 'funeral', amount: 100000, count: 1, chartColor: '#FFE3A3' },
+    { label: '조의금', type: 'funeral', amount: 100000, count: 1, chartColor: '#ffdb8a' },
   ];
 
   const sentDetails: DetailItem[] = [
@@ -94,14 +93,6 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
   // Donut chart dimensions
   const chartSize = isTablet ? 180 : 150;
   const strokeWidth = isTablet ? 28 : 24;
-
-  const handleNavPress = (tab: NavTabKey) => {
-    onNavPress?.(tab);
-  };
-
-  const handleAddPress = () => {
-    onAddPress?.();
-  };
 
   const getCategoryIcon = (type: EventType) => {
     if (type === 'wedding') return <WeddingIcon size={isTablet ? 24 : 20} color="#EC4899" />;

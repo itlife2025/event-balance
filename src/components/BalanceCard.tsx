@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, useWindowDimensions } from 'react-native';
 
 interface MonthlyData {
   month: string;
@@ -13,19 +13,10 @@ interface BalanceCardProps {
   monthlyData?: MonthlyData[];
 }
 
-const defaultMonthlyData: MonthlyData[] = [
-  { month: '2025년 8월', sent: 45, received: 60 },
-  { month: '2025년 9월', sent: 30, received: 50 },
-  { month: '2025년 10월', sent: 55, received: 40 },
-  { month: '2025년 11월', sent: 70, received: 45 },
-  { month: '2025년 12월', sent: 60, received: 80 },
-  { month: '2026년 1월', sent: 35, received: 55 },
-];
-
 export const BalanceCard: React.FC<BalanceCardProps> = ({
-  sentAmount = 850000,
-  receivedAmount = 1200000,
-  monthlyData = defaultMonthlyData,
+  sentAmount = 0,
+  receivedAmount = 0,
+  monthlyData = [],
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -34,9 +25,12 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
     return `₩${amount.toLocaleString()}`;
   };
 
-  const maxValue = Math.max(
-    ...monthlyData.flatMap(d => [d.sent, d.received])
-  );
+  const maxValue = monthlyData.length > 0
+    ? Math.max(...monthlyData.flatMap(d => [d.sent, d.received]))
+    : 0;
+
+  const MIN_BAR_GROUP_WIDTH = 40;
+  const totalMinWidth = MIN_BAR_GROUP_WIDTH * monthlyData.length;
 
   return (
     <View style={[styles.container, isTablet && styles.containerTablet]}>
@@ -57,31 +51,37 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
       </View>
 
       <View style={[styles.chartSection, isTablet && styles.chartSectionTablet]}>
-        <View style={styles.chartContainer}>
-          {monthlyData.map((data, index) => (
-            <View key={index} style={styles.barGroup}>
-              <View style={styles.barsContainer}>
-                <View
-                  style={[
-                    styles.bar,
-                    styles.sentBar,
-                    { height: (data.sent / maxValue) * (isTablet ? 80 : 60) },
-                  ]}
-                />
-                <View
-                  style={[
-                    styles.bar,
-                    styles.receivedBar,
-                    { height: (data.received / maxValue) * (isTablet ? 80 : 60) },
-                  ]}
-                />
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chartScrollContent}
+        >
+          <View style={[styles.chartContainer, { minWidth: totalMinWidth }]}>
+            {monthlyData.map((data, index) => (
+              <View key={index} style={styles.barGroup}>
+                <View style={styles.barsContainer}>
+                  <View
+                    style={[
+                      styles.bar,
+                      styles.sentBar,
+                      { height: maxValue > 0 ? (data.sent / maxValue) * (isTablet ? 80 : 60) : 0 },
+                    ]}
+                  />
+                  <View
+                    style={[
+                      styles.bar,
+                      styles.receivedBar,
+                      { height: maxValue > 0 ? (data.received / maxValue) * (isTablet ? 80 : 60) : 0 },
+                    ]}
+                  />
+                </View>
+                <Text style={[styles.monthLabel, isTablet && styles.monthLabelTablet]}>
+                  {data.month}
+                </Text>
               </View>
-              <Text style={[styles.monthLabel, isTablet && styles.monthLabelTablet]}>
-                {data.month}
-              </Text>
-            </View>
-          ))}
-        </View>
+            ))}
+          </View>
+        </ScrollView>
       </View>
     </View>
   );
@@ -158,25 +158,30 @@ const styles = StyleSheet.create({
   chartSectionTablet: {
     marginTop: 16,
   },
+  chartScrollContent: {
+    flexGrow: 1,
+  },
   chartContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     alignItems: 'flex-end',
+    flex: 1,
     height: 100,
     paddingTop: 20,
   },
   barGroup: {
+    flex: 1,
     alignItems: 'center',
   },
   barsContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    gap: 4,
-    marginBottom: 8,
+    gap: 2,
+    marginBottom: 6,
   },
   bar: {
-    width: 16,
-    borderRadius: 4,
+    width: 10,
+    borderRadius: 3,
   },
   sentBar: {
     backgroundColor: '#818CF8',

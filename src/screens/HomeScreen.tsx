@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -17,74 +17,45 @@ import { DetailScreen } from './DetailScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { ListScreen } from './ListScreen';
 import { StatsScreen } from './StatsScreen';
+import { initDatabase } from '../database/database';
+import { getYearlyTotals, getMonthlyBreakdown, getRecentRecords, getUpcomingEvents, type MonthlyData, type RecentRecord, type UpcomingEvent } from '../database/queries';
 
 import { NavTabKey } from '../types/navigation';
 
-const sampleEvents: Event[] = [
-  {
-    id: '1',
-    name: '김민수 결혼식',
-    type: 'wedding',
-    date: '2024.04.22 (월)',
-    daysLeft: 5,
-  },
-  {
-    id: '2',
-    name: '이영호 상',
-    type: 'funeral',
-    date: '2024.04.29',
-    daysLeft: 12,
-  },
-  {
-    id: '3',
-    name: '박서연 결혼식',
-    type: 'wedding',
-    date: '2024.05.05 (일)',
-    daysLeft: 18,
-  },
-  {
-    id: '4',
-    name: '최준혁 결혼식',
-    type: 'wedding',
-    date: '2024.05.12 (일)',
-    daysLeft: 25,
-  },
-];
 
-const sampleRecords: Record[] = [
-  {
-    id: '1',
-    name: '김민수 결혼식',
-    type: 'wedding',
-    date: '2024.04.15 (금)',
-    amount: 200000,
-    isSent: true,
-  },
-  {
-    id: '2',
-    name: '이영호 조의금',
-    type: 'funeral',
-    date: '2023.03.30 (목)',
-    amount: 100000,
-    isSent: true,
-  },
-];
-
-const sampleMonthlyData = [
-  { month: '2025년 8월', sent: 45, received: 60 },
-  { month: '2025년 9월', sent: 30, received: 50 },
-  { month: '2025년 10월', sent: 55, received: 40 },
-  { month: '2025년 11월', sent: 70, received: 45 },
-  { month: '2025년 12월', sent: 60, received: 80 },
-  { month: '2026년 1월', sent: 35, received: 55 },
-];
 
 export const HomeScreen: React.FC = () => {
   const [activeTab, setActiveTab] = useState<NavTabKey>('home');
   const [showDetailScreen, setShowDetailScreen] = useState(false);
   const [showSettingsScreen, setShowSettingsScreen] = useState(false);
+  const [sentAmount, setSentAmount] = useState(0);
+  const [receivedAmount, setReceivedAmount] = useState(0);
+  const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
+  const [recentRecords, setRecentRecords] = useState<RecentRecord[]>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([]);
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+
+  const currentYear = new Date().getFullYear();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        await initDatabase();
+        const totals = await getYearlyTotals(currentYear);
+        setSentAmount(totals.sentAmount);
+        setReceivedAmount(totals.receivedAmount);
+        const monthly = await getMonthlyBreakdown(currentYear);
+        setMonthlyData(monthly);
+        const records = await getRecentRecords(3);
+        setRecentRecords(records);
+        const events = await getUpcomingEvents();
+        setUpcomingEvents(events);
+      } catch (error) {
+        console.error('DB init error:', error);
+      }
+    })();
+  }, [currentYear]);
 
   const handleNotificationPress = () => {
     // Notification pressed
@@ -143,13 +114,15 @@ export const HomeScreen: React.FC = () => {
               ]}
               showsVerticalScrollIndicator={false}
             >
-              <BalanceCard
-                sentAmount={850000}
-                receivedAmount={1200000}
-                monthlyData={sampleMonthlyData}
-              />
-              <UpcomingEvents events={sampleEvents} onEventPress={handleEventPress} />
-              <RecentRecords records={sampleRecords} onRecordPress={handleRecordPress} />
+              <View style={styles.contentWrapper}>
+                <BalanceCard
+                  sentAmount={sentAmount}
+                  receivedAmount={receivedAmount}
+                  monthlyData={monthlyData}
+                />
+                <UpcomingEvents events={upcomingEvents} onEventPress={handleEventPress} />
+                <RecentRecords records={recentRecords} onRecordPress={handleRecordPress} />
+              </View>
             </ScrollView>
           </View>
         );
@@ -200,6 +173,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    alignSelf: 'stretch',
   },
   scrollContent: {
     paddingTop: 8,
@@ -207,7 +181,10 @@ const styles = StyleSheet.create({
   },
   scrollContentTablet: {
     paddingTop: 16,
+  },
+  contentWrapper: {
     maxWidth: 800,
     width: '100%',
+    alignSelf: 'center',
   },
 });
