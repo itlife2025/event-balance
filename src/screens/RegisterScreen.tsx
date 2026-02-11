@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,12 +7,14 @@ import {
   TouchableOpacity,
   TextInput,
   useWindowDimensions,
+  Keyboard,
 } from 'react-native';
 import { ChevronRightIcon, CalendarIcon } from '../components/Icons';
 import { Header } from '../components/Header';
+import { useTransactions } from '../context/TransactionContext';
+import { EventType } from '../components/UpcomingEvents';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
-
-type EventType = 'wedding' | 'funeral' | 'gift' | 'celebration';
 type TabType = 'pay' | 'receive';
 
 interface RegisterScreenProps {
@@ -25,12 +27,36 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
 
+  const { addTransaction, transactions } = useTransactions();
+
+  // 데이터 확인용 로그 (임시)
+  useEffect(() => {
+    console.log('현재 저장된 DB 데이터:', JSON.stringify(transactions, null, 2));
+  }, [transactions]);
+
   const [activeTab, setActiveTab] = useState<TabType>('pay');
   const [selectedType, setSelectedType] = useState<EventType>('wedding');
   const [eventName, setEventName] = useState('');
-  const [date, setDate] = useState('2026.01.17');
-  const [amount, setAmount] = useState('50');
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0].replace(/-/g, '.')); // Default to today
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [amount, setAmount] = useState('0'); // Start with 0
+  const [isDirectInput, setIsDirectInput] = useState(false);
+  const [relation, setRelation] = useState('');
   const [memo, setMemo] = useState('');
+
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (selectedDate: Date) => {
+    const formattedDate = selectedDate.toISOString().split('T')[0].replace(/-/g, '.');
+    setDate(formattedDate);
+    hideDatePicker();
+  };
 
   const eventTypes = [
     { key: 'wedding', label: '결혼' },
@@ -39,21 +65,54 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
     { key: 'celebration', label: '기타' },
   ] as const;
 
-  const quickAmounts = [3, 5, 10, 1];
+  const quickAmounts = [1, 5, 10];
 
   const handleQuickAmount = (quickAmount: number) => {
-    setAmount(String(quickAmount));
+    setIsDirectInput(false);
+    setAmount((prev) => {
+      const current = prev ? parseInt(prev) : 0;
+      return String(current + quickAmount);
+    });
   };
 
-  const handleSave = () => {
-    console.log({
-      tab: activeTab,
-      type: selectedType,
-      name: eventName,
+  const handleDirectInputMode = () => {
+    setIsDirectInput(true);
+    setAmount(''); // Clear for direct input
+  };
+
+  const isValid = Boolean(eventName && amount && date);
+
+  const handleSave = async () => {
+    if (!isValid) return;
+
+    const transactionData = {
+      type: activeTab,
+      amount: parseInt(amount) * 10000,
       date,
-      amount,
+      name: eventName,
+      event_type: selectedType,
+      relation,
       memo,
-    });
+    };
+
+    console.log('RegisterScreen: Saving data...', transactionData);
+
+    try {
+      await addTransaction(transactionData);
+
+      if (onClose) {
+        onClose();
+      } else {
+        setEventName('');
+        setAmount('0'); // Reset to 0
+        setRelation('');
+        setMemo('');
+        setIsDirectInput(false);
+      }
+    } catch (error) {
+      console.error('Failed to save transaction:', error);
+      // TODO: Show error to user
+    }
   };
 
   return (
@@ -158,19 +217,49 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
             <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet]}>
               날짜
             </Text>
-            <TouchableOpacity style={[styles.inputBox, isTablet && styles.inputBoxTablet]}>
+            <TouchableOpacity
+              style={[styles.inputBox, isTablet && styles.inputBoxTablet]}
+              onPress={showDatePicker}
+            >
               <Text style={[styles.inputText, isTablet && styles.inputTextTablet]}>
                 {date}
               </Text>
               <CalendarIcon size={isTablet ? 20 : 18} color="#6B7280" />
             </TouchableOpacity>
+            <DateTimePickerModal
+              isVisible={isDatePickerVisible}
+              mode="date"
+              onConfirm={handleConfirm}
+              onCancel={hideDatePicker}
+              locale="ko_KR"
+              confirmTextIOS="확인"
+              cancelTextIOS="취소"
+            />
           </View>
 
           {/* Amount */}
           <View style={[styles.sectionContainer, isTablet && styles.sectionContainerTablet]}>
-            <Text style={[styles.amountDisplay, isTablet && styles.amountDisplayTablet]}>
-              ₩ {amount} 만원
-            </Text>
+            <View style={{ marginBottom: 12 }}>
+              {isDirectInput ? (
+                <View style={[styles.inputBox, isTablet && styles.inputBoxTablet]}>
+                  <TextInput
+                    style={[styles.inputText, isTablet && styles.inputTextTablet, { flex: 1 }]}
+                    value={amount}
+                    onChangeText={setAmount}
+                    keyboardType="number-pad"
+                    placeholder="금액을 입력하세요"
+                    placeholderTextColor="#D1D5DB"
+                    autoFocus
+                  />
+                  <Text style={[styles.inputText, { marginLeft: 8 }]}>만원</Text>
+                </View>
+              ) : (
+                <Text style={[styles.amountDisplay, isTablet && styles.amountDisplayTablet]}>
+                  ₩ {amount} 만원
+                </Text>
+              )}
+            </View>
+
             <View style={styles.quickAmountContainer}>
               {quickAmounts.map((quickAmount, index) => (
                 <TouchableOpacity
@@ -192,6 +281,25 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                   </Text>
                 </TouchableOpacity>
               ))}
+              <TouchableOpacity
+                style={[
+                  styles.quickAmountButton,
+                  isDirectInput && styles.quickAmountButtonActive,
+                  isTablet && styles.quickAmountButtonTablet,
+                ]}
+                onPress={handleDirectInputMode}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.quickAmountText,
+                    isDirectInput && styles.quickAmountTextActive,
+                    isTablet && styles.quickAmountTextTablet,
+                  ]}
+                >
+                  직접입력
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -221,17 +329,31 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               numberOfLines={3}
               value={memo}
               onChangeText={setMemo}
+              returnKeyType="done"
+              onSubmitEditing={() => Keyboard.dismiss()}
+              blurOnSubmit={true}
             />
           </View>
 
           {/* Save Button */}
           <View style={[styles.section, { marginBottom: 40 }, isTablet && styles.sectionTablet]}>
             <TouchableOpacity
-              style={[styles.saveButton, isTablet && styles.saveButtonTablet]}
+              style={[
+                styles.saveButton,
+                !isValid && styles.saveButtonDisabled,
+                isTablet && styles.saveButtonTablet,
+              ]}
               onPress={handleSave}
               activeOpacity={0.7}
+              disabled={!isValid}
             >
-              <Text style={[styles.saveButtonText, isTablet && styles.saveButtonTextTablet]}>
+              <Text
+                style={[
+                  styles.saveButtonText,
+                  !isValid && styles.saveButtonTextDisabled,
+                  isTablet && styles.saveButtonTextTablet,
+                ]}
+              >
                 저장하기
               </Text>
             </TouchableOpacity>
@@ -451,9 +573,16 @@ const styles = StyleSheet.create({
   quickAmountButtonTablet: {
     paddingVertical: 11,
   },
+  quickAmountButtonActive: {
+    backgroundColor: '#EEF2FF',
+    borderColor: '#6366F1',
+  },
   quickAmountText: {
     fontSize: 12,
     fontWeight: '600',
+    color: '#6366F1',
+  },
+  quickAmountTextActive: {
     color: '#6366F1',
   },
   quickAmountTextTablet: {
@@ -512,10 +641,17 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 12,
   },
+  saveButtonDisabled: {
+    backgroundColor: '#6366F1', // Keep original color
+    opacity: 0.5, // Reduce opacity
+  },
   saveButtonText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#FFFFFF',
+  },
+  saveButtonTextDisabled: {
+    color: '#9CA3AF',
   },
   saveButtonTextTablet: {
     fontSize: 15,
