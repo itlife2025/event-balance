@@ -36,11 +36,13 @@ interface DetailItem {
 interface StatsScreenProps {
   onNavPress?: (tab: NavTabKey) => void;
   onAddPress?: () => void;
+  onBackPress?: () => void;
 }
 
 export const StatsScreen: React.FC<StatsScreenProps> = ({
   onNavPress,
   onAddPress,
+  onBackPress,
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -143,7 +145,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
       <View style={[styles.container, isTablet && styles.containerTablet]}>
-        <Header title="경조사비 통계" />
+        <Header title="통계" onBackPress={onBackPress} />
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={[

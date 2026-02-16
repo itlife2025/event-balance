@@ -1,312 +1,482 @@
 [
   {
     "name": "김민준",
-    "type": "결혼",
-    "date": "2023-02-18",
+    "type": "wedding",
+    "date": "2023-01-14",
     "amount": 100000,
     "amountType": "send",
-    "relationship": "친구",
-    "memo": ""
+    "relationship": "friend",
+    "memo": "행복하게 살아!"
   },
   {
     "name": "이서연",
-    "type": "돌",
-    "date": "2023-04-09",
-    "amount": 50000,
-    "amountType": "received",
-    "relationship": "지인",
-    "memo": "아이 돌잔치"
-  },
-  {
-    "name": "박도윤",
-    "type": "결혼",
-    "date": "2023-07-22",
-    "amount": 150000,
+    "type": "birthday",
+    "date": "2023-02-03",
+    "amount": 70000,
     "amountType": "send",
-    "relationship": "가족",
+    "relationship": "family",
     "memo": ""
   },
   {
-    "name": "김하은",
-    "type": "장례",
-    "date": "2023-09-03",
+    "name": "박지훈",
+    "type": "funeral",
+    "date": "2023-03-21",
+    "amount": 50000,
+    "amountType": "send",
+    "relationship": "coworker",
+    "memo": ""
+  },
+  {
+    "name": "최지우",
+    "type": "firstBirthday",
+    "date": "2023-04-11",
+    "amount": 70000,
+    "amountType": "send",
+    "relationship": "relative",
+    "memo": "건강하게 자라렴"
+  },
+  {
+    "name": "정현우",
+    "type": "etc",
+    "date": "2023-05-09",
+    "amount": 50000,
+    "amountType": "send",
+    "relationship": "friend",
+    "memo": ""
+  },
+  {
+    "name": "한지민",
+    "type": "wedding",
+    "date": "2023-06-18",
     "amount": 100000,
     "amountType": "send",
-    "relationship": "직장",
-    "memo": ""
-  },
-  {
-    "name": "이준우",
-    "type": "기타",
-    "date": "2023-11-27",
-    "amount": 30000,
-    "amountType": "received",
-    "relationship": "친구",
-    "memo": "개업 축하"
-  },
-  {
-    "name": "박수아",
-    "type": "결혼",
-    "date": "2024-01-13",
-    "amount": 50000,
-    "amountType": "send",
-    "relationship": "직장",
+    "relationship": "family",
     "memo": ""
   },
   {
     "name": "김도윤",
-    "type": "돌",
-    "date": "2024-03-24",
+    "type": "birthday",
+    "date": "2023-07-02",
     "amount": 70000,
-    "amountType": "received",
-    "relationship": "친구",
+    "amountType": "send",
+    "relationship": "friend",
     "memo": ""
   },
   {
-    "name": "이지아",
-    "type": "결혼",
-    "date": "2024-05-11",
+    "name": "장서준",
+    "type": "etc",
+    "date": "2023-08-26",
     "amount": 50000,
     "amountType": "send",
-    "relationship": "직장",
-    "memo": "사정상 참석 불가"
-  },
-  {
-    "name": "박현우",
-    "type": "장례",
-    "date": "2024-06-30",
-    "amount": 100000,
-    "amountType": "send",
-    "relationship": "지인",
+    "relationship": "coworker",
     "memo": ""
   },
+
   {
-    "name": "김채원",
-    "type": "기타",
-    "date": "2024-08-19",
+    "name": "윤아린",
+    "type": "wedding",
+    "date": "2023-09-05",
     "amount": 50000,
     "amountType": "received",
-    "relationship": "친구",
-    "memo": "집들이"
+    "relationship": "friend",
+    "memo": "고마워!"
   },
   {
-    "name": "이민준",
-    "type": "결혼",
-    "date": "2024-10-05",
-    "amount": 200000,
-    "amountType": "send",
-    "relationship": "가족",
-    "memo": ""
-  },
-  {
-    "name": "박하린",
-    "type": "돌",
-    "date": "2024-12-14",
-    "amount": 50000,
-    "amountType": "received",
-    "relationship": "지인",
-    "memo": ""
-  },
-  {
-    "name": "김지훈",
-    "type": "장례",
-    "date": "2025-01-26",
-    "amount": 100000,
-    "amountType": "send",
-    "relationship": "직장",
-    "memo": ""
-  },
-  {
-    "name": "이윤서",
-    "type": "결혼",
-    "date": "2025-03-08",
-    "amount": 100000,
-    "amountType": "send",
-    "relationship": "친구",
-    "memo": ""
-  },
-  {
-    "name": "박서준",
-    "type": "생일",
-    "date": "2025-05-21",
+    "name": "서지훈",
+    "type": "birthday",
+    "date": "2023-09-19",
     "amount": 30000,
     "amountType": "received",
-    "relationship": "지인",
+    "relationship": "coworker",
     "memo": ""
   },
   {
-    "name": "김지안",
-    "type": "생일",
-    "date": "2025-07-02",
-    "amount": 70000,
-    "amountType": "received",
-    "relationship": "친구",
-    "memo": ""
-  },
-  {
-    "name": "이시우",
-    "type": "결혼",
-    "date": "2025-08-22",
-    "amount": 100000,
-    "amountType": "send",
-    "relationship": "가족",
-    "memo": ""
-  },
-  {
-    "name": "박예린",
-    "type": "기타",
-    "date": "2025-10-11",
+    "name": "최유진",
+    "type": "firstBirthday",
+    "date": "2023-10-07",
     "amount": 50000,
     "amountType": "received",
-    "relationship": "친구",
-    "memo": "출산 축하"
-  },
-  {
-    "name": "김준서",
-    "type": "장례",
-    "date": "2025-12-03",
-    "amount": 100000,
-    "amountType": "send",
-    "relationship": "지인",
+    "relationship": "family",
     "memo": ""
   },
   {
-    "name": "이아린",
-    "type": "결혼",
-    "date": "2026-02-07",
-    "amount": 150000,
+    "name": "이도현",
+    "type": "funeral",
+    "date": "2023-10-22",
+    "amount": 30000,
+    "amountType": "received",
+    "relationship": "relative",
+    "memo": ""
+  },
+  {
+    "name": "박서윤",
+    "type": "etc",
+    "date": "2023-11-03",
+    "amount": 50000,
+    "amountType": "received",
+    "relationship": "friend",
+    "memo": ""
+  },
+  {
+    "name": "강민재",
+    "type": "birthday",
+    "date": "2023-11-25",
+    "amount": 30000,
+    "amountType": "received",
+    "relationship": "acquaintance",
+    "memo": ""
+  },
+  {
+    "name": "정수빈",
+    "type": "wedding",
+    "date": "2023-12-12",
+    "amount": 50000,
+    "amountType": "received",
+    "relationship": "family",
+    "memo": ""
+  },
+
+  {
+    "name": "김하율",
+    "type": "wedding",
+    "date": "2024-01-09",
+    "amount": 100000,
     "amountType": "send",
-    "relationship": "친구",
+    "relationship": "family",
+    "memo": ""
+  },
+  {
+    "name": "이준서",
+    "type": "birthday",
+    "date": "2024-02-14",
+    "amount": 70000,
+    "amountType": "send",
+    "relationship": "friend",
+    "memo": ""
+  },
+  {
+    "name": "박민아",
+    "type": "etc",
+    "date": "2024-03-02",
+    "amount": 50000,
+    "amountType": "send",
+    "relationship": "coworker",
     "memo": ""
   },
   {
     "name": "최은우",
-    "type": "결혼",
-    "date": "2023-01-29",
+    "type": "funeral",
+    "date": "2024-03-27",
     "amount": 70000,
     "amountType": "send",
-    "relationship": "지인",
+    "relationship": "relative",
     "memo": ""
   },
   {
-    "name": "정다은",
-    "type": "기타",
-    "date": "2023-06-11",
-    "amount": 30000,
-    "amountType": "received",
-    "relationship": "친구",
-    "memo": "카페 오픈 축하"
+    "name": "정예준",
+    "type": "firstBirthday",
+    "date": "2024-04-16",
+    "amount": 50000,
+    "amountType": "send",
+    "relationship": "friend",
+    "memo": ""
   },
   {
-    "name": "오지훈",
-    "type": "장례",
-    "date": "2023-12-02",
+    "name": "한지호",
+    "type": "birthday",
+    "date": "2024-05-08",
     "amount": 100000,
     "amountType": "send",
-    "relationship": "가족",
+    "relationship": "family",
+    "memo": "축하해!"
+  },
+  {
+    "name": "김서아",
+    "type": "etc",
+    "date": "2024-06-21",
+    "amount": 70000,
+    "amountType": "send",
+    "relationship": "friend",
+    "memo": ""
+  },
+  {
+    "name": "이태윤",
+    "type": "wedding",
+    "date": "2024-07-13",
+    "amount": 50000,
+    "amountType": "send",
+    "relationship": "coworker",
+    "memo": ""
+  },
+
+  {
+    "name": "오지민",
+    "type": "birthday",
+    "date": "2024-08-01",
+    "amount": 30000,
+    "amountType": "received",
+    "relationship": "friend",
+    "memo": ""
+  },
+  {
+    "name": "윤하진",
+    "type": "wedding",
+    "date": "2024-08-18",
+    "amount": 50000,
+    "amountType": "received",
+    "relationship": "family",
+    "memo": ""
+  },
+  {
+    "name": "서현우",
+    "type": "etc",
+    "date": "2024-09-06",
+    "amount": 30000,
+    "amountType": "received",
+    "relationship": "acquaintance",
+    "memo": ""
+  },
+  {
+    "name": "장예린",
+    "type": "firstBirthday",
+    "date": "2024-09-29",
+    "amount": 50000,
+    "amountType": "received",
+    "relationship": "relative",
+    "memo": ""
+  },
+  {
+    "name": "강지훈",
+    "type": "birthday",
+    "date": "2024-10-12",
+    "amount": 30000,
+    "amountType": "received",
+    "relationship": "coworker",
+    "memo": ""
+  },
+  {
+    "name": "김채원",
+    "type": "funeral",
+    "date": "2024-11-04",
+    "amount": 50000,
+    "amountType": "received",
+    "relationship": "family",
+    "memo": ""
+  },
+  {
+    "name": "이동건",
+    "type": "etc",
+    "date": "2024-12-17",
+    "amount": 30000,
+    "amountType": "received",
+    "relationship": "friend",
+    "memo": ""
+  },
+  {
+    "name": "김민석",
+    "type": "wedding",
+    "date": "2025-01-12",
+    "amount": 100000,
+    "amountType": "send",
+    "relationship": "friend",
+    "memo": "행복하게 살아!"
+  },
+  {
+    "name": "이하은",
+    "type": "birthday",
+    "date": "2025-02-04",
+    "amount": 70000,
+    "amountType": "send",
+    "relationship": "family",
+    "memo": ""
+  },
+  {
+    "name": "박준호",
+    "type": "etc",
+    "date": "2025-03-19",
+    "amount": 50000,
+    "amountType": "send",
+    "relationship": "coworker",
+    "memo": ""
+  },
+  {
+    "name": "최서윤",
+    "type": "firstBirthday",
+    "date": "2025-04-08",
+    "amount": 70000,
+    "amountType": "send",
+    "relationship": "relative",
+    "memo": ""
+  },
+  {
+    "name": "정도윤",
+    "type": "funeral",
+    "date": "2025-05-23",
+    "amount": 50000,
+    "amountType": "send",
+    "relationship": "friend",
     "memo": ""
   },
   {
     "name": "한유진",
-    "type": "생일",
-    "date": "2024-02-04",
-    "amount": 50000,
-    "amountType": "received",
-    "relationship": "지인",
-    "memo": ""
-  },
-  {
-    "name": "윤태호",
-    "type": "결혼",
-    "date": "2024-07-07",
-    "amount": 150000,
-    "amountType": "send",
-    "relationship": "친구",
-    "memo": ""
-  },
-  {
-    "name": "신예원",
-    "type": "기타",
-    "date": "2024-11-23",
-    "amount": 50000,
-    "amountType": "received",
-    "relationship": "직장",
-    "memo": "퇴사 기념 선물"
-  },
-  {
-    "name": "장우성",
-    "type": "장례",
-    "date": "2025-02-15",
+    "type": "wedding",
+    "date": "2025-06-14",
     "amount": 100000,
     "amountType": "send",
-    "relationship": "지인",
+    "relationship": "family",
     "memo": ""
   },
   {
-    "name": "문서현",
-    "type": "결혼",
-    "date": "2025-06-18",
-    "amount": 200000,
-    "amountType": "received",
-    "relationship": "가족",
-    "memo": ""
-  },
-  {
-    "name": "배나연",
-    "type": "돌",
-    "date": "2025-09-09",
+    "name": "김지훈",
+    "type": "birthday",
+    "date": "2025-07-01",
     "amount": 70000,
-    "amountType": "received",
-    "relationship": "친구",
+    "amountType": "send",
+    "relationship": "friend",
     "memo": ""
   },
   {
-    "name": "임준혁",
-    "type": "생일",
-    "date": "2026-01-12",
+    "name": "장하준",
+    "type": "etc",
+    "date": "2025-08-27",
+    "amount": 50000,
+    "amountType": "send",
+    "relationship": "coworker",
+    "memo": ""
+  },
+
+  {
+    "name": "윤서아",
+    "type": "birthday",
+    "date": "2025-09-03",
     "amount": 30000,
-    "amountType": "send",
-    "relationship": "직장",
+    "amountType": "received",
+    "relationship": "friend",
     "memo": ""
   },
   {
-    "name": "김서영",
-    "type": "기타",
-    "date": "2026-03-14",
-    "amount": 0,
-    "amountType": "send",
-    "relationship": "친구",
-    "eventRole": "host",
-    "memo": "집들이 모임 주최"
+    "name": "서준영",
+    "type": "wedding",
+    "date": "2025-09-18",
+    "amount": 50000,
+    "amountType": "received",
+    "relationship": "family",
+    "memo": ""
   },
   {
-    "name": "박진우",
-    "type": "결혼",
-    "date": "2026-04-18",
+    "name": "최민재",
+    "type": "etc",
+    "date": "2025-10-05",
+    "amount": 30000,
+    "amountType": "received",
+    "relationship": "acquaintance",
+    "memo": ""
+  },
+  {
+    "name": "이서진",
+    "type": "funeral",
+    "date": "2025-10-29",
+    "amount": 50000,
+    "amountType": "received",
+    "relationship": "relative",
+    "memo": ""
+  },
+  {
+    "name": "박채은",
+    "type": "birthday",
+    "date": "2025-11-11",
+    "amount": 30000,
+    "amountType": "received",
+    "relationship": "coworker",
+    "memo": ""
+  },
+  {
+    "name": "강도현",
+    "type": "etc",
+    "date": "2025-11-30",
+    "amount": 50000,
+    "amountType": "received",
+    "relationship": "family",
+    "memo": ""
+  },
+  {
+    "name": "정예린",
+    "type": "firstBirthday",
+    "date": "2025-12-20",
+    "amount": 30000,
+    "amountType": "received",
+    "relationship": "friend",
+    "memo": ""
+  },
+  {
+    "name": "김도현",
+    "type": "wedding",
+    "date": "2026-01-05",
     "amount": 100000,
     "amountType": "send",
-    "relationship": "직장",
-    "eventRole": "attend",
+    "relationship": "family",
     "memo": ""
   },
   {
-    "name": "이소민",
-    "type": "기타",
-    "date": "2026-05-02",
+    "name": "이서윤",
+    "type": "birthday",
+    "date": "2026-01-22",
+    "amount": 70000,
+    "amountType": "received",
+    "relationship": "friend",
+    "memo": ""
+  },
+
+  {
+    "name": "박지후",
+    "type": "etc",
+    "date": "2026-02-01",
     "amount": 50000,
     "amountType": "send",
-    "relationship": "지인",
-    "eventRole": "attend",
-    "memo": "출판 기념회 참석"
+    "relationship": "coworker",
+    "memo": ""
   },
   {
-    "name": "최현수",
-    "type": "돌",
-    "date": "2026-06-21",
+    "name": "최유나",
+    "type": "firstBirthday",
+    "date": "2026-02-09",
     "amount": 70000,
     "amountType": "send",
-    "relationship": "친구",
-    "eventRole": "attend",
+    "relationship": "relative",
+    "memo": ""
+  },
+  {
+    "name": "정하람",
+    "type": "birthday",
+    "date": "2026-02-14",
+    "amount": 50000,
+    "amountType": "received",
+    "relationship": "friend",
+    "memo": ""
+  },
+
+  {
+    "name": "김민수",
+    "type": "wedding",
+    "date": "2026-03-14",
+    "isSchedule": true,
+    "relationship": "friend",
+    "memo": ""
+  },
+  {
+    "name": "이영호",
+    "type": "funeral",
+    "date": "2026-03-21",
+    "isSchedule": true,
+    "relationship": "coworker",
+    "memo": ""
+  },
+  {
+    "name": "박서연",
+    "type": "wedding",
+    "date": "2026-04-05",
+    "isSchedule": true,
+    "relationship": "friend",
     "memo": ""
   }
 ]

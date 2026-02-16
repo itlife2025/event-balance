@@ -132,12 +132,12 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 24,
     paddingHorizontal: 16,
-    paddingBottom: 100,
+    paddingBottom: 8,
   },
   containerTablet: {
     paddingHorizontal: 32,
     marginTop: 32,
-    paddingBottom: 120,
+    paddingBottom: 12,
     maxWidth: 800,
     alignSelf: 'center',
     width: '100%',

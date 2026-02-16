@@ -151,8 +151,8 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
     type: string;
     date: string;
   }>(
-    `SELECT id, name, type, date FROM events
-     WHERE date > ?
+    `SELECT id, name, type, date FROM schedules
+     WHERE date >= ?
      ORDER BY date ASC`,
     [today]
   );
@@ -174,4 +174,20 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
       daysLeft,
     };
   });
+}
+
+export interface ScheduleInput {
+  name: string;
+  type: string;
+  date: string;
+  relationship?: string;
+  memo?: string;
+}
+
+export async function insertSchedule(schedule: ScheduleInput): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync(
+    'INSERT INTO schedules (name, type, date, relationship, memo) VALUES (?, ?, ?, ?, ?)',
+    [schedule.name, schedule.type, schedule.date, schedule.relationship || '', schedule.memo || '']
+  );
 }

@@ -35,12 +35,14 @@ interface ListScreenProps {
   onTransactionPress?: (transaction: Transaction) => void;
   onNavPress?: (tab: NavTabKey) => void;
   onAddPress?: () => void;
+  onBackPress?: () => void;
 }
 
 export const ListScreen: React.FC<ListScreenProps> = ({
   onTransactionPress,
   onNavPress,
-  onAddPress
+  onAddPress,
+  onBackPress,
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -63,7 +65,7 @@ export const ListScreen: React.FC<ListScreenProps> = ({
 
   return (
     <View style={[styles.container]}>
-      <Header title="내역 리스트" />
+      <Header title="리스트" onBackPress={onBackPress} />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={[

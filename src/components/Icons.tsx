@@ -261,6 +261,19 @@ export const GiftIcon: React.FC<IconProps> = ({ size = 24, color = '#6366F1' }) 
   </View>
 );
 
+// Chevron Left Icon (<)
+export const ChevronLeftIcon: React.FC<IconProps> = ({ size = 24, color = '#9CA3AF' }) => (
+  <View style={[styles.iconContainer, { width: size, height: size }]}>
+    <View style={[styles.chevronLeft, {
+      width: size * 0.35,
+      height: size * 0.35,
+      borderLeftWidth: size * 0.1,
+      borderBottomWidth: size * 0.1,
+      borderColor: color,
+    }]} />
+  </View>
+);
+
 // Chevron Right Icon (>)
 export const ChevronRightIcon: React.FC<IconProps> = ({ size = 24, color = '#9CA3AF' }) => (
   <View style={[styles.iconContainer, { width: size, height: size }]}>
@@ -352,6 +365,9 @@ const styles = StyleSheet.create({
   },
   bellClapper: {
     position: 'absolute',
+  },
+  chevronLeft: {
+    transform: [{ rotate: '45deg' }],
   },
   chevronRight: {
     transform: [{ rotate: '-45deg' }],

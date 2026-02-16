@@ -13,6 +13,7 @@ import {
   FuneralIcon,
   GiftIcon,
   ChevronRightIcon,
+  PlusIcon,
 } from './Icons';
 
 export type EventType = 'wedding' | 'funeral' | 'birthday' | 'firstBirthday' | 'other';
@@ -29,6 +30,7 @@ interface UpcomingEventsProps {
   events?: Event[];
   onEventPress?: (event: Event) => void;
   onMorePress?: () => void;
+  onAddPress?: () => void;
 }
 
 const defaultEvents: Event[] = [
@@ -66,6 +68,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
   events = defaultEvents,
   onEventPress,
   onMorePress,
+  onAddPress,
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -98,7 +101,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
     <View style={[styles.container, isTablet && styles.containerTablet]}>
       <TouchableOpacity
         style={styles.header}
-        onPress={onMorePress}
+        onPress={events.length > 0 ? onMorePress : onAddPress}
         activeOpacity={0.7}
       >
         <View style={styles.headerLeft}>
@@ -107,7 +110,11 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
             다가오는 경조사
           </Text>
         </View>
-        <ChevronRightIcon size={isTablet ? 28 : 24} color="#9CA3AF" />
+        {events.length > 0 ? (
+          <ChevronRightIcon size={isTablet ? 28 : 24} color="#9CA3AF" />
+        ) : (
+          <PlusIcon size={isTablet ? 28 : 24} color="#9CA3AF" />
+        )}
       </TouchableOpacity>
 
       <ScrollView

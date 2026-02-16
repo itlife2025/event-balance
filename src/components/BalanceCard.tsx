@@ -110,10 +110,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 4,
   },
   balanceSectionTablet: {
-    marginBottom: 28,
+    marginBottom: 8,
   },
   amountItem: {
     flex: 1,

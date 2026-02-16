@@ -1,21 +1,37 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
-import { BellIcon } from './Icons';
+import { BellIcon, ChevronLeftIcon } from './Icons';
 
 interface HeaderProps {
   title?: string;
   onNotificationPress?: () => void;
+  onBackPress?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  title = '경조사비 관리',
+  title = '경조사 관리',
   onNotificationPress,
+  onBackPress,
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
 
   return (
     <View style={[styles.container, isTablet && styles.containerTablet]}>
+      {onBackPress ? (
+        <TouchableOpacity
+          style={[styles.iconButton, isTablet && styles.iconButtonTablet]}
+          onPress={onBackPress}
+          activeOpacity={0.7}
+        >
+          <ChevronLeftIcon size={isTablet ? 28 : 24} color="#6B7280" />
+        </TouchableOpacity>
+      ) : (
+        <View style={[styles.iconButton, isTablet && styles.iconButtonTablet, styles.placeholder]} />
+      )}
+
+      <Text style={[styles.title, isTablet && styles.titleTablet]}>{title}</Text>
+
       <TouchableOpacity
         style={[styles.iconButton, isTablet && styles.iconButtonTablet]}
         onPress={onNotificationPress}
@@ -23,10 +39,6 @@ export const Header: React.FC<HeaderProps> = ({
       >
         <BellIcon size={isTablet ? 28 : 24} color="#6B7280" />
       </TouchableOpacity>
-
-      <Text style={[styles.title, isTablet && styles.titleTablet]}>{title}</Text>
-
-      <View style={[styles.iconButton, isTablet && styles.iconButtonTablet, styles.placeholder]} />
     </View>
   );
 };

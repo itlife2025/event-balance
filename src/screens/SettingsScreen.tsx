@@ -12,9 +12,11 @@ import { ChevronRightIcon, BellIcon } from '../components/Icons';
 import { Header } from '../components/Header';
 
 
-interface SettingsScreenProps { }
+interface SettingsScreenProps {
+  onBackPress?: () => void;
+}
 
-export const SettingsScreen: React.FC<SettingsScreenProps> = () => {
+export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
 
@@ -74,7 +76,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = () => {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <Header title="설정" />
+      <Header title="설정" onBackPress={onBackPress} />
 
       {/* Content */}
       <View style={styles.contentWrapper}>

@@ -13,6 +13,8 @@ import { UpcomingEvents, Event } from '../components/UpcomingEvents';
 import { RecentRecords, Record } from '../components/RecentRecords';
 import { BottomNavigation } from '../components/BottomNavigation';
 import { RegisterScreen } from './RegisterScreen';
+import { RegisterScheduleScreen, type ScheduleData } from './RegisterScheduleScreen';
+import { CalendarScreen } from './CalendarScreen';
 import { DetailScreen } from './DetailScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { ListScreen } from './ListScreen';
@@ -20,14 +22,77 @@ import { StatsScreen } from './StatsScreen';
 import { initDatabase } from '../database/database';
 import { getYearlyTotals, getMonthlyBreakdown, getRecentRecords, getUpcomingEvents, type MonthlyData, type RecentRecord, type UpcomingEvent } from '../database/queries';
 
+const refreshUpcomingEvents = async (setter: (events: UpcomingEvent[]) => void) => {
+  const events = await getUpcomingEvents();
+  setter(events);
+};
+
 import { NavTabKey } from '../types/navigation';
 
 
 
+interface NavState {
+  activeTab: NavTabKey;
+  showDetailScreen: boolean;
+  showRegisterSchedule: boolean;
+  showCalendar: boolean;
+  scheduleInitialData?: ScheduleData;
+  registerInitialData?: ScheduleData;
+}
+
+const getDefaultNavState = (): NavState => ({
+  activeTab: 'home',
+  showDetailScreen: false,
+  showRegisterSchedule: false,
+  showCalendar: false,
+  scheduleInitialData: undefined,
+  registerInitialData: undefined,
+});
+
 export const HomeScreen: React.FC = () => {
   const [activeTab, setActiveTab] = useState<NavTabKey>('home');
   const [showDetailScreen, setShowDetailScreen] = useState(false);
+  const [showRegisterSchedule, setShowRegisterSchedule] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
   const [showSettingsScreen, setShowSettingsScreen] = useState(false);
+  const [scheduleInitialData, setScheduleInitialData] = useState<ScheduleData | undefined>(undefined);
+  const [registerInitialData, setRegisterInitialData] = useState<ScheduleData | undefined>(undefined);
+  const [navHistory, setNavHistory] = useState<NavState[]>([]);
+
+  const pushNavState = () => {
+    setNavHistory(prev => [...prev, {
+      activeTab,
+      showDetailScreen,
+      showRegisterSchedule,
+      showCalendar,
+      scheduleInitialData,
+      registerInitialData,
+    }]);
+  };
+
+  const goBack = () => {
+    setNavHistory(prev => {
+      if (prev.length === 0) {
+        // No history, go to home
+        setActiveTab('home');
+        setShowDetailScreen(false);
+        setShowRegisterSchedule(false);
+        setShowCalendar(false);
+        setScheduleInitialData(undefined);
+        setRegisterInitialData(undefined);
+        return [];
+      }
+      const newHistory = [...prev];
+      const last = newHistory.pop()!;
+      setActiveTab(last.activeTab);
+      setShowDetailScreen(last.showDetailScreen);
+      setShowRegisterSchedule(last.showRegisterSchedule);
+      setShowCalendar(last.showCalendar);
+      setScheduleInitialData(last.scheduleInitialData);
+      setRegisterInitialData(last.registerInitialData);
+      return newHistory;
+    });
+  };
   const [sentAmount, setSentAmount] = useState(0);
   const [receivedAmount, setReceivedAmount] = useState(0);
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
@@ -62,7 +127,13 @@ export const HomeScreen: React.FC = () => {
   };
 
   const handleEventPress = (event: Event) => {
-    // Event pressed
+    pushNavState();
+    setScheduleInitialData({
+      name: event.name,
+      type: event.type,
+      date: event.date,
+    });
+    setShowRegisterSchedule(true);
   };
 
   const handleRecordPress = (record: Record) => {
@@ -70,34 +141,97 @@ export const HomeScreen: React.FC = () => {
   };
 
   const handleTabPress = (tab: NavTabKey) => {
+    pushNavState();
     setActiveTab(tab);
     setShowDetailScreen(false);
+    setShowRegisterSchedule(false);
+    setShowCalendar(false);
+    setScheduleInitialData(undefined);
+    setRegisterInitialData(undefined);
   };
 
   const handleAddPress = () => {
+    pushNavState();
     setActiveTab('register');
+    setShowRegisterSchedule(false);
+    setShowCalendar(false);
+    setRegisterInitialData(undefined);
   };
 
   const renderContent = () => {
+    if (showCalendar) {
+      return (
+        <CalendarScreen
+          onBackPress={goBack}
+          onRegisterSchedule={() => {
+            pushNavState();
+            setShowCalendar(false);
+            setScheduleInitialData(undefined);
+            setShowRegisterSchedule(true);
+          }}
+          onEventPress={(event) => {
+            pushNavState();
+            setScheduleInitialData({
+              name: event.name,
+              type: event.type,
+              date: event.date,
+            });
+            setShowCalendar(false);
+            setShowRegisterSchedule(true);
+          }}
+        />
+      );
+    }
+
+    if (showRegisterSchedule) {
+      return (
+        <RegisterScheduleScreen
+          onClose={goBack}
+          onSaved={() => {
+            refreshUpcomingEvents(setUpcomingEvents);
+          }}
+          initialData={scheduleInitialData}
+          onRegisterEvent={(data) => {
+            pushNavState();
+            setRegisterInitialData(data);
+            setShowRegisterSchedule(false);
+            setScheduleInitialData(undefined);
+            setActiveTab('register');
+          }}
+        />
+      );
+    }
+
     switch (activeTab) {
       case 'register':
         return (
           <RegisterScreen
-            onClose={() => setActiveTab('home')}
+            onClose={goBack}
+            initialData={registerInitialData}
+            onRegisterSchedule={(data) => {
+              pushNavState();
+              setScheduleInitialData(undefined);
+              setActiveTab('home');
+              setShowRegisterSchedule(true);
+            }}
           />
         );
       case 'settings':
         return (
-          <SettingsScreen />
+          <SettingsScreen onBackPress={goBack} />
         );
       case 'stats':
         return (
-          <StatsScreen />
+          <StatsScreen onBackPress={goBack} />
         );
       case 'list':
         return (
           <ListScreen
-            onTransactionPress={() => setShowDetailScreen(true)}
+            onTransactionPress={() => {
+              pushNavState();
+              setShowDetailScreen(true);
+            }}
+            onBackPress={goBack}
           />
         );
       case 'home':
@@ -120,7 +254,19 @@ export const HomeScreen: React.FC = () => {
                   receivedAmount={receivedAmount}
                   monthlyData={monthlyData}
                 />
-                <UpcomingEvents events={upcomingEvents} onEventPress={handleEventPress} />
+                <UpcomingEvents
+                  events={upcomingEvents}
+                  onEventPress={handleEventPress}
+                  onAddPress={() => {
+                    pushNavState();
+                    setScheduleInitialData(undefined);
+                    setShowRegisterSchedule(true);
+                  }}
+                  onMorePress={() => {
+                    pushNavState();
+                    setShowCalendar(true);
+                  }}
+                />
                 <RecentRecords records={recentRecords} onRecordPress={handleRecordPress} />
               </View>
             </ScrollView>
@@ -134,10 +280,7 @@ export const HomeScreen: React.FC = () => {
       <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
       {showDetailScreen ? (
         <DetailScreen
-          onClose={() => {
-            setShowDetailScreen(false);
-            setActiveTab('home');
-          }}
+          onClose={goBack}
         />
       ) : (
         <>
@@ -147,7 +290,6 @@ export const HomeScreen: React.FC = () => {
           </View>
 
           {/* Global Bottom Navigation */}
-          {/* Register 화면 등 네비게이션이 필요한 모든 화면에 공통 적용 */}
           <BottomNavigation
             activeTab={activeTab}
             onTabPress={handleTabPress}

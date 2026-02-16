@@ -17,12 +17,22 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 type TabType = 'pay' | 'receive';
 
+export interface RegisterInitialData {
+  name: string;
+  type: EventType;
+  date: string; // "YYYY.MM.DD (요일)" format
+}
+
 interface RegisterScreenProps {
   onClose?: () => void;
+  initialData?: RegisterInitialData;
+  onRegisterSchedule?: (data: RegisterInitialData) => void;
 }
 
 export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   onClose,
+  initialData,
+  onRegisterSchedule,
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -34,10 +44,15 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
     console.log('현재 저장된 DB 데이터:', JSON.stringify(transactions, null, 2));
   }, [transactions]);
 
+  // Parse initialData date "YYYY.MM.DD (요일)" → "YYYY.MM.DD"
+  const initialDateStr = initialData?.date
+    ? initialData.date.split(' ')[0]
+    : new Date().toISOString().split('T')[0].replace(/-/g, '.');
+
   const [activeTab, setActiveTab] = useState<TabType>('pay');
-  const [selectedType, setSelectedType] = useState<EventType>('wedding');
-  const [eventName, setEventName] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0].replace(/-/g, '.')); // Default to today
+  const [selectedType, setSelectedType] = useState<EventType>(initialData?.type || 'wedding');
+  const [eventName, setEventName] = useState(initialData?.name || '');
+  const [date, setDate] = useState(initialDateStr);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [amount, setAmount] = useState('0'); // Start with 0
   const [isDirectInput, setIsDirectInput] = useState(false);
@@ -118,7 +133,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   return (
     <View style={styles.container}>
       {/* Header */}
-      <Header title="내역 추가" />
+      <Header title="등록" onBackPress={onClose} />
 
       {/* Content Area */}
       <View style={styles.contentArea}>
@@ -217,15 +232,38 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
             <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet]}>
               날짜
             </Text>
-            <TouchableOpacity
-              style={[styles.inputBox, isTablet && styles.inputBoxTablet]}
-              onPress={showDatePicker}
-            >
-              <Text style={[styles.inputText, isTablet && styles.inputTextTablet]}>
-                {date}
-              </Text>
-              <CalendarIcon size={isTablet ? 20 : 18} color="#6B7280" />
-            </TouchableOpacity>
+            <View style={styles.dateRow}>
+              <TouchableOpacity
+                style={[styles.inputBox, isTablet && styles.inputBoxTablet, { flex: 1 }]}
+                onPress={showDatePicker}
+              >
+                <Text style={[styles.inputText, isTablet && styles.inputTextTablet]}>
+                  {date}
+                </Text>
+                <CalendarIcon size={isTablet ? 20 : 18} color="#6B7280" />
+              </TouchableOpacity>
+              {onRegisterSchedule && (
+                <TouchableOpacity
+                  style={[styles.registerScheduleButton, isTablet && styles.registerScheduleButtonTablet]}
+                  onPress={() => {
+                    const days = ['일', '월', '화', '수', '목', '금', '토'];
+                    const dateParts = date.split('.');
+                    const d = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+                    const dayName = days[d.getDay()];
+                    onRegisterSchedule({
+                      name: eventName,
+                      type: selectedType,
+                      date: `${date} (${dayName})`,
+                    });
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.registerScheduleButtonText, isTablet && styles.registerScheduleButtonTextTablet]}>
+                    일정 등록
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
             <DateTimePickerModal
               isVisible={isDatePickerVisible}
               mode="date"
@@ -336,10 +374,11 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
           </View>
 
           {/* Save Button */}
-          <View style={[styles.section, { marginBottom: 40 }, isTablet && styles.sectionTablet]}>
+          <View style={{ marginBottom: 40 }}>
             <TouchableOpacity
               style={[
                 styles.saveButton,
+                styles.saveButtonStandalone,
                 !isValid && styles.saveButtonDisabled,
                 isTablet && styles.saveButtonTablet,
               ]}
@@ -508,6 +547,32 @@ const styles = StyleSheet.create({
     color: '#6366F1',
     fontWeight: '600',
   },
+  dateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  registerScheduleButton: {
+    backgroundColor: '#F59E0B',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  registerScheduleButtonTablet: {
+    height: 44,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+  },
+  registerScheduleButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  registerScheduleButtonTextTablet: {
+    fontSize: 13,
+  },
   inputBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -634,6 +699,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  saveButtonStandalone: {
+    marginHorizontal: 0,
+    marginVertical: 0,
   },
   saveButtonTablet: {
     marginHorizontal: 14,

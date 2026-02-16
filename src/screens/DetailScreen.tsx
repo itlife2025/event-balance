@@ -99,7 +99,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
       <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
       <View style={styles.container}>
         {/* Header */}
-        <Header title={personName} />
+        <Header title={personName} onBackPress={onClose} />
 
         {/* Content */}
         <View style={styles.contentWrapper}>
