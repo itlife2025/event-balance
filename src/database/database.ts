@@ -73,10 +73,21 @@ async function seedData(database: SQLite.SQLiteDatabase): Promise<void> {
     );
   `);
 
-  for (const record of seedRecordsJson) {
+  const eventRecords = seedRecordsJson.filter((r: any) => !r.isSchedule);
+  const scheduleRecords = seedRecordsJson.filter((r: any) => r.isSchedule);
+
+  for (const record of eventRecords) {
     await database.runAsync(
       'INSERT INTO events (name, type, date, amount, amountType, relationship, eventRole, memo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [record.name, record.type, record.date, record.amount, record.amountType, record.relationship, record.eventRole || '', record.memo]
+      [record.name, record.type, record.date, record.amount, record.amountType, record.relationship, (record as any).eventRole || '', record.memo]
+    );
+  }
+
+  await database.execAsync(`DELETE FROM schedules;`);
+  for (const record of scheduleRecords) {
+    await database.runAsync(
+      'INSERT INTO schedules (name, type, date, relationship, memo) VALUES (?, ?, ?, ?, ?)',
+      [record.name, record.type, record.date, record.relationship || '', record.memo]
     );
   }
 
