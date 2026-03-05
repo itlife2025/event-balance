@@ -16,7 +16,7 @@ import {
   PlusIcon,
 } from './Icons';
 
-export type EventType = 'wedding' | 'funeral' | 'birthday' | 'firstBirthday' | 'other';
+export type EventType = 'wedding' | 'funeral' | 'birthday' | 'firstBirthday' | 'birth' | 'custom' | 'other';
 
 export interface Event {
   id: string;
