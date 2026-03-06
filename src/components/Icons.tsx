@@ -261,6 +261,66 @@ export const GiftIcon: React.FC<IconProps> = ({ size = 24, color = '#6366F1' }) 
   </View>
 );
 
+// Schedule List Icon — calendar with list lines (common "recall/load schedule" icon)
+export const ScheduleListIcon: React.FC<IconProps> = ({ size = 24, color = '#6B7280' }) => (
+  <View style={[styles.iconContainer, { width: size, height: size }]}>
+    {/* Calendar body with clipped inner content */}
+    <View style={{
+      position: 'absolute',
+      width: size * 0.78,
+      height: size * 0.68,
+      borderWidth: Math.max(1.5, size * 0.08),
+      borderColor: color,
+      borderRadius: size * 0.09,
+      bottom: size * 0.02,
+      overflow: 'hidden',
+    }}>
+      {/* Header bar */}
+      <View style={{ backgroundColor: color, height: size * 0.21, width: '100%' }} />
+      {/* List line 1 */}
+      <View style={{
+        position: 'absolute',
+        width: '64%',
+        height: Math.max(1.5, size * 0.08),
+        backgroundColor: color,
+        borderRadius: 1,
+        top: size * 0.28,
+        left: '13%',
+      }} />
+      {/* List line 2 */}
+      <View style={{
+        position: 'absolute',
+        width: '46%',
+        height: Math.max(1.5, size * 0.08),
+        backgroundColor: color,
+        borderRadius: 1,
+        top: size * 0.43,
+        left: '13%',
+      }} />
+    </View>
+    {/* Left hook */}
+    <View style={{
+      position: 'absolute',
+      width: size * 0.08,
+      height: size * 0.16,
+      backgroundColor: color,
+      borderRadius: 1,
+      left: size * 0.23,
+      top: size * 0.03,
+    }} />
+    {/* Right hook */}
+    <View style={{
+      position: 'absolute',
+      width: size * 0.08,
+      height: size * 0.16,
+      backgroundColor: color,
+      borderRadius: 1,
+      right: size * 0.23,
+      top: size * 0.03,
+    }} />
+  </View>
+);
+
 // Chevron Left Icon (<)
 export const ChevronLeftIcon: React.FC<IconProps> = ({ size = 24, color = '#9CA3AF' }) => (
   <View style={[styles.iconContainer, { width: size, height: size }]}>

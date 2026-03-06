@@ -2,7 +2,7 @@ import * as SQLite from 'expo-sqlite';
 import seedRecordsJson from '../data/mockEvents.json';
 
 const DB_NAME = 'event-balance.db';
-const SEED_VERSION = 10;
+const SEED_VERSION = 11;
 
 let db: SQLite.SQLiteDatabase | null = null;
 

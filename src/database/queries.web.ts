@@ -1,6 +1,6 @@
 import mockEvents from '../data/mockEvents.json';
 
-interface ScheduleRecord {
+interface ScheduleStoreRecord {
   id: number;
   name: string;
   type: string;
@@ -9,8 +9,22 @@ interface ScheduleRecord {
   memo: string;
 }
 
-const schedulesStore: ScheduleRecord[] = [];
+interface EventStoreRecord {
+  id: number;
+  name: string;
+  type: string;
+  date: string;
+  amount: number;
+  amountType: string;
+  relationship: string;
+  memo: string;
+}
+
+const schedulesStore: ScheduleStoreRecord[] = [];
 let scheduleNextId = 1;
+
+const eventsStore: EventStoreRecord[] = [];
+let eventNextId = 1;
 
 export interface YearlyTotals {
   sentAmount: number;
@@ -40,6 +54,8 @@ export interface UpcomingEvent {
   type: EventTypeKey;
   date: string;
   daysLeft: number;
+  relationship: string;
+  memo: string;
 }
 
 const typeMap: Record<string, EventTypeKey> = {
@@ -151,6 +167,8 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
       type: toEventType(e.type),
       date: formatDate(e.date),
       daysLeft: Math.ceil((new Date(e.date).setHours(0,0,0,0) - now.getTime()) / (1000 * 60 * 60 * 24)),
+      relationship: e.relationship || '',
+      memo: e.memo || '',
     }));
 
   const userSchedules = schedulesStore
@@ -167,10 +185,68 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
         type: toEventType(s.type),
         date: formatDate(s.date),
         daysLeft,
+        relationship: s.relationship,
+        memo: s.memo,
       };
     });
 
   return [...mockSchedules, ...userSchedules].sort((a, b) => a.daysLeft - b.daysLeft);
+}
+
+export interface EventInput {
+  name: string;
+  type: string;
+  date: string; // "YYYY-MM-DD"
+  amount: number;
+  amountType: 'send' | 'received';
+  relationship: string;
+  memo?: string;
+}
+
+export async function insertEvent(event: EventInput): Promise<void> {
+  eventsStore.push({
+    id: eventNextId++,
+    name: event.name,
+    type: event.type,
+    date: event.date,
+    amount: event.amount,
+    amountType: event.amountType,
+    relationship: event.relationship,
+    memo: event.memo || '',
+  });
+}
+
+export interface ScheduleRecord {
+  id: string;
+  name: string;
+  type: string;
+  date: string; // "YYYY-MM-DD"
+  relationship: string;
+  memo: string;
+}
+
+export async function getAllSchedules(): Promise<ScheduleRecord[]> {
+  const mockSchedules = (mockEvents as any[])
+    .filter((e: any) => e.isSchedule)
+    .map((e: any, i: number) => ({
+      id: `mock-${i}`,
+      name: e.name,
+      type: e.type,
+      date: e.date,
+      relationship: e.relationship || '',
+      memo: e.memo || '',
+    }));
+
+  const userSchedules = schedulesStore.map(s => ({
+    id: String(s.id),
+    name: s.name,
+    type: s.type,
+    date: s.date,
+    relationship: s.relationship,
+    memo: s.memo,
+  }));
+
+  return [...mockSchedules, ...userSchedules].sort((a, b) => a.date.localeCompare(b.date));
 }
 
 export interface ScheduleInput {

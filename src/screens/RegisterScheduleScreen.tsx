@@ -18,6 +18,8 @@ export interface ScheduleData {
   name: string;
   type: EventType;
   date: string; // "YYYY.MM.DD (요일)" format
+  relationship?: string;
+  memo?: string;
 }
 
 interface RegisterScheduleScreenProps {
@@ -100,8 +102,24 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
   const [calendarYear, setCalendarYear] = useState(initialDate.getFullYear());
   const [calendarMonth, setCalendarMonth] = useState(initialDate.getMonth());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [relation, setRelation] = useState('');
-  const [memo, setMemo] = useState('');
+  const [relation, setRelation] = useState(initialData?.relationship || '');
+  const [isRelationDirectInput, setIsRelationDirectInput] = useState(() => {
+    const preset = ['본인', '배우자', '자녀', '부친', '모친', '조부', '조모', '빙부', '빙모'];
+    return !!initialData?.relationship && !preset.includes(initialData.relationship);
+  });
+  const [memo, setMemo] = useState(initialData?.memo || '');
+
+  const relationOptions = ['본인', '배우자', '자녀', '부친', '모친', '조부', '조모', '빙부', '빙모'];
+
+  const handleRelationSelect = (value: string) => {
+    setRelation(value);
+    setIsRelationDirectInput(false);
+  };
+
+  const handleRelationDirectInput = () => {
+    setIsRelationDirectInput(true);
+    setRelation('');
+  };
 
   const calendarDays = useMemo(
     () => getCalendarDays(calendarYear, calendarMonth),
@@ -345,12 +363,47 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
             <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet]}>
               관계
             </Text>
-            <TouchableOpacity style={[styles.inputBox, isTablet && styles.inputBoxTablet]}>
-              <Text style={[styles.placeholderText, isTablet && styles.inputTextTablet]}>
-                친구 / 직장 / 가족...
-              </Text>
-              <ChevronRightIcon size={isTablet ? 20 : 18} color="#9CA3AF" />
-            </TouchableOpacity>
+            <View style={styles.typeButtonsContainer}>
+              {relationOptions.map((opt) => (
+                <TouchableOpacity
+                  key={opt}
+                  style={[
+                    styles.typeButton,
+                    relation === opt && !isRelationDirectInput && styles.typeButtonActive,
+                  ]}
+                  onPress={() => handleRelationSelect(opt)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[
+                    styles.typeButtonText,
+                    relation === opt && !isRelationDirectInput && styles.typeButtonTextActive,
+                  ]}>
+                    {opt}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity
+                style={[styles.typeButton, isRelationDirectInput && styles.typeButtonActive]}
+                onPress={handleRelationDirectInput}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.typeButtonText, isRelationDirectInput && styles.typeButtonTextActive]}>
+                  직접입력
+                </Text>
+              </TouchableOpacity>
+            </View>
+            {isRelationDirectInput && (
+              <TextInput
+                style={[styles.relationDirectInput, isTablet && styles.inputTextTablet]}
+                placeholder="관계를 입력하세요"
+                placeholderTextColor="#D1D5DB"
+                value={relation}
+                onChangeText={setRelation}
+                autoFocus
+                returnKeyType="done"
+                onSubmitEditing={() => Keyboard.dismiss()}
+              />
+            )}
           </View>
 
           {/* Memo */}
@@ -518,6 +571,18 @@ const styles = StyleSheet.create({
   typeButtonTextActive: {
     color: '#6366F1',
     fontWeight: '600',
+  },
+  relationDirectInput: {
+    marginTop: 10,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: '#6366F1',
+    fontSize: 13,
+    color: '#1F2937',
+    height: 40,
   },
   inputBox: {
     flexDirection: 'row',

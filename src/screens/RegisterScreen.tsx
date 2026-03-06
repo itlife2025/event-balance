@@ -14,10 +14,10 @@ import {
   Alert,
   KeyboardAvoidingView,
 } from 'react-native';
-import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon } from '../components/Icons';
+import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon, WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
 import { Header } from '../components/Header';
-import { useTransactions } from '../context/TransactionContext';
 import { EventType } from '../components/UpcomingEvents';
+import { insertEvent, insertSchedule, getAllSchedules, ScheduleRecord } from '../database/queries';
 
 // expo-contacts는 웹에서 지원하지 않으므로 모바일에서만 동적 로드
 let Contacts: any = null;
@@ -36,18 +36,15 @@ export interface RegisterInitialData {
 interface RegisterScreenProps {
   onClose?: () => void;
   initialData?: RegisterInitialData;
-  onRegisterSchedule?: (data: RegisterInitialData) => void;
 }
 
 export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   onClose,
   initialData,
-  onRegisterSchedule,
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
 
-  const { addTransaction, transactions } = useTransactions();
   const scrollViewRef = useRef<ScrollView>(null);
 
   const scrollToEnd = () => {
@@ -55,11 +52,6 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
       scrollViewRef.current?.scrollToEnd({ animated: true });
     }, 300);
   };
-
-  // 데이터 확인용 로그 (임시)
-  useEffect(() => {
-    console.log('현재 저장된 DB 데이터:', JSON.stringify(transactions, null, 2));
-  }, [transactions]);
 
   // Parse initialData date "YYYY.MM.DD (요일)" → Date
   const initialDate = React.useMemo(() => {
@@ -214,6 +206,89 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
     setRelation('');
   };
 
+  // Recall Schedule modal
+  const [recallModalVisible, setRecallModalVisible] = useState(false);
+  const [schedulesList, setSchedulesList] = useState<ScheduleRecord[]>([]);
+  const [registerScheduleChecked, setRegisterScheduleChecked] = useState(false);
+
+  const typeToKorean: Record<string, string> = {
+    wedding: '결혼',
+    funeral: '장례',
+    birthday: '생일',
+    firstBirthday: '돌',
+    birth: '출산',
+    other: '기타',
+  };
+
+  const koreanToType: Record<string, EventType> = {
+    '결혼': 'wedding',   wedding: 'wedding',
+    '장례': 'funeral',   funeral: 'funeral',
+    '생일': 'birthday',  birthday: 'birthday',
+    '돌': 'firstBirthday', '돌잔치': 'firstBirthday', firstBirthday: 'firstBirthday',
+    '출산': 'birth',     birth: 'birth',
+    '기타': 'other',     other: 'other',
+  };
+
+  const getTypeKorean = (type: string): string => {
+    const map: Record<string, string> = {
+      wedding: '결혼',      '결혼': '결혼',
+      funeral: '장례',      '장례': '장례',
+      birthday: '생일',     '생일': '생일',
+      firstBirthday: '돌잔치', '돌': '돌잔치', '돌잔치': '돌잔치',
+      birth: '출산',        '출산': '출산',
+      other: '기타',        '기타': '기타',
+    };
+    return map[type] || type;
+  };
+
+  const getScheduleIcon = (type: string) => {
+    const t = koreanToType[type] || 'other';
+    if (t === 'wedding') return <WeddingIcon size={20} color="#EC4899" />;
+    if (t === 'funeral') return <FuneralIcon size={20} color="#3B82F6" />;
+    return <GiftIcon size={20} color={t === 'birthday' || t === 'firstBirthday' ? '#F59E0B' : '#8B5CF6'} />;
+  };
+
+  const getScheduleIconBg = (type: string): string => {
+    const t = koreanToType[type] || 'other';
+    if (t === 'wedding') return '#FDF2F8';
+    if (t === 'funeral') return '#EFF6FF';
+    if (t === 'birthday' || t === 'firstBirthday') return '#FFFBEB';
+    return '#F5F3FF';
+  };
+
+  const openRecallModal = async () => {
+    try {
+      const schedules = await getAllSchedules();
+      setSchedulesList(schedules);
+      setRecallModalVisible(true);
+    } catch (error) {
+      console.error('Failed to load schedules:', error);
+      Alert.alert('오류', '일정을 불러오는데 실패했습니다.');
+    }
+  };
+
+  const handleScheduleSelect = (schedule: ScheduleRecord) => {
+    setEventName(schedule.name);
+    const eventType = koreanToType[schedule.type] || 'other';
+    setSelectedType(eventType);
+    setIsEventTypeDirectInput(false);
+    setCustomEventType('');
+    const parts = schedule.date.split('-').map(Number);
+    if (parts.length === 3 && parts[0] && parts[1] && parts[2]) {
+      const date = new Date(parts[0], parts[1] - 1, parts[2]);
+      setSelectedDate(date);
+      setCalendarYear(date.getFullYear());
+      setCalendarMonth(date.getMonth());
+    }
+    const presetRelations = ['본인', '배우자', '자녀', '부친', '모친', '조부', '조모', '빙부', '빙모'];
+    setRelation(schedule.relationship);
+    setIsRelationDirectInput(
+      schedule.relationship !== '' && !presetRelations.includes(schedule.relationship)
+    );
+    setMemo(schedule.memo);
+    setRecallModalVisible(false);
+  };
+
   const eventTypes = [
     { key: 'wedding', label: '결혼' },
     { key: 'birth', label: '출산' },
@@ -256,37 +331,51 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   const handleSave = async () => {
     if (!isValid) return;
 
-    const transactionData = {
-      type: activeTab,
-      amount: parseInt(amount) * 10000,
-      date: formatDisplayDate(selectedDate),
-      name: eventName,
-      event_type: selectedType,
-      custom_event_type: isEventTypeDirectInput ? customEventType : undefined,
-      relation,
-      memo,
-    };
-
-    console.log('RegisterScreen: Saving data...', transactionData);
+    const y = selectedDate.getFullYear();
+    const m = String(selectedDate.getMonth() + 1).padStart(2, '0');
+    const d = String(selectedDate.getDate()).padStart(2, '0');
+    const dbDate = `${y}-${m}-${d}`;
+    const koreanType = isEventTypeDirectInput
+      ? (customEventType || '기타')
+      : (typeToKorean[selectedType] || '기타');
+    const amountType = activeTab === 'pay' ? 'received' : 'send';
 
     try {
-      await addTransaction(transactionData);
+      await insertEvent({
+        name: eventName,
+        type: koreanType,
+        date: dbDate,
+        amount: parseInt(amount) * 10000,
+        amountType,
+        relationship: relation,
+        memo,
+      });
+
+      if (registerScheduleChecked) {
+        await insertSchedule({
+          name: eventName,
+          type: koreanType,
+          date: dbDate,
+          relationship: relation,
+          memo,
+        });
+      }
 
       if (onClose) {
         onClose();
       } else {
         setEventName('');
-        setAmount('0'); // Reset to 0
+        setAmount('0');
         setRelation('');
         setMemo('');
         setIsDirectInput(false);
         setIsEventTypeDirectInput(false);
         setCustomEventType('');
         setIsRelationDirectInput(false);
+        setRegisterScheduleChecked(false);
       }
     } catch (error) {
       console.error('Failed to save transaction:', error);
-      // TODO: Show error to user
     }
   };
 
@@ -502,25 +591,17 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                 </Text>
                 <CalendarIcon size={isTablet ? 20 : 18} color="#6B7280" />
               </TouchableOpacity>
-              {onRegisterSchedule && (
-                <TouchableOpacity
-                  style={[styles.registerScheduleButton, isTablet && styles.registerScheduleButtonTablet]}
-                  onPress={() => {
-                    const days = ['일', '월', '화', '수', '목', '금', '토'];
-                    const dayName = days[selectedDate.getDay()];
-                    onRegisterSchedule({
-                      name: eventName,
-                      type: selectedType,
-                      date: `${formatDisplayDate(selectedDate)} (${dayName})`,
-                    });
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.registerScheduleButtonText, isTablet && styles.registerScheduleButtonTextTablet]}>
-                    일정 등록
-                  </Text>
-                </TouchableOpacity>
-              )}
+
+              {/* Recall Schedule — text button */}
+              <TouchableOpacity
+                style={[styles.recallButton, isTablet && styles.recallButtonTablet]}
+                onPress={openRecallModal}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.recallButtonText, isTablet && styles.recallButtonTextTablet]}>
+                  일정 불러오기
+                </Text>
+              </TouchableOpacity>
             </View>
 
             {/* Inline Calendar */}
@@ -581,6 +662,20 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                 </View>
               </View>
             )}
+
+            {/* Register Schedule checkbox */}
+            <TouchableOpacity
+              style={styles.checkboxRow}
+              onPress={() => setRegisterScheduleChecked(!registerScheduleChecked)}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.checkbox, registerScheduleChecked && styles.checkboxChecked]}>
+                {registerScheduleChecked && (
+                  <Text style={styles.checkmark}>✓</Text>
+                )}
+              </View>
+              <Text style={styles.checkboxLabel}>일정 등록</Text>
+            </TouchableOpacity>
           </View>
 
           {/* Amount */}
@@ -671,8 +766,32 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
             />
           </View>
 
-          {/* Save Button */}
-          <View style={{ marginBottom: 40 }}>
+          {/* Reset + Save Buttons */}
+          <View style={{ marginBottom: 40, gap: 10 }}>
+            <TouchableOpacity
+              style={[styles.resetButton, isTablet && styles.resetButtonTablet]}
+              onPress={() => {
+                setEventName('');
+                setAmount('0');
+                setRelation('');
+                setMemo('');
+                setIsDirectInput(false);
+                setIsEventTypeDirectInput(false);
+                setCustomEventType('');
+                setIsRelationDirectInput(false);
+                setRegisterScheduleChecked(false);
+                setSelectedType('wedding');
+                setSelectedDate(new Date());
+                setCalendarYear(new Date().getFullYear());
+                setCalendarMonth(new Date().getMonth());
+                setIsCalendarOpen(false);
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.resetButtonText, isTablet && styles.resetButtonTextTablet]}>
+                초기화
+              </Text>
+            </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.saveButton,
@@ -697,6 +816,56 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* 일정 불러오기 모달 */}
+      <Modal
+        visible={recallModalVisible}
+        animationType="slide"
+        presentationStyle={isMobile ? 'pageSheet' : 'fullScreen'}
+        onRequestClose={() => setRecallModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>일정 불러오기</Text>
+            <TouchableOpacity
+              onPress={() => setRecallModalVisible(false)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.modalCloseText}>닫기</Text>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={schedulesList}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.scheduleItem}
+                onPress={() => handleScheduleSelect(item)}
+                activeOpacity={0.6}
+              >
+                <View style={[styles.scheduleIconContainer, { backgroundColor: getScheduleIconBg(item.type) }]}>
+                  {getScheduleIcon(item.type)}
+                </View>
+                <View style={styles.scheduleItemLeft}>
+                  <Text style={styles.scheduleItemName}>{item.name}</Text>
+                  <Text style={styles.scheduleItemMeta}>
+                    {getTypeKorean(item.type)}{item.relationship ? ` · ${item.relationship}` : ''}
+                  </Text>
+                </View>
+                <Text style={styles.scheduleItemDate}>
+                  {item.date.replace(/-/g, '.')}
+                </Text>
+              </TouchableOpacity>
+            )}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>등록된 일정이 없습니다</Text>
+              </View>
+            }
+            contentContainerStyle={styles.contactList}
+          />
+        </View>
+      </Modal>
 
       {/* 연락처 선택 모달 (모바일 전용) */}
       {isMobile && (
@@ -1015,26 +1184,91 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  registerScheduleButton: {
-    backgroundColor: '#F59E0B',
-    borderRadius: 10,
-    paddingHorizontal: 12,
+  recallButton: {
     height: 40,
+    borderRadius: 10,
+    backgroundColor: '#F59E0B',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 12,
   },
-  registerScheduleButtonTablet: {
+  recallButtonTablet: {
     height: 44,
-    paddingHorizontal: 14,
     borderRadius: 12,
+    paddingHorizontal: 14,
   },
-  registerScheduleButtonText: {
+  recallButtonText: {
     fontSize: 12,
     fontWeight: '600',
     color: '#FFFFFF',
   },
-  registerScheduleButtonTextTablet: {
+  recallButtonTextTablet: {
     fontSize: 13,
+  },
+  scheduleIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 8,
+  },
+  checkbox: {
+    width: 18,
+    height: 18,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: '#D1D5DB',
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxChecked: {
+    borderColor: '#6366F1',
+    backgroundColor: '#6366F1',
+  },
+  checkmark: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    lineHeight: 14,
+  },
+  checkboxLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#6B7280',
+  },
+  scheduleItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  scheduleItemLeft: {
+    flex: 1,
+  },
+  scheduleItemName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1F2937',
+  },
+  scheduleItemMeta: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: 2,
+  },
+  scheduleItemDate: {
+    fontSize: 13,
+    color: '#9CA3AF',
+    marginLeft: 12,
   },
   inputBox: {
     flexDirection: 'row',
@@ -1153,6 +1387,25 @@ const styles = StyleSheet.create({
   sectionTablet: {
     marginBottom: 24,
     borderRadius: 14,
+  },
+  resetButton: {
+    paddingVertical: 12,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  resetButtonTablet: {
+    paddingVertical: 14,
+    borderRadius: 12,
+  },
+  resetButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  resetButtonTextTablet: {
+    fontSize: 15,
   },
   saveButton: {
     marginHorizontal: 12,

@@ -139,6 +139,8 @@ export interface UpcomingEvent {
   type: EventTypeKey;
   date: string;
   daysLeft: number;
+  relationship: string;
+  memo: string;
 }
 
 export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
@@ -150,8 +152,10 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
     name: string;
     type: string;
     date: string;
+    relationship: string;
+    memo: string;
   }>(
-    `SELECT id, name, type, date FROM schedules
+    `SELECT id, name, type, date, relationship, memo FROM schedules
      WHERE date >= ?
      ORDER BY date ASC`,
     [today]
@@ -172,8 +176,59 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
       type: typeMap[row.type] ?? 'other',
       date: formatDate(row.date),
       daysLeft,
+      relationship: row.relationship || '',
+      memo: row.memo || '',
     };
   });
+}
+
+export interface EventInput {
+  name: string;
+  type: string;        // Korean: '결혼', '장례', etc.
+  date: string;        // "YYYY-MM-DD"
+  amount: number;      // in won
+  amountType: 'send' | 'received';
+  relationship: string;
+  memo?: string;
+}
+
+export async function insertEvent(event: EventInput): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync(
+    'INSERT INTO events (name, type, date, amount, amountType, relationship, eventRole, memo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    [event.name, event.type, event.date, event.amount, event.amountType, event.relationship, '', event.memo || '']
+  );
+}
+
+export interface ScheduleRecord {
+  id: string;
+  name: string;
+  type: string;
+  date: string; // "YYYY-MM-DD"
+  relationship: string;
+  memo: string;
+}
+
+export async function getAllSchedules(): Promise<ScheduleRecord[]> {
+  const db = await getDatabase();
+  const rows = await db.getAllAsync<{
+    id: number;
+    name: string;
+    type: string;
+    date: string;
+    relationship: string;
+    memo: string;
+  }>(
+    'SELECT id, name, type, date, relationship, memo FROM schedules ORDER BY date ASC'
+  );
+  return rows.map(row => ({
+    id: String(row.id),
+    name: row.name,
+    type: row.type,
+    date: row.date,
+    relationship: row.relationship || '',
+    memo: row.memo || '',
+  }));
 }
 
 export interface ScheduleInput {

@@ -5,7 +5,7 @@
     "date": "2023-01-14",
     "amount": 100000,
     "amountType": "send",
-    "relationship": "friend",
+    "relationship": "본인",
     "memo": "행복하게 살아!"
   },
   {
@@ -14,7 +14,7 @@
     "date": "2023-02-03",
     "amount": 70000,
     "amountType": "send",
-    "relationship": "family",
+    "relationship": "배우자",
     "memo": ""
   },
   {
@@ -23,7 +23,7 @@
     "date": "2023-03-21",
     "amount": 50000,
     "amountType": "send",
-    "relationship": "coworker",
+    "relationship": "자녀",
     "memo": ""
   },
   {
@@ -32,7 +32,7 @@
     "date": "2023-04-11",
     "amount": 70000,
     "amountType": "send",
-    "relationship": "relative",
+    "relationship": "부친",
     "memo": "건강하게 자라렴"
   },
   {
@@ -41,7 +41,7 @@
     "date": "2023-05-09",
     "amount": 50000,
     "amountType": "send",
-    "relationship": "friend",
+    "relationship": "모친",
     "memo": ""
   },
   {
@@ -50,7 +50,7 @@
     "date": "2023-06-18",
     "amount": 100000,
     "amountType": "send",
-    "relationship": "family",
+    "relationship": "조부",
     "memo": ""
   },
   {
@@ -59,7 +59,7 @@
     "date": "2023-07-02",
     "amount": 70000,
     "amountType": "send",
-    "relationship": "friend",
+    "relationship": "조모",
     "memo": ""
   },
   {
@@ -68,7 +68,7 @@
     "date": "2023-08-26",
     "amount": 50000,
     "amountType": "send",
-    "relationship": "coworker",
+    "relationship": "빙부",
     "memo": ""
   },
 
@@ -78,7 +78,7 @@
     "date": "2023-09-05",
     "amount": 50000,
     "amountType": "received",
-    "relationship": "friend",
+    "relationship": "빙모",
     "memo": "고마워!"
   },
   {
@@ -87,7 +87,7 @@
     "date": "2023-09-19",
     "amount": 30000,
     "amountType": "received",
-    "relationship": "coworker",
+    "relationship": "본인",
     "memo": ""
   },
   {
@@ -96,7 +96,7 @@
     "date": "2023-10-07",
     "amount": 50000,
     "amountType": "received",
-    "relationship": "family",
+    "relationship": "배우자",
     "memo": ""
   },
   {
@@ -105,7 +105,7 @@
     "date": "2023-10-22",
     "amount": 30000,
     "amountType": "received",
-    "relationship": "relative",
+    "relationship": "자녀",
     "memo": ""
   },
   {
@@ -114,7 +114,7 @@
     "date": "2023-11-03",
     "amount": 50000,
     "amountType": "received",
-    "relationship": "friend",
+    "relationship": "부친",
     "memo": ""
   },
   {
@@ -123,7 +123,7 @@
     "date": "2023-11-25",
     "amount": 30000,
     "amountType": "received",
-    "relationship": "acquaintance",
+    "relationship": "모친",
     "memo": ""
   },
   {
@@ -132,7 +132,7 @@
     "date": "2023-12-12",
     "amount": 50000,
     "amountType": "received",
-    "relationship": "family",
+    "relationship": "조부",
     "memo": ""
   },
 
@@ -142,7 +142,7 @@
     "date": "2024-01-09",
     "amount": 100000,
     "amountType": "send",
-    "relationship": "family",
+    "relationship": "조모",
     "memo": ""
   },
   {
@@ -151,7 +151,7 @@
     "date": "2024-02-14",
     "amount": 70000,
     "amountType": "send",
-    "relationship": "friend",
+    "relationship": "빙부",
     "memo": ""
   },
   {
@@ -160,7 +160,7 @@
     "date": "2024-03-02",
     "amount": 50000,
     "amountType": "send",
-    "relationship": "coworker",
+    "relationship": "빙모",
     "memo": ""
   },
   {
@@ -169,7 +169,7 @@
     "date": "2024-03-27",
     "amount": 70000,
     "amountType": "send",
-    "relationship": "relative",
+    "relationship": "친구",
     "memo": ""
   },
   {
@@ -178,7 +178,7 @@
     "date": "2024-04-16",
     "amount": 50000,
     "amountType": "send",
-    "relationship": "friend",
+    "relationship": "친구",
     "memo": ""
   },
   {
@@ -187,7 +187,7 @@
     "date": "2024-05-08",
     "amount": 100000,
     "amountType": "send",
-    "relationship": "family",
+    "relationship": "본인",
     "memo": "축하해!"
   },
   {
@@ -196,7 +196,7 @@
     "date": "2024-06-21",
     "amount": 70000,
     "amountType": "send",
-    "relationship": "friend",
+    "relationship": "배우자",
     "memo": ""
   },
   {
@@ -205,7 +205,7 @@
     "date": "2024-07-13",
     "amount": 50000,
     "amountType": "send",
-    "relationship": "coworker",
+    "relationship": "부친",
     "memo": ""
   },
 
@@ -215,7 +215,7 @@
     "date": "2024-08-01",
     "amount": 30000,
     "amountType": "received",
-    "relationship": "friend",
+    "relationship": "모친",
     "memo": ""
   },
   {
@@ -224,7 +224,7 @@
     "date": "2024-08-18",
     "amount": 50000,
     "amountType": "received",
-    "relationship": "family",
+    "relationship": "자녀",
     "memo": ""
   },
   {
@@ -233,7 +233,7 @@
     "date": "2024-09-06",
     "amount": 30000,
     "amountType": "received",
-    "relationship": "acquaintance",
+    "relationship": "조부",
     "memo": ""
   },
   {
@@ -242,7 +242,7 @@
     "date": "2024-09-29",
     "amount": 50000,
     "amountType": "received",
-    "relationship": "relative",
+    "relationship": "조모",
     "memo": ""
   },
   {
@@ -251,7 +251,7 @@
     "date": "2024-10-12",
     "amount": 30000,
     "amountType": "received",
-    "relationship": "coworker",
+    "relationship": "빙부",
     "memo": ""
   },
   {
@@ -260,7 +260,7 @@
     "date": "2024-11-04",
     "amount": 50000,
     "amountType": "received",
-    "relationship": "family",
+    "relationship": "빙모",
     "memo": ""
   },
   {
@@ -269,7 +269,7 @@
     "date": "2024-12-17",
     "amount": 30000,
     "amountType": "received",
-    "relationship": "friend",
+    "relationship": "직장동료",
     "memo": ""
   },
   {
@@ -278,7 +278,7 @@
     "date": "2025-01-12",
     "amount": 100000,
     "amountType": "send",
-    "relationship": "friend",
+    "relationship": "직장동료",
     "memo": "행복하게 살아!"
   },
   {
@@ -287,7 +287,7 @@
     "date": "2025-02-04",
     "amount": 70000,
     "amountType": "send",
-    "relationship": "family",
+    "relationship": "본인",
     "memo": ""
   },
   {
@@ -296,7 +296,7 @@
     "date": "2025-03-19",
     "amount": 50000,
     "amountType": "send",
-    "relationship": "coworker",
+    "relationship": "배우자",
     "memo": ""
   },
   {
@@ -305,7 +305,7 @@
     "date": "2025-04-08",
     "amount": 70000,
     "amountType": "send",
-    "relationship": "relative",
+    "relationship": "자녀",
     "memo": ""
   },
   {
@@ -314,7 +314,7 @@
     "date": "2025-05-23",
     "amount": 50000,
     "amountType": "send",
-    "relationship": "friend",
+    "relationship": "부친",
     "memo": ""
   },
   {
@@ -323,7 +323,7 @@
     "date": "2025-06-14",
     "amount": 100000,
     "amountType": "send",
-    "relationship": "family",
+    "relationship": "모친",
     "memo": ""
   },
   {
@@ -332,7 +332,7 @@
     "date": "2025-07-01",
     "amount": 70000,
     "amountType": "send",
-    "relationship": "friend",
+    "relationship": "조부",
     "memo": ""
   },
   {
@@ -341,7 +341,7 @@
     "date": "2025-08-27",
     "amount": 50000,
     "amountType": "send",
-    "relationship": "coworker",
+    "relationship": "조모",
     "memo": ""
   },
 
@@ -351,7 +351,7 @@
     "date": "2025-09-03",
     "amount": 30000,
     "amountType": "received",
-    "relationship": "friend",
+    "relationship": "빙부",
     "memo": ""
   },
   {
@@ -360,7 +360,7 @@
     "date": "2025-09-18",
     "amount": 50000,
     "amountType": "received",
-    "relationship": "family",
+    "relationship": "빙모",
     "memo": ""
   },
   {
@@ -369,7 +369,7 @@
     "date": "2025-10-05",
     "amount": 30000,
     "amountType": "received",
-    "relationship": "acquaintance",
+    "relationship": "지인",
     "memo": ""
   },
   {
@@ -378,7 +378,7 @@
     "date": "2025-10-29",
     "amount": 50000,
     "amountType": "received",
-    "relationship": "relative",
+    "relationship": "지인",
     "memo": ""
   },
   {
@@ -387,7 +387,7 @@
     "date": "2025-11-11",
     "amount": 30000,
     "amountType": "received",
-    "relationship": "coworker",
+    "relationship": "본인",
     "memo": ""
   },
   {
@@ -396,7 +396,7 @@
     "date": "2025-11-30",
     "amount": 50000,
     "amountType": "received",
-    "relationship": "family",
+    "relationship": "배우자",
     "memo": ""
   },
   {
@@ -405,7 +405,7 @@
     "date": "2025-12-20",
     "amount": 30000,
     "amountType": "received",
-    "relationship": "friend",
+    "relationship": "자녀",
     "memo": ""
   },
   {
@@ -414,7 +414,7 @@
     "date": "2026-01-05",
     "amount": 100000,
     "amountType": "send",
-    "relationship": "family",
+    "relationship": "부친",
     "memo": ""
   },
   {
@@ -423,7 +423,7 @@
     "date": "2026-01-22",
     "amount": 70000,
     "amountType": "received",
-    "relationship": "friend",
+    "relationship": "모친",
     "memo": ""
   },
 
@@ -433,7 +433,7 @@
     "date": "2026-02-01",
     "amount": 50000,
     "amountType": "send",
-    "relationship": "coworker",
+    "relationship": "조부",
     "memo": ""
   },
   {
@@ -442,7 +442,7 @@
     "date": "2026-02-09",
     "amount": 70000,
     "amountType": "send",
-    "relationship": "relative",
+    "relationship": "조모",
     "memo": ""
   },
   {
@@ -451,7 +451,7 @@
     "date": "2026-02-14",
     "amount": 50000,
     "amountType": "received",
-    "relationship": "friend",
+    "relationship": "빙부",
     "memo": ""
   },
 
@@ -460,7 +460,7 @@
     "type": "wedding",
     "date": "2026-03-14",
     "isSchedule": true,
-    "relationship": "friend",
+    "relationship": "빙모",
     "memo": ""
   },
   {
@@ -468,7 +468,7 @@
     "type": "funeral",
     "date": "2026-03-21",
     "isSchedule": true,
-    "relationship": "coworker",
+    "relationship": "친구",
     "memo": ""
   },
   {
@@ -476,7 +476,7 @@
     "type": "wedding",
     "date": "2026-04-05",
     "isSchedule": true,
-    "relationship": "friend",
+    "relationship": "직장동료",
     "memo": ""
   }
 ]

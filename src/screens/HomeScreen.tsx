@@ -175,6 +175,8 @@ export const HomeScreen: React.FC = () => {
               name: event.name,
               type: event.type,
               date: event.date,
+              relationship: event.relationship,
+              memo: event.memo,
             });
             setShowCalendar(false);
             setShowRegisterSchedule(true);
@@ -208,12 +210,6 @@ export const HomeScreen: React.FC = () => {
           <RegisterScreen
             onClose={goBack}
             initialData={registerInitialData}
-            onRegisterSchedule={(data) => {
-              pushNavState();
-              setScheduleInitialData(undefined);
-              setActiveTab('home');
-              setShowRegisterSchedule(true);
-            }}
           />
         );
       case 'settings':

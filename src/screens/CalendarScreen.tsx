@@ -286,8 +286,13 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
                     {event.name}
                   </Text>
                   <Text style={[styles.eventDate, isTablet && styles.eventDateTablet]}>
-                    {event.date}
+                    {event.date}{event.relationship ? ` · ${event.relationship}` : ''}
                   </Text>
+                  {!!event.memo && (
+                    <Text style={[styles.eventMemo, isTablet && styles.eventMemoTablet]} numberOfLines={2}>
+                      {event.memo}
+                    </Text>
+                  )}
                 </View>
                 <View style={[styles.eventBadge, { backgroundColor: getEventIconBg(event.type) }]}>
                   <Text style={styles.eventBadgeText}>D-{event.daysLeft}</Text>
@@ -516,6 +521,14 @@ const styles = StyleSheet.create({
   },
   eventDateTablet: {
     fontSize: 13,
+  },
+  eventMemo: {
+    fontSize: 11,
+    color: '#9CA3AF',
+    marginTop: 2,
+  },
+  eventMemoTablet: {
+    fontSize: 12,
   },
   eventBadge: {
     paddingHorizontal: 10,
