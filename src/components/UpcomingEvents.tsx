@@ -24,6 +24,8 @@ export interface Event {
   type: EventType;
   date: string;
   daysLeft: number;
+  relationship?: string;
+  memo?: string;
 }
 
 interface UpcomingEventsProps {

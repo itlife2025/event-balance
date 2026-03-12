@@ -31,15 +31,19 @@ export interface RegisterInitialData {
   name: string;
   type: EventType;
   date: string; // "YYYY.MM.DD (요일)" format
+  relationship?: string;
+  memo?: string;
 }
 
 interface RegisterScreenProps {
   onClose?: () => void;
+  onSaved?: () => void;
   initialData?: RegisterInitialData;
 }
 
 export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   onClose,
+  onSaved,
   initialData,
 }) => {
   const { width } = useWindowDimensions();
@@ -71,8 +75,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [amount, setAmount] = useState('0'); // Start with 0
   const [isDirectInput, setIsDirectInput] = useState(false);
-  const [relation, setRelation] = useState('');
-  const [memo, setMemo] = useState('');
+  const [relation, setRelation] = useState(initialData?.relationship || '');
+  const [memo, setMemo] = useState(initialData?.memo || '');
 
   const dismissAll = () => {
     Keyboard.dismiss();
@@ -194,7 +198,10 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   const cellSize = 32;
 
   const relationOptions = ['본인', '배우자', '자녀', '부친', '모친', '조부', '조모', '빙부', '빙모'];
-  const [isRelationDirectInput, setIsRelationDirectInput] = useState(false);
+  const [isRelationDirectInput, setIsRelationDirectInput] = useState(() => {
+    const preset = ['본인', '배우자', '자녀', '부친', '모친', '조부', '조모', '빙부', '빙모'];
+    return !!initialData?.relationship && !preset.includes(initialData.relationship);
+  });
 
   const handleRelationSelect = (value: string) => {
     setRelation(value);
@@ -361,7 +368,9 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
         });
       }
 
-      if (onClose) {
+      if (onSaved) {
+        onSaved();
+      } else if (onClose) {
         onClose();
       } else {
         setEventName('');

@@ -100,6 +100,15 @@ export async function getYearlyTotals(year: number): Promise<YearlyTotals> {
     }
   }
 
+  for (const e of eventsStore) {
+    if (e.date.substring(0, 4) !== yearStr) continue;
+    if (e.amountType === 'send') {
+      sentAmount += e.amount;
+    } else {
+      receivedAmount += e.amount;
+    }
+  }
+
   return { sentAmount, receivedAmount };
 }
 
@@ -113,6 +122,17 @@ export async function getMonthlyBreakdown(year: number): Promise<MonthlyData[]> 
 
   for (const e of mockEvents as any[]) {
     if ((e as any).isSchedule) continue;
+    if (e.date.substring(0, 4) !== yearStr) continue;
+    const month = parseInt(e.date.substring(5, 7), 10);
+    const entry = monthMap.get(month)!;
+    if (e.amountType === 'send') {
+      entry.sent += e.amount;
+    } else {
+      entry.received += e.amount;
+    }
+  }
+
+  for (const e of eventsStore) {
     if (e.date.substring(0, 4) !== yearStr) continue;
     const month = parseInt(e.date.substring(5, 7), 10);
     const entry = monthMap.get(month)!;
@@ -139,9 +159,28 @@ export async function getMonthlyBreakdown(year: number): Promise<MonthlyData[]> 
 export async function getRecentRecords(limit: number = 3): Promise<RecentRecord[]> {
   const today = new Date().toISOString().slice(0, 10);
 
-  return (mockEvents as any[])
+  const mockRecords = (mockEvents as any[])
     .filter((e: any) => !e.isSchedule && e.date <= today)
-    .sort((a: any, b: any) => b.date.localeCompare(a.date))
+    .map((e: any) => ({
+      name: e.name,
+      type: e.type,
+      date: e.date,
+      amount: e.amount,
+      amountType: e.amountType,
+    }));
+
+  const userRecords = eventsStore
+    .filter(e => e.date <= today)
+    .map(e => ({
+      name: e.name,
+      type: e.type,
+      date: e.date,
+      amount: e.amount,
+      amountType: e.amountType,
+    }));
+
+  return [...mockRecords, ...userRecords]
+    .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, limit)
     .map((e, i) => ({
       id: String(i + 1),
@@ -191,6 +230,63 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
     });
 
   return [...mockSchedules, ...userSchedules].sort((a, b) => a.daysLeft - b.daysLeft);
+}
+
+export interface TransactionRecord {
+  id: string;
+  name: string;
+  type: EventTypeKey;
+  date: string;
+  rawDate: string;
+  amount: number;
+  isSent: boolean;
+}
+
+export async function getAvailableYears(): Promise<number[]> {
+  const yearsSet = new Set<number>();
+  for (const e of mockEvents as any[]) {
+    if (e.isSchedule) continue;
+    yearsSet.add(parseInt(e.date.substring(0, 4), 10));
+  }
+  for (const e of eventsStore) {
+    yearsSet.add(parseInt(e.date.substring(0, 4), 10));
+  }
+  return [...yearsSet].sort((a, b) => b - a);
+}
+
+export async function getTransactionsByYear(year: number): Promise<TransactionRecord[]> {
+  const yearStr = String(year);
+  const all: TransactionRecord[] = [];
+
+  (mockEvents as any[])
+    .filter((e: any) => !e.isSchedule && e.date.substring(0, 4) === yearStr)
+    .forEach((e: any, i: number) => {
+      all.push({
+        id: `mock-${i}`,
+        name: e.name,
+        type: toEventType(e.type),
+        date: formatDate(e.date),
+        rawDate: e.date,
+        amount: e.amount,
+        isSent: e.amountType === 'send',
+      });
+    });
+
+  eventsStore
+    .filter(e => e.date.substring(0, 4) === yearStr)
+    .forEach(e => {
+      all.push({
+        id: String(e.id),
+        name: e.name,
+        type: toEventType(e.type),
+        date: formatDate(e.date),
+        rawDate: e.date,
+        amount: e.amount,
+        isSent: e.amountType === 'send',
+      });
+    });
+
+  return all.sort((a, b) => b.rawDate.localeCompare(a.rawDate));
 }
 
 export interface EventInput {

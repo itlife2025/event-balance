@@ -182,6 +182,51 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
   });
 }
 
+export interface TransactionRecord {
+  id: string;
+  name: string;
+  type: EventTypeKey;
+  date: string;
+  rawDate: string;
+  amount: number;
+  isSent: boolean;
+}
+
+export async function getAvailableYears(): Promise<number[]> {
+  const db = await getDatabase();
+  const rows = await db.getAllAsync<{ year: string }>(
+    `SELECT DISTINCT substr(date, 1, 4) as year FROM events ORDER BY year DESC`
+  );
+  return rows.map(r => parseInt(r.year, 10));
+}
+
+export async function getTransactionsByYear(year: number): Promise<TransactionRecord[]> {
+  const db = await getDatabase();
+  const rows = await db.getAllAsync<{
+    id: number;
+    name: string;
+    type: string;
+    date: string;
+    amount: number;
+    amountType: string;
+  }>(
+    `SELECT id, name, type, date, amount, amountType FROM events
+     WHERE substr(date, 1, 4) = ?
+     ORDER BY date DESC`,
+    [String(year)]
+  );
+
+  return rows.map(row => ({
+    id: String(row.id),
+    name: row.name,
+    type: (typeMap[row.type] ?? 'other') as EventTypeKey,
+    date: formatDate(row.date),
+    rawDate: row.date,
+    amount: row.amount,
+    isSent: row.amountType === 'send',
+  }));
+}
+
 export interface EventInput {
   name: string;
   type: string;        // Korean: '결혼', '장례', etc.

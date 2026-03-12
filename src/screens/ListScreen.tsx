@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,37 +6,29 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   ScrollView,
+  Platform,
 } from 'react-native';
-import { WeddingIcon, FuneralIcon } from '../components/Icons';
+import { WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
 import { EventType } from '../components/UpcomingEvents';
+import { Header } from '../components/Header';
+import { NavTabKey } from '../types/navigation';
+import {
+  getAvailableYears,
+  getTransactionsByYear,
+  getYearlyTotals,
+  type TransactionRecord,
+} from '../database/queries';
 
 type FilterKey = 'all' | 'received' | 'sent';
 
-interface Transaction {
-  id: string;
-  name: string;
-  type: EventType;
-  date: string;
-  amount: number;
-  isSent: boolean;
-}
-
-const sampleTransactions: Transaction[] = [
-  { id: '1', name: '김민수 결혼식', type: 'wedding', date: '2022.12.15', amount: 200000, isSent: false },
-  { id: '2', name: '이영호 조의금', type: 'funeral', date: '2022.11.30', amount: 100000, isSent: true },
-  { id: '3', name: '박지연 결혼식', type: 'wedding', date: '2022.10.05', amount: 300000, isSent: false },
-  { id: '4', name: '회사 동문 돌잔치', type: 'wedding', date: '2022.09.18', amount: 50000, isSent: true },
-];
-
-import { Header } from '../components/Header';
-import { NavTabKey } from '../types/navigation';
-
 interface ListScreenProps {
-  onTransactionPress?: (transaction: Transaction) => void;
+  onTransactionPress?: (transaction: TransactionRecord) => void;
   onNavPress?: (tab: NavTabKey) => void;
   onAddPress?: () => void;
   onBackPress?: () => void;
 }
+
+const currentYear = new Date().getFullYear();
 
 export const ListScreen: React.FC<ListScreenProps> = ({
   onTransactionPress,
@@ -46,12 +38,34 @@ export const ListScreen: React.FC<ListScreenProps> = ({
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+
   const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
+  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+  const [availableYears, setAvailableYears] = useState<number[]>([currentYear]);
+  const [transactions, setTransactions] = useState<TransactionRecord[]>([]);
+  const [sentAmount, setSentAmount] = useState(0);
+  const [receivedAmount, setReceivedAmount] = useState(0);
+  const [showYearDropdown, setShowYearDropdown] = useState(false);
 
-  const receivedAmount = 1200000;
-  const sentAmount = 850000;
+  useEffect(() => {
+    getAvailableYears().then((years: number[]) => {
+      const merged = [...new Set([currentYear, ...years])].sort((a, b) => b - a);
+      setAvailableYears(merged);
+    });
+  }, []);
 
-  const filteredTransactions = sampleTransactions.filter((t) => {
+  useEffect(() => {
+    Promise.all([
+      getTransactionsByYear(selectedYear),
+      getYearlyTotals(selectedYear),
+    ]).then(([txs, totals]) => {
+      setTransactions(txs);
+      setSentAmount(totals.sentAmount);
+      setReceivedAmount(totals.receivedAmount);
+    });
+  }, [selectedYear]);
+
+  const filteredTransactions = transactions.filter(t => {
     if (activeFilter === 'received') return !t.isSent;
     if (activeFilter === 'sent') return t.isSent;
     return true;
@@ -59,12 +73,24 @@ export const ListScreen: React.FC<ListScreenProps> = ({
 
   const filters: { key: FilterKey; label: string }[] = [
     { key: 'all', label: '전체' },
-    { key: 'received', label: '받은 내역' },
     { key: 'sent', label: '보낸 내역' },
+    { key: 'received', label: '받은 내역' },
   ];
 
+  const getIcon = (type: EventType) => {
+    if (type === 'wedding') return <WeddingIcon size={isTablet ? 24 : 20} color="#EC4899" />;
+    if (type === 'funeral') return <FuneralIcon size={isTablet ? 24 : 20} color="#3B82F6" />;
+    return <GiftIcon size={isTablet ? 24 : 20} color="#F59E0B" />;
+  };
+
+  const getIconBg = (type: EventType) => {
+    if (type === 'wedding') return '#FDF2F8';
+    if (type === 'funeral') return '#EFF6FF';
+    return '#FFFBEB';
+  };
+
   return (
-    <View style={[styles.container]}>
+    <View style={styles.container}>
       <Header title="리스트" onBackPress={onBackPress} />
       <ScrollView
         style={styles.scrollView}
@@ -74,25 +100,28 @@ export const ListScreen: React.FC<ListScreenProps> = ({
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Summary Cards */}
-        <View style={[styles.summaryContainer, isTablet && styles.summaryContainerTablet]}>
-          <View style={[styles.summaryCard, styles.sentCard]}>
-            <Text style={styles.summaryLabel}>보낸 금액</Text>
-            <Text style={[styles.summaryAmount, styles.sentAmountText]} numberOfLines={1} adjustsFontSizeToFit>
-              ₩{sentAmount.toLocaleString()}
-            </Text>
-          </View>
-          <View style={[styles.summaryCard, styles.receivedCard]}>
-            <Text style={styles.summaryLabel}>받은 금액</Text>
-            <Text style={[styles.summaryAmount, styles.receivedAmount]} numberOfLines={1} adjustsFontSizeToFit>
-              ₩{receivedAmount.toLocaleString()}
-            </Text>
+        {/* Summary Card */}
+        <View style={[styles.summaryCard, isTablet && styles.summaryCardTablet]}>
+          <View style={styles.summaryRow}>
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>보낸 금액</Text>
+              <Text style={[styles.summaryAmount, styles.sentAmountText]} numberOfLines={1} adjustsFontSizeToFit>
+                ₩{sentAmount.toLocaleString()}
+              </Text>
+            </View>
+            <View style={styles.summaryDivider} />
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>받은 금액</Text>
+              <Text style={[styles.summaryAmount, styles.receivedAmountText]} numberOfLines={1} adjustsFontSizeToFit>
+                ₩{receivedAmount.toLocaleString()}
+              </Text>
+            </View>
           </View>
         </View>
 
         {/* Filter Tabs */}
         <View style={[styles.filterContainer, isTablet && styles.filterContainerTablet]}>
-          {filters.map((filter) => (
+          {filters.map(filter => (
             <TouchableOpacity
               key={filter.key}
               style={[
@@ -116,46 +145,110 @@ export const ListScreen: React.FC<ListScreenProps> = ({
 
         {/* Transaction List */}
         <View style={[styles.transactionList, isTablet && styles.transactionListTablet]}>
-          {filteredTransactions.map((transaction, index) => (
-            <TouchableOpacity
-              key={transaction.id}
-              style={[
-                styles.transactionItem,
-                isTablet && styles.transactionItemTablet,
-                index < filteredTransactions.length - 1 && styles.transactionItemBorder,
-              ]}
-              onPress={() => onTransactionPress?.(transaction)}
-              activeOpacity={0.7}
-            >
-              <View
-                style={[
-                  styles.transactionIcon,
-                  isTablet && styles.transactionIconTablet,
-                  { backgroundColor: transaction.type === 'wedding' ? '#FDF2F8' : '#EFF6FF' },
-                ]}
-              >
-                {transaction.type === 'wedding' ? (
-                  <WeddingIcon size={isTablet ? 24 : 20} color="#EC4899" />
-                ) : (
-                  <FuneralIcon size={isTablet ? 24 : 20} color="#3B82F6" />
+          {/* Year Selector */}
+          <View style={styles.listDateSelectorContainer}>
+            {Platform.OS === 'web' ? (
+              <View style={styles.listDateSelectorPill}>
+                <select
+                  value={selectedYear}
+                  onChange={e => setSelectedYear(Number(e.target.value))}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    fontSize: isTablet ? 16 : 14,
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    MozAppearance: 'none',
+                  } as any}
+                >
+                  {availableYears.map(y => (
+                    <option key={y} value={y}>{y}년</option>
+                  ))}
+                </select>
+                <Text style={styles.listDateSelectorArrow}>{'∨'}</Text>
+              </View>
+            ) : (
+              <View>
+                <TouchableOpacity
+                  style={styles.listDateSelectorPill}
+                  onPress={() => setShowYearDropdown(v => !v)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.listDateSelectorText, isTablet && styles.listDateSelectorTextTablet]}>{selectedYear}년</Text>
+                  <Text style={styles.listDateSelectorArrow}>{'∨'}</Text>
+                </TouchableOpacity>
+                {showYearDropdown && (
+                  <View style={styles.yearDropdownList}>
+                    {availableYears.map(y => (
+                      <TouchableOpacity
+                        key={y}
+                        style={[styles.yearDropdownItem, y === selectedYear && styles.yearDropdownItemActive]}
+                        onPress={() => { setSelectedYear(y); setShowYearDropdown(false); }}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[styles.yearDropdownItemText, y === selectedYear && styles.yearDropdownItemTextActive]}>
+                          {y}년
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
                 )}
               </View>
-              <View style={styles.transactionInfo}>
-                <Text
-                  style={[styles.transactionName, isTablet && styles.transactionNameTablet]}
-                  numberOfLines={1}
+            )}
+          </View>
+
+          {filteredTransactions.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>{selectedYear}년 내역이 없습니다.</Text>
+            </View>
+          ) : (
+            filteredTransactions.map((transaction, index) => (
+              <TouchableOpacity
+                key={transaction.id}
+                style={[
+                  styles.transactionItem,
+                  isTablet && styles.transactionItemTablet,
+                  index < filteredTransactions.length - 1 && styles.transactionItemBorder,
+                ]}
+                onPress={() => onTransactionPress?.(transaction)}
+                activeOpacity={0.7}
+              >
+                <View
+                  style={[
+                    styles.transactionIcon,
+                    isTablet && styles.transactionIconTablet,
+                    { backgroundColor: getIconBg(transaction.type) },
+                  ]}
                 >
-                  {transaction.name}
+                  {getIcon(transaction.type)}
+                </View>
+                <View style={styles.transactionInfo}>
+                  <Text
+                    style={[styles.transactionName, isTablet && styles.transactionNameTablet]}
+                    numberOfLines={1}
+                  >
+                    {transaction.name}
+                  </Text>
+                  <Text style={[styles.transactionDate, isTablet && styles.transactionDateTablet]}>
+                    {transaction.date}
+                  </Text>
+                </View>
+                <Text
+                  style={[
+                    styles.transactionAmount,
+                    isTablet && styles.transactionAmountTablet,
+                    { color: '#1F2937' },
+                  ]}
+                >
+                  {transaction.isSent ? '-' : '+'}₩{transaction.amount.toLocaleString()}
                 </Text>
-                <Text style={[styles.transactionDate, isTablet && styles.transactionDateTablet]}>
-                  {transaction.date}
-                </Text>
-              </View>
-              <Text style={[styles.transactionAmount, isTablet && styles.transactionAmountTablet]}>
-                {transaction.isSent ? '-' : '+'}₩{transaction.amount.toLocaleString()}
-              </Text>
-            </TouchableOpacity>
-          ))}
+              </TouchableOpacity>
+            ))
+          )}
         </View>
       </ScrollView>
     </View>
@@ -166,9 +259,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
-  },
-  containerTablet: {
-    alignItems: 'center',
   },
   scrollView: {
     flex: 1,
@@ -186,42 +276,110 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 
-  // Summary Cards
-  summaryContainer: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 16,
-  },
-  summaryContainerTablet: {
-    gap: 16,
-  },
+  // Summary Card
   summaryCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  summaryCardTablet: {
+    padding: 24,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  summaryItem: {
     flex: 1,
-    borderRadius: 12,
-    padding: 16,
     alignItems: 'center',
   },
-  receivedCard: {
-    backgroundColor: '#FFFFFF',
-  },
-  sentCard: {
-    backgroundColor: '#FFFFFF',
+  summaryDivider: {
+    width: 1,
+    height: 50,
+    backgroundColor: '#E5E7EB',
+    marginHorizontal: 16,
   },
   summaryLabel: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
     color: '#4B5563',
     marginBottom: 8,
   },
   summaryAmount: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: '700',
-  },
-  receivedAmount: {
-    color: '#34D399',
   },
   sentAmountText: {
     color: '#818CF8',
+  },
+  receivedAmountText: {
+    color: '#34D399',
+  },
+
+  // Year Selector (StatsScreen style)
+  listDateSelectorContainer: {
+    alignItems: 'center',
+    paddingTop: 24,
+    paddingBottom: 0,
+  },
+  listDateSelectorPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    gap: 6,
+  },
+  listDateSelectorText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1F2937',
+  },
+  listDateSelectorTextTablet: {
+    fontSize: 16,
+  },
+  listDateSelectorArrow: {
+    fontSize: 12,
+    color: '#9CA3AF',
+  },
+  yearDropdownList: {
+    position: 'absolute',
+    top: 40,
+    left: 0,
+    right: 0,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
+    zIndex: 100,
+  },
+  yearDropdownItem: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  yearDropdownItemActive: {
+    backgroundColor: '#EEF2FF',
+  },
+  yearDropdownItemText: {
+    fontSize: 14,
+    color: '#374151',
+  },
+  yearDropdownItemTextActive: {
+    fontWeight: '700',
+    color: '#6366F1',
   },
 
   // Filter Tabs
@@ -314,9 +472,16 @@ const styles = StyleSheet.create({
   transactionAmount: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1F2937',
   },
   transactionAmountTablet: {
     fontSize: 18,
+  },
+  emptyState: {
+    padding: 32,
+    alignItems: 'center',
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: '#9CA3AF',
   },
 });

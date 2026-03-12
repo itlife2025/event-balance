@@ -96,7 +96,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
     return today;
   }, [initialData, today]);
 
-  const [selectedType, setSelectedType] = useState<EventType>(initialData?.type || 'wedding');
+  const [selectedType, setSelectedType] = useState<EventType | null>(initialData?.type || null);
   const [eventName, setEventName] = useState(initialData?.name || '');
   const [selectedDate, setSelectedDate] = useState<Date>(initialDate);
   const [calendarYear, setCalendarYear] = useState(initialDate.getFullYear());
@@ -199,7 +199,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
 
       await insertSchedule({
         name: eventName,
-        type: typeToKorean[selectedType] || selectedType,
+        type: selectedType ? (typeToKorean[selectedType] || selectedType) : '기타',
         date: dbDate,
         relationship: relation,
         memo,
@@ -456,8 +456,10 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
                   const dateStr = `${formatDisplayDate(selectedDate)} (${dayName})`;
                   onRegisterEvent({
                     name: eventName,
-                    type: selectedType,
+                    type: selectedType || 'other',
                     date: dateStr,
+                    relationship: relation,
+                    memo,
                   });
                 }}
                 activeOpacity={0.7}

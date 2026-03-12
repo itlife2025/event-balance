@@ -132,12 +132,23 @@ export const HomeScreen: React.FC = () => {
       name: event.name,
       type: event.type,
       date: event.date,
+      relationship: event.relationship,
+      memo: event.memo,
     });
     setShowRegisterSchedule(true);
   };
 
   const handleRecordPress = (record: Record) => {
-    // Record pressed
+    pushNavState();
+    setShowDetailScreen(true);
+  };
+
+  const handleRecentRecordsMorePress = () => {
+    pushNavState();
+    setActiveTab('list');
+    setShowDetailScreen(false);
+    setShowRegisterSchedule(false);
+    setShowCalendar(false);
   };
 
   const handleTabPress = (tab: NavTabKey) => {
@@ -209,6 +220,18 @@ export const HomeScreen: React.FC = () => {
         return (
           <RegisterScreen
             onClose={goBack}
+            onSaved={async () => {
+              const [totals, monthly, records] = await Promise.all([
+                getYearlyTotals(currentYear),
+                getMonthlyBreakdown(currentYear),
+                getRecentRecords(3),
+              ]);
+              setSentAmount(totals.sentAmount);
+              setReceivedAmount(totals.receivedAmount);
+              setMonthlyData(monthly);
+              setRecentRecords(records);
+              goBack();
+            }}
             initialData={registerInitialData}
           />
         );
@@ -263,7 +286,7 @@ export const HomeScreen: React.FC = () => {
                     setShowCalendar(true);
                   }}
                 />
-                <RecentRecords records={recentRecords} onRecordPress={handleRecordPress} />
+                <RecentRecords records={recentRecords} onRecordPress={handleRecordPress} onMorePress={handleRecentRecordsMorePress} />
               </View>
             </ScrollView>
           </View>
