@@ -10,6 +10,7 @@ import {
 import { ChevronRightIcon, ChevronLeftIcon, WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
 import { Header } from '../components/Header';
 import { getUpcomingEvents, type UpcomingEvent } from '../database/queries';
+import { type EventTypeKey } from '../constants/eventTypes';
 
 interface CalendarScreenProps {
   onBackPress?: () => void;
@@ -18,8 +19,6 @@ interface CalendarScreenProps {
 }
 
 const WEEKDAYS = ['월', '화', '수', '목', '금', '토', '일'];
-
-type EventTypeKey = 'wedding' | 'funeral' | 'birthday' | 'firstBirthday' | 'other';
 
 function getCalendarDays(year: number, month: number) {
   const rawFirstDay = new Date(year, month, 1).getDay();

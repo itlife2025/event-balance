@@ -18,6 +18,8 @@ import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon, WeddingIcon, FuneralIc
 import { Header } from '../components/Header';
 import { EventType } from '../components/UpcomingEvents';
 import { insertEvent, insertSchedule, getAllSchedules, ScheduleRecord } from '../database/queries';
+import { getDatabase } from '../database/database';
+import { resolveEventType, getEventTypeLabel } from '../constants/eventTypes';
 
 // expo-contacts는 웹에서 지원하지 않으므로 모바일에서만 동적 로드
 let Contacts: any = null;
@@ -113,6 +115,17 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
       Alert.alert('연락처 없음', '저장된 연락처가 없습니다.');
     }
   };
+
+  useEffect(() => {
+    (async () => {
+      const db = await getDatabase();
+      const allEvents = await db.getAllAsync('SELECT * FROM events ORDER BY date DESC');
+      const allSchedules = await db.getAllAsync('SELECT * FROM schedules ORDER BY date ASC');
+      console.log(`=== 저장된 데이터 (events: ${allEvents.length}건, schedules: ${allSchedules.length}건) ===`);
+      console.log('[events]', JSON.stringify(allEvents, null, 2));
+      console.log('[schedules]', JSON.stringify(allSchedules, null, 2));
+    })();
+  }, []);
 
   useEffect(() => {
     if (contactSearch.trim() === '') {
@@ -227,36 +240,16 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
     other: '기타',
   };
 
-  const koreanToType: Record<string, EventType> = {
-    '결혼': 'wedding',   wedding: 'wedding',
-    '장례': 'funeral',   funeral: 'funeral',
-    '생일': 'birthday',  birthday: 'birthday',
-    '돌': 'firstBirthday', '돌잔치': 'firstBirthday', firstBirthday: 'firstBirthday',
-    '출산': 'birth',     birth: 'birth',
-    '기타': 'other',     other: 'other',
-  };
-
-  const getTypeKorean = (type: string): string => {
-    const map: Record<string, string> = {
-      wedding: '결혼',      '결혼': '결혼',
-      funeral: '장례',      '장례': '장례',
-      birthday: '생일',     '생일': '생일',
-      firstBirthday: '돌잔치', '돌': '돌잔치', '돌잔치': '돌잔치',
-      birth: '출산',        '출산': '출산',
-      other: '기타',        '기타': '기타',
-    };
-    return map[type] || type;
-  };
 
   const getScheduleIcon = (type: string) => {
-    const t = koreanToType[type] || 'other';
+    const t = resolveEventType(type);
     if (t === 'wedding') return <WeddingIcon size={20} color="#EC4899" />;
     if (t === 'funeral') return <FuneralIcon size={20} color="#3B82F6" />;
     return <GiftIcon size={20} color={t === 'birthday' || t === 'firstBirthday' ? '#F59E0B' : '#8B5CF6'} />;
   };
 
   const getScheduleIconBg = (type: string): string => {
-    const t = koreanToType[type] || 'other';
+    const t = resolveEventType(type);
     if (t === 'wedding') return '#FDF2F8';
     if (t === 'funeral') return '#EFF6FF';
     if (t === 'birthday' || t === 'firstBirthday') return '#FFFBEB';
@@ -276,7 +269,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
 
   const handleScheduleSelect = (schedule: ScheduleRecord) => {
     setEventName(schedule.name);
-    const eventType = koreanToType[schedule.type] || 'other';
+    const eventType = resolveEventType(schedule.type);
     setSelectedType(eventType);
     setIsEventTypeDirectInput(false);
     setCustomEventType('');
@@ -342,15 +335,15 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
     const m = String(selectedDate.getMonth() + 1).padStart(2, '0');
     const d = String(selectedDate.getDate()).padStart(2, '0');
     const dbDate = `${y}-${m}-${d}`;
-    const koreanType = isEventTypeDirectInput
-      ? (customEventType || '기타')
-      : (typeToKorean[selectedType] || '기타');
+    const eventType = isEventTypeDirectInput
+      ? (customEventType.trim() || 'other')
+      : (selectedType || 'other');
     const amountType = activeTab === 'pay' ? 'received' : 'send';
 
     try {
       await insertEvent({
         name: eventName,
-        type: koreanType,
+        type: eventType,
         date: dbDate,
         amount: parseInt(amount) * 10000,
         amountType,
@@ -361,7 +354,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
       if (registerScheduleChecked) {
         await insertSchedule({
           name: eventName,
-          type: koreanType,
+          type: eventType,
           date: dbDate,
           relationship: relation,
           memo,
@@ -673,18 +666,21 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
             )}
 
             {/* Register Schedule checkbox */}
-            <TouchableOpacity
-              style={styles.checkboxRow}
-              onPress={() => setRegisterScheduleChecked(!registerScheduleChecked)}
-              activeOpacity={0.7}
-            >
-              <View style={[styles.checkbox, registerScheduleChecked && styles.checkboxChecked]}>
-                {registerScheduleChecked && (
-                  <Text style={styles.checkmark}>✓</Text>
-                )}
-              </View>
-              <Text style={styles.checkboxLabel}>일정 등록</Text>
-            </TouchableOpacity>
+            <View style={styles.checkboxRow}>
+              <View style={{ flex: 1 }} />
+              <TouchableOpacity
+                style={styles.checkboxContent}
+                onPress={() => setRegisterScheduleChecked(!registerScheduleChecked)}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.checkbox, registerScheduleChecked && styles.checkboxChecked]}>
+                  {registerScheduleChecked && (
+                    <Text style={styles.checkmark}>✓</Text>
+                  )}
+                </View>
+                <Text style={styles.checkboxLabel}>일정 등록</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Amount */}
@@ -858,7 +854,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                 <View style={styles.scheduleItemLeft}>
                   <Text style={styles.scheduleItemName}>{item.name}</Text>
                   <Text style={styles.scheduleItemMeta}>
-                    {getTypeKorean(item.type)}{item.relationship ? ` · ${item.relationship}` : ''}
+                    {getEventTypeLabel(resolveEventType(item.type))}{item.relationship ? ` · ${item.relationship}` : ''}
                   </Text>
                 </View>
                 <Text style={styles.scheduleItemDate}>
@@ -1225,8 +1221,16 @@ const styles = StyleSheet.create({
   checkboxRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     marginTop: 8,
+  },
+  checkboxContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    height: 40,
   },
   checkbox: {
     width: 18,

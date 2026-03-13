@@ -26,6 +26,8 @@ interface ListScreenProps {
   onNavPress?: (tab: NavTabKey) => void;
   onAddPress?: () => void;
   onBackPress?: () => void;
+  selectedYear?: number;
+  onYearChange?: (year: number) => void;
 }
 
 const currentYear = new Date().getFullYear();
@@ -35,12 +37,19 @@ export const ListScreen: React.FC<ListScreenProps> = ({
   onNavPress,
   onAddPress,
   onBackPress,
+  selectedYear: selectedYearProp,
+  onYearChange,
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
 
   const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
-  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+  const [selectedYear, setSelectedYearInternal] = useState<number>(selectedYearProp ?? currentYear);
+
+  const setSelectedYear = (year: number) => {
+    setSelectedYearInternal(year);
+    onYearChange?.(year);
+  };
   const [availableYears, setAvailableYears] = useState<number[]>([currentYear]);
   const [transactions, setTransactions] = useState<TransactionRecord[]>([]);
   const [sentAmount, setSentAmount] = useState(0);

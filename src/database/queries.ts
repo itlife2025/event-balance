@@ -76,7 +76,8 @@ export async function getMonthlyBreakdown(year: number): Promise<MonthlyData[]> 
   return result;
 }
 
-type EventTypeKey = 'wedding' | 'funeral' | 'birthday' | 'firstBirthday' | 'other';
+import { EventTypeKey, resolveEventType } from '../constants/eventTypes';
+export type { EventTypeKey };
 
 export interface RecentRecord {
   id: string;
@@ -86,14 +87,6 @@ export interface RecentRecord {
   amount: number;
   isSent: boolean;
 }
-
-const typeMap: Record<string, EventTypeKey> = {
-  '결혼': 'wedding',
-  '장례': 'funeral',
-  '생일': 'birthday',
-  '돌': 'firstBirthday',
-  '기타': 'other',
-};
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
@@ -126,7 +119,7 @@ export async function getRecentRecords(limit: number = 3): Promise<RecentRecord[
   return rows.map(row => ({
     id: String(row.id),
     name: row.name,
-    type: typeMap[row.type] ?? 'other',
+    type: resolveEventType(row.type),
     date: formatDate(row.date),
     amount: row.amount,
     isSent: row.amountType === 'send',
@@ -173,7 +166,7 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
     return {
       id: String(row.id),
       name: row.name,
-      type: typeMap[row.type] ?? 'other',
+      type: resolveEventType(row.type),
       date: formatDate(row.date),
       daysLeft,
       relationship: row.relationship || '',
@@ -219,12 +212,70 @@ export async function getTransactionsByYear(year: number): Promise<TransactionRe
   return rows.map(row => ({
     id: String(row.id),
     name: row.name,
-    type: (typeMap[row.type] ?? 'other') as EventTypeKey,
+    type: resolveEventType(row.type),
     date: formatDate(row.date),
     rawDate: row.date,
     amount: row.amount,
     isSent: row.amountType === 'send',
   }));
+}
+
+export interface PersonDetail {
+  records: {
+    id: string;
+    type: EventTypeKey;
+    typeName: string;
+    date: string;
+    amount: number;
+    isSent: boolean;
+    relationship: string;
+  }[];
+  sentTotal: number;
+  receivedTotal: number;
+}
+
+export async function getEventsByName(name: string): Promise<PersonDetail> {
+  const db = await getDatabase();
+
+  const rows = await db.getAllAsync<{
+    id: number;
+    type: string;
+    date: string;
+    amount: number;
+    amountType: string;
+    relationship: string;
+  }>(
+    `SELECT id, type, date, amount, amountType, relationship FROM events
+     WHERE name = ?
+     ORDER BY date DESC`,
+    [name]
+  );
+
+  let sentTotal = 0;
+  let receivedTotal = 0;
+  const records = rows.map(row => {
+    const isSent = row.amountType === 'send';
+    if (isSent) {
+      sentTotal += row.amount;
+    } else {
+      receivedTotal += row.amount;
+    }
+    return {
+      id: String(row.id),
+      type: resolveEventType(row.type),
+      typeName: row.type,
+      date: formatDate(row.date),
+      amount: row.amount,
+      isSent,
+      relationship: row.relationship || '',
+    };
+  });
+
+  return {
+    records,
+    sentTotal,
+    receivedTotal,
+  };
 }
 
 export interface EventInput {

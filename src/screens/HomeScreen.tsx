@@ -57,6 +57,8 @@ export const HomeScreen: React.FC = () => {
   const [showSettingsScreen, setShowSettingsScreen] = useState(false);
   const [scheduleInitialData, setScheduleInitialData] = useState<ScheduleData | undefined>(undefined);
   const [registerInitialData, setRegisterInitialData] = useState<ScheduleData | undefined>(undefined);
+  const [detailName, setDetailName] = useState('');
+  const [listSelectedYear, setListSelectedYear] = useState(new Date().getFullYear());
   const [navHistory, setNavHistory] = useState<NavState[]>([]);
 
   const pushNavState = () => {
@@ -140,6 +142,7 @@ export const HomeScreen: React.FC = () => {
 
   const handleRecordPress = (record: Record) => {
     pushNavState();
+    setDetailName(record.name);
     setShowDetailScreen(true);
   };
 
@@ -246,8 +249,11 @@ export const HomeScreen: React.FC = () => {
       case 'list':
         return (
           <ListScreen
-            onTransactionPress={() => {
+            selectedYear={listSelectedYear}
+            onYearChange={setListSelectedYear}
+            onTransactionPress={(transaction) => {
               pushNavState();
+              setDetailName(transaction.name);
               setShowDetailScreen(true);
             }}
             onBackPress={goBack}
@@ -299,6 +305,7 @@ export const HomeScreen: React.FC = () => {
       <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
       {showDetailScreen ? (
         <DetailScreen
+          name={detailName}
           onClose={goBack}
         />
       ) : (

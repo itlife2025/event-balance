@@ -37,7 +37,8 @@ export interface MonthlyData {
   received: number;
 }
 
-type EventTypeKey = 'wedding' | 'funeral' | 'birthday' | 'firstBirthday' | 'other';
+import { EventTypeKey, resolveEventType } from '../constants/eventTypes';
+export type { EventTypeKey };
 
 export interface RecentRecord {
   id: string;
@@ -58,23 +59,6 @@ export interface UpcomingEvent {
   memo: string;
 }
 
-const typeMap: Record<string, EventTypeKey> = {
-  wedding: 'wedding',
-  funeral: 'funeral',
-  birthday: 'birthday',
-  firstBirthday: 'firstBirthday',
-  etc: 'other',
-  // Korean fallbacks (in case DB-seeded data uses Korean keys)
-  '결혼': 'wedding',
-  '장례': 'funeral',
-  '생일': 'birthday',
-  '돌': 'firstBirthday',
-  '기타': 'other',
-};
-
-function toEventType(raw: string): EventTypeKey {
-  return typeMap[raw] ?? 'other';
-}
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
@@ -185,7 +169,7 @@ export async function getRecentRecords(limit: number = 3): Promise<RecentRecord[
     .map((e, i) => ({
       id: String(i + 1),
       name: e.name,
-      type: toEventType(e.type),
+      type: resolveEventType(e.type),
       date: formatDate(e.date),
       amount: e.amount,
       isSent: e.amountType === 'send',
@@ -203,7 +187,7 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
     .map((e: any, i: number) => ({
       id: `mock-${i}`,
       name: e.name,
-      type: toEventType(e.type),
+      type: resolveEventType(e.type),
       date: formatDate(e.date),
       daysLeft: Math.ceil((new Date(e.date).setHours(0,0,0,0) - now.getTime()) / (1000 * 60 * 60 * 24)),
       relationship: e.relationship || '',
@@ -221,7 +205,7 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
       return {
         id: String(s.id),
         name: s.name,
-        type: toEventType(s.type),
+        type: resolveEventType(s.type),
         date: formatDate(s.date),
         daysLeft,
         relationship: s.relationship,
@@ -264,7 +248,7 @@ export async function getTransactionsByYear(year: number): Promise<TransactionRe
       all.push({
         id: `mock-${i}`,
         name: e.name,
-        type: toEventType(e.type),
+        type: resolveEventType(e.type),
         date: formatDate(e.date),
         rawDate: e.date,
         amount: e.amount,
@@ -278,7 +262,7 @@ export async function getTransactionsByYear(year: number): Promise<TransactionRe
       all.push({
         id: String(e.id),
         name: e.name,
-        type: toEventType(e.type),
+        type: resolveEventType(e.type),
         date: formatDate(e.date),
         rawDate: e.date,
         amount: e.amount,

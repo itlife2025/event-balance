@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,82 +8,52 @@ import {
   StatusBar,
   TouchableOpacity,
   useWindowDimensions,
-  Image,
+  ActivityIndicator,
 } from 'react-native';
-import { ChevronRightIcon, WeddingIcon, FuneralIcon } from '../components/Icons';
+import { WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
 import { Header } from '../components/Header';
-
-
-type EventType = 'wedding' | 'funeral';
-
-interface HistoryRecord {
-  id: string;
-  date: string;
-  type: EventType;
-  name: string;
-  amount: number;
-  isSent: boolean;
-}
+import { getEventsByName, type PersonDetail } from '../database/queries';
+import { type EventTypeKey, getEventTypeLabel } from '../constants/eventTypes';
 
 interface DetailScreenProps {
+  name: string;
   onClose?: () => void;
 }
 
 export const DetailScreen: React.FC<DetailScreenProps> = ({
+  name,
   onClose,
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<PersonDetail | null>(null);
 
-  // 샘플 데이터
-  const personName = '김철수';
-  const personTitle = '직장 동료';
-  const sentAmount = 200000;
-  const receivedAmount = 100000;
+  useEffect(() => {
+    (async () => {
+      try {
+        const result = await getEventsByName(name);
+        setData(result);
+      } catch (error) {
+        console.error('Failed to load person detail:', error);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [name]);
+
+  const personName = name;
+  const sentAmount = data?.sentTotal ?? 0;
+  const receivedAmount = data?.receivedTotal ?? 0;
   const balance = sentAmount - receivedAmount;
-
-  const records: HistoryRecord[] = [
-    {
-      id: '1',
-      date: '2024.04.24',
-      type: 'wedding',
-      name: '2024.04.24 결혼식',
-      amount: 100000,
-      isSent: true,
-    },
-    {
-      id: '2',
-      date: '2026.01.17',
-      type: 'funeral',
-      name: '장례',
-      amount: 50000,
-      isSent: false,
-    },
-    {
-      id: '3',
-      date: '2023.01.10',
-      type: 'wedding',
-      name: '내 생일 손혁',
-      amount: 100000,
-      isSent: false,
-    },
-    {
-      id: '4',
-      date: '2022.08.15',
-      type: 'wedding',
-      name: '부친상 부친상',
-      amount: 100000,
-      isSent: true,
-    },
-  ];
+  const records = data?.records ?? [];
 
 
 
-  const getEventIcon = (type: EventType) => {
-    if (type === 'wedding') {
-      return <WeddingIcon size={isTablet ? 32 : 28} color="#EC4899" />;
-    }
-    return <FuneralIcon size={isTablet ? 32 : 28} color="#3B82F6" />;
+  const getEventIcon = (type: EventTypeKey) => {
+    if (type === 'wedding') return <WeddingIcon size={isTablet ? 32 : 28} color="#EC4899" />;
+    if (type === 'funeral') return <FuneralIcon size={isTablet ? 32 : 28} color="#3B82F6" />;
+    return <GiftIcon size={isTablet ? 32 : 28} color="#F59E0B" />;
   };
 
   const getAmountColor = (isSent: boolean) => {
@@ -103,6 +73,11 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
 
         {/* Content */}
         <View style={styles.contentWrapper}>
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#6366F1" />
+            </View>
+          ) : (
           <ScrollView
             style={styles.scrollView}
             contentContainerStyle={[
@@ -119,13 +94,10 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
                   isTablet && styles.profileAvatarTablet,
                 ]}
               >
-                <Text style={styles.profileInitial}>김</Text>
+                <Text style={styles.profileInitial}>{personName.charAt(0)}</Text>
               </View>
               <Text style={[styles.profileName, isTablet && styles.profileNameTablet]}>
                 {personName}
-              </Text>
-              <Text style={[styles.profileTitle, isTablet && styles.profileTitleTablet]}>
-                ({personTitle})
               </Text>
             </View>
 
@@ -179,7 +151,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
                       { color: '#EF4444' },
                     ]}
                   >
-                    {balance > 0 ? '-' : '+'}{Math.abs(balance).toLocaleString()} 원 (손해)
+                    {balance > 0 ? '-' : '+'}{Math.abs(balance).toLocaleString()} 원 ({balance > 0 ? '손해' : balance < 0 ? '이득' : '균형'})
                   </Text>
                 </View>
               </View>
@@ -211,7 +183,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
                           ]}
                           numberOfLines={1}
                         >
-                          {record.name}
+                          {getEventTypeLabel(record.typeName)}{record.relationship ? ` (${record.relationship})` : ''}
                         </Text>
                         <Text
                           style={[
@@ -238,8 +210,8 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
               </View>
             </View>
           </ScrollView>
+          )}
         </View>
-
 
       </View>
     </SafeAreaView>
@@ -257,6 +229,11 @@ const styles = StyleSheet.create({
   },
   contentWrapper: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scrollView: {
     flex: 1,
@@ -309,15 +286,6 @@ const styles = StyleSheet.create({
   },
   profileNameTablet: {
     fontSize: 18,
-  },
-  profileTitle: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#6B7280',
-    marginTop: 4,
-  },
-  profileTitleTablet: {
-    fontSize: 14,
   },
   balanceCard: {
     backgroundColor: '#FFFFFF',
