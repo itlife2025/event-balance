@@ -6,6 +6,7 @@ import { EventType } from './UpcomingEvents';
 export interface Record {
   id: string;
   name: string;
+  phone: string;
   type: EventType;
   date: string;
   amount: number;
@@ -22,6 +23,7 @@ const defaultRecords: Record[] = [
   {
     id: '1',
     name: '김민수 결혼식',
+    phone: '010-0000-0000',
     type: 'wedding',
     date: '2024.04.15 (금)',
     amount: 200000,
@@ -30,6 +32,7 @@ const defaultRecords: Record[] = [
   {
     id: '2',
     name: '이영호 조의금',
+    phone: '010-0000-0001',
     type: 'funeral',
     date: '2023.03.30 (목)',
     amount: 100000,

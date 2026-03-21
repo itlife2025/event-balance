@@ -58,6 +58,7 @@ export const HomeScreen: React.FC = () => {
   const [scheduleInitialData, setScheduleInitialData] = useState<ScheduleData | undefined>(undefined);
   const [registerInitialData, setRegisterInitialData] = useState<ScheduleData | undefined>(undefined);
   const [detailName, setDetailName] = useState('');
+  const [detailPhone, setDetailPhone] = useState('');
   const [listSelectedYear, setListSelectedYear] = useState(new Date().getFullYear());
   const [navHistory, setNavHistory] = useState<NavState[]>([]);
 
@@ -105,24 +106,41 @@ export const HomeScreen: React.FC = () => {
 
   const currentYear = new Date().getFullYear();
 
+  const refreshHomeData = async () => {
+    try {
+      const [totals, monthly, records, events] = await Promise.all([
+        getYearlyTotals(currentYear),
+        getMonthlyBreakdown(currentYear),
+        getRecentRecords(3),
+        getUpcomingEvents(),
+      ]);
+      setSentAmount(totals.sentAmount);
+      setReceivedAmount(totals.receivedAmount);
+      setMonthlyData(monthly);
+      setRecentRecords(records);
+      setUpcomingEvents(events);
+    } catch (error) {
+      console.error('Data refresh error:', error);
+    }
+  };
+
   useEffect(() => {
     (async () => {
       try {
         await initDatabase();
-        const totals = await getYearlyTotals(currentYear);
-        setSentAmount(totals.sentAmount);
-        setReceivedAmount(totals.receivedAmount);
-        const monthly = await getMonthlyBreakdown(currentYear);
-        setMonthlyData(monthly);
-        const records = await getRecentRecords(3);
-        setRecentRecords(records);
-        const events = await getUpcomingEvents();
-        setUpcomingEvents(events);
+        await refreshHomeData();
       } catch (error) {
         console.error('DB init error:', error);
       }
     })();
   }, [currentYear]);
+
+  // 홈 탭으로 돌아올 때 데이터 새로고침
+  useEffect(() => {
+    if (activeTab === 'home' && !showDetailScreen && !showRegisterSchedule && !showCalendar) {
+      refreshHomeData();
+    }
+  }, [activeTab, showDetailScreen, showRegisterSchedule, showCalendar]);
 
   const handleNotificationPress = () => {
     // Notification pressed
@@ -132,6 +150,7 @@ export const HomeScreen: React.FC = () => {
     pushNavState();
     setScheduleInitialData({
       name: event.name,
+      phone: event.phone,
       type: event.type,
       date: event.date,
       relationship: event.relationship,
@@ -141,8 +160,10 @@ export const HomeScreen: React.FC = () => {
   };
 
   const handleRecordPress = (record: Record) => {
+    console.log('[HomeScreen] record:', JSON.stringify(record));
     pushNavState();
     setDetailName(record.name);
+    setDetailPhone(record.phone);
     setShowDetailScreen(true);
   };
 
@@ -187,6 +208,7 @@ export const HomeScreen: React.FC = () => {
             pushNavState();
             setScheduleInitialData({
               name: event.name,
+              phone: event.phone,
               type: event.type,
               date: event.date,
               relationship: event.relationship,
@@ -223,16 +245,7 @@ export const HomeScreen: React.FC = () => {
         return (
           <RegisterScreen
             onClose={goBack}
-            onSaved={async () => {
-              const [totals, monthly, records] = await Promise.all([
-                getYearlyTotals(currentYear),
-                getMonthlyBreakdown(currentYear),
-                getRecentRecords(3),
-              ]);
-              setSentAmount(totals.sentAmount);
-              setReceivedAmount(totals.receivedAmount);
-              setMonthlyData(monthly);
-              setRecentRecords(records);
+            onSaved={() => {
               goBack();
             }}
             initialData={registerInitialData}
@@ -240,7 +253,7 @@ export const HomeScreen: React.FC = () => {
         );
       case 'settings':
         return (
-          <SettingsScreen onBackPress={goBack} />
+          <SettingsScreen onBackPress={goBack} onDataReset={refreshHomeData} />
         );
       case 'stats':
         return (
@@ -252,8 +265,10 @@ export const HomeScreen: React.FC = () => {
             selectedYear={listSelectedYear}
             onYearChange={setListSelectedYear}
             onTransactionPress={(transaction) => {
+              console.log('[HomeScreen] transaction:', JSON.stringify(transaction));
               pushNavState();
               setDetailName(transaction.name);
+              setDetailPhone(transaction.phone);
               setShowDetailScreen(true);
             }}
             onBackPress={goBack}
@@ -306,6 +321,7 @@ export const HomeScreen: React.FC = () => {
       {showDetailScreen ? (
         <DetailScreen
           name={detailName}
+          phone={detailPhone}
           onClose={goBack}
         />
       ) : (

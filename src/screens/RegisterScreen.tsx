@@ -31,6 +31,7 @@ type TabType = 'pay' | 'receive';
 
 export interface RegisterInitialData {
   name: string;
+  phone?: string;
   type: EventType;
   date: string; // "YYYY.MM.DD (요일)" format
   relationship?: string;
@@ -77,6 +78,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [amount, setAmount] = useState('0'); // Start with 0
   const [isDirectInput, setIsDirectInput] = useState(false);
+  const [phone, setPhone] = useState(initialData?.phone || '');
   const [relation, setRelation] = useState(initialData?.relationship || '');
   const [memo, setMemo] = useState(initialData?.memo || '');
 
@@ -142,6 +144,9 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   const selectContact = (contact: any) => {
     if (contact.name) {
       setEventName(contact.name);
+    }
+    if (contact.phoneNumbers && contact.phoneNumbers.length > 0) {
+      setPhone(contact.phoneNumbers[0].number || '');
     }
     setContactModalVisible(false);
   };
@@ -269,6 +274,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
 
   const handleScheduleSelect = (schedule: ScheduleRecord) => {
     setEventName(schedule.name);
+    setPhone(schedule.phone || '');
     const eventType = resolveEventType(schedule.type);
     setSelectedType(eventType);
     setIsEventTypeDirectInput(false);
@@ -326,7 +332,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
     setAmount(''); // Clear for direct input
   };
 
-  const isValid = Boolean(eventName && amount && selectedDate);
+  const isValid = Boolean(eventName && phone && amount && selectedDate);
 
   const handleSave = async () => {
     if (!isValid) return;
@@ -343,6 +349,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
     try {
       await insertEvent({
         name: eventName,
+        phone,
         type: eventType,
         date: dbDate,
         amount: parseInt(amount) * 10000,
@@ -354,6 +361,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
       if (registerScheduleChecked) {
         await insertSchedule({
           name: eventName,
+          phone,
           type: eventType,
           date: dbDate,
           relationship: relation,
@@ -367,6 +375,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
         onClose();
       } else {
         setEventName('');
+        setPhone('');
         setAmount('0');
         setRelation('');
         setMemo('');
@@ -460,6 +469,19 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
             ) : (
               <Text style={[styles.searchIconText, styles.searchIconRight]}>🔍</Text>
             )}
+          </View>
+
+          {/* Phone */}
+          <View style={[styles.searchContainer, isTablet && styles.searchContainerTablet]}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="전화번호를 입력하세요"
+              placeholderTextColor="#D1D5DB"
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+            />
+            <Text style={[styles.searchIconText, styles.searchIconRight]}>📞</Text>
           </View>
 
           {/* Relation */}
@@ -777,6 +799,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               style={[styles.resetButton, isTablet && styles.resetButtonTablet]}
               onPress={() => {
                 setEventName('');
+                setPhone('');
                 setAmount('0');
                 setRelation('');
                 setMemo('');

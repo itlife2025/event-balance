@@ -12,16 +12,18 @@ import {
 } from 'react-native';
 import { WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
 import { Header } from '../components/Header';
-import { getEventsByName, type PersonDetail } from '../database/queries';
+import { getEventsByPhone, type PersonDetail } from '../database/queries';
 import { type EventTypeKey, getEventTypeLabel } from '../constants/eventTypes';
 
 interface DetailScreenProps {
   name: string;
+  phone: string;
   onClose?: () => void;
 }
 
 export const DetailScreen: React.FC<DetailScreenProps> = ({
   name,
+  phone,
   onClose,
 }) => {
   const { width } = useWindowDimensions();
@@ -32,7 +34,9 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
   useEffect(() => {
     (async () => {
       try {
-        const result = await getEventsByName(name);
+        console.log('[DetailScreen] name:', name, 'phone:', phone);
+        const result = await getEventsByPhone(phone);
+        console.log('[DetailScreen] records count:', result.records.length);
         setData(result);
       } catch (error) {
         console.error('Failed to load person detail:', error);
@@ -40,7 +44,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
         setLoading(false);
       }
     })();
-  }, [name]);
+  }, [phone]);
 
   const personName = name;
   const sentAmount = data?.sentTotal ?? 0;

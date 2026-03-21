@@ -21,6 +21,7 @@ export type EventType = 'wedding' | 'funeral' | 'birthday' | 'firstBirthday' | '
 export interface Event {
   id: string;
   name: string;
+  phone?: string;
   type: EventType;
   date: string;
   daysLeft: number;

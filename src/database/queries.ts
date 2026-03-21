@@ -79,9 +79,25 @@ export async function getMonthlyBreakdown(year: number): Promise<MonthlyData[]> 
 import { EventTypeKey, resolveEventType } from '../constants/eventTypes';
 export type { EventTypeKey };
 
+function normalizePhone(phone: string): string {
+  return phone.replace(/[^0-9]/g, '');
+}
+
+export function formatPhone(phone: string): string {
+  const digits = normalizePhone(phone);
+  if (digits.length === 11) {
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+  }
+  if (digits.length === 10) {
+    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+  }
+  return digits;
+}
+
 export interface RecentRecord {
   id: string;
   name: string;
+  phone: string;
   type: EventTypeKey;
   date: string;
   amount: number;
@@ -104,12 +120,13 @@ export async function getRecentRecords(limit: number = 3): Promise<RecentRecord[
   const rows = await db.getAllAsync<{
     id: number;
     name: string;
+    phone: string;
     type: string;
     date: string;
     amount: number;
     amountType: string;
   }>(
-    `SELECT id, name, type, date, amount, amountType FROM events
+    `SELECT id, name, phone, type, date, amount, amountType FROM events
      WHERE date <= ?
      ORDER BY date DESC
      LIMIT ?`,
@@ -119,6 +136,7 @@ export async function getRecentRecords(limit: number = 3): Promise<RecentRecord[
   return rows.map(row => ({
     id: String(row.id),
     name: row.name,
+    phone: row.phone || '',
     type: resolveEventType(row.type),
     date: formatDate(row.date),
     amount: row.amount,
@@ -129,6 +147,7 @@ export async function getRecentRecords(limit: number = 3): Promise<RecentRecord[
 export interface UpcomingEvent {
   id: string;
   name: string;
+  phone: string;
   type: EventTypeKey;
   date: string;
   daysLeft: number;
@@ -143,12 +162,13 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
   const rows = await db.getAllAsync<{
     id: number;
     name: string;
+    phone: string;
     type: string;
     date: string;
     relationship: string;
     memo: string;
   }>(
-    `SELECT id, name, type, date, relationship, memo FROM schedules
+    `SELECT id, name, phone, type, date, relationship, memo FROM schedules
      WHERE date >= ?
      ORDER BY date ASC`,
     [today]
@@ -166,6 +186,7 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
     return {
       id: String(row.id),
       name: row.name,
+      phone: row.phone || '',
       type: resolveEventType(row.type),
       date: formatDate(row.date),
       daysLeft,
@@ -178,6 +199,7 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
 export interface TransactionRecord {
   id: string;
   name: string;
+  phone: string;
   type: EventTypeKey;
   date: string;
   rawDate: string;
@@ -198,12 +220,13 @@ export async function getTransactionsByYear(year: number): Promise<TransactionRe
   const rows = await db.getAllAsync<{
     id: number;
     name: string;
+    phone: string;
     type: string;
     date: string;
     amount: number;
     amountType: string;
   }>(
-    `SELECT id, name, type, date, amount, amountType FROM events
+    `SELECT id, name, phone, type, date, amount, amountType FROM events
      WHERE substr(date, 1, 4) = ?
      ORDER BY date DESC`,
     [String(year)]
@@ -212,6 +235,7 @@ export async function getTransactionsByYear(year: number): Promise<TransactionRe
   return rows.map(row => ({
     id: String(row.id),
     name: row.name,
+    phone: row.phone || '',
     type: resolveEventType(row.type),
     date: formatDate(row.date),
     rawDate: row.date,
@@ -234,8 +258,9 @@ export interface PersonDetail {
   receivedTotal: number;
 }
 
-export async function getEventsByName(name: string): Promise<PersonDetail> {
+export async function getEventsByPhone(phone: string): Promise<PersonDetail> {
   const db = await getDatabase();
+  const normalized = normalizePhone(phone);
 
   const rows = await db.getAllAsync<{
     id: number;
@@ -246,9 +271,9 @@ export async function getEventsByName(name: string): Promise<PersonDetail> {
     relationship: string;
   }>(
     `SELECT id, type, date, amount, amountType, relationship FROM events
-     WHERE name = ?
+     WHERE phone = ?
      ORDER BY date DESC`,
-    [name]
+    [normalized]
   );
 
   let sentTotal = 0;
@@ -280,6 +305,7 @@ export async function getEventsByName(name: string): Promise<PersonDetail> {
 
 export interface EventInput {
   name: string;
+  phone?: string;
   type: string;        // Korean: '결혼', '장례', etc.
   date: string;        // "YYYY-MM-DD"
   amount: number;      // in won
@@ -291,14 +317,15 @@ export interface EventInput {
 export async function insertEvent(event: EventInput): Promise<void> {
   const db = await getDatabase();
   await db.runAsync(
-    'INSERT INTO events (name, type, date, amount, amountType, relationship, eventRole, memo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    [event.name, event.type, event.date, event.amount, event.amountType, event.relationship, '', event.memo || '']
+    'INSERT INTO events (name, phone, type, date, amount, amountType, relationship, eventRole, memo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [event.name, normalizePhone(event.phone || ''), event.type, event.date, event.amount, event.amountType, event.relationship, '', event.memo || '']
   );
 }
 
 export interface ScheduleRecord {
   id: string;
   name: string;
+  phone: string;
   type: string;
   date: string; // "YYYY-MM-DD"
   relationship: string;
@@ -310,16 +337,18 @@ export async function getAllSchedules(): Promise<ScheduleRecord[]> {
   const rows = await db.getAllAsync<{
     id: number;
     name: string;
+    phone: string;
     type: string;
     date: string;
     relationship: string;
     memo: string;
   }>(
-    'SELECT id, name, type, date, relationship, memo FROM schedules ORDER BY date ASC'
+    'SELECT id, name, phone, type, date, relationship, memo FROM schedules ORDER BY date ASC'
   );
   return rows.map(row => ({
     id: String(row.id),
     name: row.name,
+    phone: row.phone || '',
     type: row.type,
     date: row.date,
     relationship: row.relationship || '',
@@ -329,6 +358,7 @@ export async function getAllSchedules(): Promise<ScheduleRecord[]> {
 
 export interface ScheduleInput {
   name: string;
+  phone?: string;
   type: string;
   date: string;
   relationship?: string;
@@ -338,7 +368,7 @@ export interface ScheduleInput {
 export async function insertSchedule(schedule: ScheduleInput): Promise<void> {
   const db = await getDatabase();
   await db.runAsync(
-    'INSERT INTO schedules (name, type, date, relationship, memo) VALUES (?, ?, ?, ?, ?)',
-    [schedule.name, schedule.type, schedule.date, schedule.relationship || '', schedule.memo || '']
+    'INSERT INTO schedules (name, phone, type, date, relationship, memo) VALUES (?, ?, ?, ?, ?, ?)',
+    [schedule.name, normalizePhone(schedule.phone || ''), schedule.type, schedule.date, schedule.relationship || '', schedule.memo || '']
   );
 }

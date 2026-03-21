@@ -7,16 +7,19 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   Switch,
+  Alert,
 } from 'react-native';
 import { ChevronRightIcon, BellIcon } from '../components/Icons';
 import { Header } from '../components/Header';
+import { resetDatabase } from '../database/database';
 
 
 interface SettingsScreenProps {
   onBackPress?: () => void;
+  onDataReset?: () => void;
 }
 
-export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress }) => {
+export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onDataReset }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
 
@@ -201,7 +204,33 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress }) =
 
           {/* Reset Button */}
           <View style={[styles.section, { marginBottom: 100 }, isTablet && styles.sectionTablet]}>
-            <TouchableOpacity style={[styles.resetButton, isTablet && styles.resetButtonTablet]}>
+            <TouchableOpacity
+              style={[styles.resetButton, isTablet && styles.resetButtonTablet]}
+              onPress={() => {
+                Alert.alert(
+                  '데이터 초기화',
+                  '모든 데이터가 삭제되고 초기 데이터로 복원됩니다. 계속하시겠습니까?',
+                  [
+                    { text: '취소', style: 'cancel' },
+                    {
+                      text: '초기화',
+                      style: 'destructive',
+                      onPress: async () => {
+                        try {
+                          await resetDatabase();
+                          Alert.alert('완료', '데이터가 초기화되었습니다.');
+                          onDataReset?.();
+                        } catch (error) {
+                          console.error('Reset failed:', error);
+                          Alert.alert('오류', '초기화에 실패했습니다.');
+                        }
+                      },
+                    },
+                  ]
+                );
+              }}
+              activeOpacity={0.7}
+            >
               <Text style={[styles.resetButtonText, isTablet && styles.resetButtonTextTablet]}>
                 초기화
               </Text>

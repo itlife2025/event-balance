@@ -16,6 +16,7 @@ import { insertSchedule } from '../database/queries';
 
 export interface ScheduleData {
   name: string;
+  phone?: string;
   type: EventType;
   date: string; // "YYYY.MM.DD (요일)" format
   relationship?: string;
@@ -98,6 +99,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
 
   const [selectedType, setSelectedType] = useState<EventType | null>(initialData?.type || null);
   const [eventName, setEventName] = useState(initialData?.name || '');
+  const [phone, setPhone] = useState(initialData?.phone || '');
   const [selectedDate, setSelectedDate] = useState<Date>(initialDate);
   const [calendarYear, setCalendarYear] = useState(initialDate.getFullYear());
   const [calendarMonth, setCalendarMonth] = useState(initialDate.getMonth());
@@ -186,7 +188,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
     other: '기타',
   };
 
-  const isValid = Boolean(eventName && selectedType && selectedDate);
+  const isValid = Boolean(eventName && phone && selectedType && selectedDate);
 
   const handleSave = async () => {
     if (!isValid) return;
@@ -199,6 +201,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
 
       await insertSchedule({
         name: eventName,
+        phone,
         type: selectedType ? (typeToKorean[selectedType] || selectedType) : '기타',
         date: dbDate,
         relationship: relation,
@@ -240,6 +243,24 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
                 placeholderTextColor="#D1D5DB"
                 value={eventName}
                 onChangeText={setEventName}
+              />
+            </View>
+          </View>
+
+          {/* Phone Input */}
+          <View style={[styles.sectionContainer, isTablet && styles.sectionContainerTablet]}>
+            <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet]}>
+              전화번호
+            </Text>
+            <View style={[styles.searchContainer, isTablet && styles.searchContainerTablet]}>
+              <Text style={styles.searchIcon}>📞</Text>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="전화번호를 입력하세요"
+                placeholderTextColor="#D1D5DB"
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
               />
             </View>
           </View>
@@ -456,6 +477,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
                   const dateStr = `${formatDisplayDate(selectedDate)} (${dayName})`;
                   onRegisterEvent({
                     name: eventName,
+                    phone,
                     type: selectedType || 'other',
                     date: dateStr,
                     relationship: relation,

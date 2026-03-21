@@ -3,6 +3,7 @@ import mockEvents from '../data/mockEvents.json';
 interface ScheduleStoreRecord {
   id: number;
   name: string;
+  phone: string;
   type: string;
   date: string;
   relationship: string;
@@ -12,6 +13,7 @@ interface ScheduleStoreRecord {
 interface EventStoreRecord {
   id: number;
   name: string;
+  phone: string;
   type: string;
   date: string;
   amount: number;
@@ -43,6 +45,7 @@ export type { EventTypeKey };
 export interface RecentRecord {
   id: string;
   name: string;
+  phone: string;
   type: EventTypeKey;
   date: string;
   amount: number;
@@ -52,6 +55,7 @@ export interface RecentRecord {
 export interface UpcomingEvent {
   id: string;
   name: string;
+  phone: string;
   type: EventTypeKey;
   date: string;
   daysLeft: number;
@@ -147,6 +151,7 @@ export async function getRecentRecords(limit: number = 3): Promise<RecentRecord[
     .filter((e: any) => !e.isSchedule && e.date <= today)
     .map((e: any) => ({
       name: e.name,
+      phone: e.phone || '',
       type: e.type,
       date: e.date,
       amount: e.amount,
@@ -157,6 +162,7 @@ export async function getRecentRecords(limit: number = 3): Promise<RecentRecord[
     .filter(e => e.date <= today)
     .map(e => ({
       name: e.name,
+      phone: e.phone || '',
       type: e.type,
       date: e.date,
       amount: e.amount,
@@ -169,6 +175,7 @@ export async function getRecentRecords(limit: number = 3): Promise<RecentRecord[
     .map((e, i) => ({
       id: String(i + 1),
       name: e.name,
+      phone: e.phone,
       type: resolveEventType(e.type),
       date: formatDate(e.date),
       amount: e.amount,
@@ -187,6 +194,7 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
     .map((e: any, i: number) => ({
       id: `mock-${i}`,
       name: e.name,
+      phone: ((e as any).phone || '').replace(/[^0-9]/g, ''),
       type: resolveEventType(e.type),
       date: formatDate(e.date),
       daysLeft: Math.ceil((new Date(e.date).setHours(0,0,0,0) - now.getTime()) / (1000 * 60 * 60 * 24)),
@@ -205,6 +213,7 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
       return {
         id: String(s.id),
         name: s.name,
+        phone: (s.phone || '').replace(/[^0-9]/g, ''),
         type: resolveEventType(s.type),
         date: formatDate(s.date),
         daysLeft,
@@ -219,6 +228,7 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
 export interface TransactionRecord {
   id: string;
   name: string;
+  phone: string;
   type: EventTypeKey;
   date: string;
   rawDate: string;
@@ -248,6 +258,7 @@ export async function getTransactionsByYear(year: number): Promise<TransactionRe
       all.push({
         id: `mock-${i}`,
         name: e.name,
+        phone: e.phone || '',
         type: resolveEventType(e.type),
         date: formatDate(e.date),
         rawDate: e.date,
@@ -262,6 +273,7 @@ export async function getTransactionsByYear(year: number): Promise<TransactionRe
       all.push({
         id: String(e.id),
         name: e.name,
+        phone: e.phone || '',
         type: resolveEventType(e.type),
         date: formatDate(e.date),
         rawDate: e.date,
@@ -273,8 +285,63 @@ export async function getTransactionsByYear(year: number): Promise<TransactionRe
   return all.sort((a, b) => b.rawDate.localeCompare(a.rawDate));
 }
 
+export interface PersonDetail {
+  records: {
+    id: string;
+    type: EventTypeKey;
+    typeName: string;
+    date: string;
+    amount: number;
+    isSent: boolean;
+    relationship: string;
+  }[];
+  sentTotal: number;
+  receivedTotal: number;
+}
+
+export async function getEventsByPhone(phone: string): Promise<PersonDetail> {
+  const allEvents = [
+    ...(mockEvents as any[]).filter((e: any) => !e.isSchedule && e.phone === phone).map((e: any, i: number) => ({
+      id: `mock-${i}`,
+      type: e.type,
+      date: e.date,
+      amount: e.amount,
+      amountType: e.amountType,
+      relationship: e.relationship || '',
+    })),
+    ...eventsStore.filter(e => e.phone === phone).map(e => ({
+      id: String(e.id),
+      type: e.type,
+      date: e.date,
+      amount: e.amount,
+      amountType: e.amountType,
+      relationship: e.relationship,
+    })),
+  ].sort((a, b) => b.date.localeCompare(a.date));
+
+  let sentTotal = 0;
+  let receivedTotal = 0;
+  const records = allEvents.map(row => {
+    const isSent = row.amountType === 'send';
+    if (isSent) sentTotal += row.amount;
+    else receivedTotal += row.amount;
+    return {
+      id: row.id,
+      type: resolveEventType(row.type),
+      typeName: row.type,
+      date: formatDate(row.date),
+      amount: row.amount,
+      isSent,
+      relationship: row.relationship,
+    };
+  });
+
+  return { records, sentTotal, receivedTotal };
+}
+
 export interface EventInput {
   name: string;
+  phone?: string;
   type: string;
   date: string; // "YYYY-MM-DD"
   amount: number;
@@ -287,6 +354,7 @@ export async function insertEvent(event: EventInput): Promise<void> {
   eventsStore.push({
     id: eventNextId++,
     name: event.name,
+    phone: event.phone || '',
     type: event.type,
     date: event.date,
     amount: event.amount,
@@ -299,6 +367,7 @@ export async function insertEvent(event: EventInput): Promise<void> {
 export interface ScheduleRecord {
   id: string;
   name: string;
+  phone: string;
   type: string;
   date: string; // "YYYY-MM-DD"
   relationship: string;
@@ -311,6 +380,7 @@ export async function getAllSchedules(): Promise<ScheduleRecord[]> {
     .map((e: any, i: number) => ({
       id: `mock-${i}`,
       name: e.name,
+      phone: e.phone || '',
       type: e.type,
       date: e.date,
       relationship: e.relationship || '',
@@ -320,6 +390,7 @@ export async function getAllSchedules(): Promise<ScheduleRecord[]> {
   const userSchedules = schedulesStore.map(s => ({
     id: String(s.id),
     name: s.name,
+    phone: s.phone || '',
     type: s.type,
     date: s.date,
     relationship: s.relationship,
@@ -331,6 +402,7 @@ export async function getAllSchedules(): Promise<ScheduleRecord[]> {
 
 export interface ScheduleInput {
   name: string;
+  phone?: string;
   type: string;
   date: string;
   relationship?: string;
@@ -341,6 +413,7 @@ export async function insertSchedule(schedule: ScheduleInput): Promise<void> {
   schedulesStore.push({
     id: scheduleNextId++,
     name: schedule.name,
+    phone: schedule.phone || '',
     type: schedule.type,
     date: schedule.date,
     relationship: schedule.relationship || '',
