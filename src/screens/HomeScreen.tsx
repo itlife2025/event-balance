@@ -19,7 +19,6 @@ import { DetailScreen } from './DetailScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { ListScreen } from './ListScreen';
 import { StatsScreen } from './StatsScreen';
-import { initDatabase } from '../database/database';
 import { getYearlyTotals, getMonthlyBreakdown, getRecentRecords, getUpcomingEvents, type MonthlyData, type RecentRecord, type UpcomingEvent } from '../database/queries';
 
 const refreshUpcomingEvents = async (setter: (events: UpcomingEvent[]) => void) => {
@@ -125,14 +124,7 @@ export const HomeScreen: React.FC = () => {
   };
 
   useEffect(() => {
-    (async () => {
-      try {
-        await initDatabase();
-        await refreshHomeData();
-      } catch (error) {
-        console.error('DB init error:', error);
-      }
-    })();
+    refreshHomeData();
   }, [currentYear]);
 
   // 홈 탭으로 돌아올 때 데이터 새로고침

@@ -356,6 +356,23 @@ export async function getAllSchedules(): Promise<ScheduleRecord[]> {
   }));
 }
 
+export async function isOnboardingCompleted(): Promise<boolean> {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<{ value: string }>(
+    'SELECT value FROM metadata WHERE key = ?',
+    ['onboarding_completed']
+  );
+  return row?.value === '1';
+}
+
+export async function setOnboardingCompleted(): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync(
+    'INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)',
+    ['onboarding_completed', '1']
+  );
+}
+
 export interface ScheduleInput {
   name: string;
   phone?: string;
