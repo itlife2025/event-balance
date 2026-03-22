@@ -1,4 +1,5 @@
 import { getDatabase } from './database';
+import { EVENT_TYPE_LABELS } from '../constants/eventTypes';
 
 export interface YearlyTotals {
   sentAmount: number;
@@ -77,6 +78,8 @@ export async function getMonthlyBreakdown(year: number): Promise<MonthlyData[]> 
 }
 
 import { EventTypeKey, resolveEventType } from '../constants/eventTypes';
+
+const CATEGORY_ORDER: EventTypeKey[] = ['wedding', 'birth', 'firstBirthday', 'birthday', 'funeral', 'other'];
 export type { EventTypeKey };
 
 function normalizePhone(phone: string): string {
@@ -380,6 +383,207 @@ export interface ScheduleInput {
   date: string;
   relationship?: string;
   memo?: string;
+}
+
+export interface MonthlyStatsCategoryStat {
+  type: EventTypeKey;
+  label: string;
+  amount: number;
+  count: number;
+}
+
+export interface MonthlyStatsDetailStat {
+  id: string;
+  name: string;
+  phone: string;
+  type: EventTypeKey;
+  amount: number;
+  date: string;
+}
+
+export interface MonthlyStats {
+  sentAmount: number;
+  receivedAmount: number;
+  sentCategories: MonthlyStatsCategoryStat[];
+  receivedCategories: MonthlyStatsCategoryStat[];
+  sentDetails: MonthlyStatsDetailStat[];
+  receivedDetails: MonthlyStatsDetailStat[];
+}
+
+export async function getMonthlyStats(year: number, month: number): Promise<MonthlyStats> {
+  const db = await getDatabase();
+  const yearMonth = `${year}-${String(month).padStart(2, '0')}`;
+
+  const rows = await db.getAllAsync<{
+    id: number;
+    name: string;
+    phone: string;
+    type: string;
+    date: string;
+    amount: number;
+    amountType: string;
+  }>(
+    `SELECT id, name, phone, type, date, amount, amountType FROM events
+     WHERE substr(date, 1, 7) = ?
+     ORDER BY date DESC`,
+    [yearMonth]
+  );
+
+  const sentCatMap = new Map<string, { amount: number; count: number }>();
+  const receivedCatMap = new Map<string, { amount: number; count: number }>();
+  const sentDetails: MonthlyStatsDetailStat[] = [];
+  const receivedDetails: MonthlyStatsDetailStat[] = [];
+  let sentAmount = 0;
+  let receivedAmount = 0;
+
+  for (const row of rows) {
+    const typeKey = resolveEventType(row.type);
+    const isSent = row.amountType === 'send';
+    const catMap = isSent ? sentCatMap : receivedCatMap;
+    const existing = catMap.get(typeKey) ?? { amount: 0, count: 0 };
+    catMap.set(typeKey, { amount: existing.amount + row.amount, count: existing.count + 1 });
+    if (isSent) {
+      sentAmount += row.amount;
+      sentDetails.push({ id: String(row.id), name: row.name, phone: row.phone || '', type: typeKey, amount: row.amount, date: formatDate(row.date) });
+    } else {
+      receivedAmount += row.amount;
+      receivedDetails.push({ id: String(row.id), name: row.name, phone: row.phone || '', type: typeKey, amount: row.amount, date: formatDate(row.date) });
+    }
+  }
+
+  const toCategories = (map: Map<string, { amount: number; count: number }>): MonthlyStatsCategoryStat[] =>
+    [...map.entries()]
+      .map(([typeKey, data]) => ({
+        type: typeKey as EventTypeKey,
+        label: EVENT_TYPE_LABELS[typeKey as EventTypeKey] ?? typeKey,
+        amount: data.amount,
+        count: data.count,
+      }))
+      .sort((a, b) => {
+        const ai = CATEGORY_ORDER.indexOf(a.type);
+        const bi = CATEGORY_ORDER.indexOf(b.type);
+        return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+      });
+
+  return {
+    sentAmount,
+    receivedAmount,
+    sentCategories: toCategories(sentCatMap),
+    receivedCategories: toCategories(receivedCatMap),
+    sentDetails,
+    receivedDetails,
+  };
+}
+
+export async function getYearlyStats(year: number): Promise<MonthlyStats> {
+  const db = await getDatabase();
+
+  const rows = await db.getAllAsync<{
+    id: number;
+    name: string;
+    phone: string;
+    type: string;
+    date: string;
+    amount: number;
+    amountType: string;
+  }>(
+    `SELECT id, name, phone, type, date, amount, amountType FROM events
+     WHERE substr(date, 1, 4) = ?
+     ORDER BY date DESC`,
+    [String(year)]
+  );
+
+  const sentCatMap = new Map<string, { amount: number; count: number }>();
+  const receivedCatMap = new Map<string, { amount: number; count: number }>();
+  const sentDetails: MonthlyStatsDetailStat[] = [];
+  const receivedDetails: MonthlyStatsDetailStat[] = [];
+  let sentAmount = 0;
+  let receivedAmount = 0;
+
+  for (const row of rows) {
+    const typeKey = resolveEventType(row.type);
+    const isSent = row.amountType === 'send';
+    const catMap = isSent ? sentCatMap : receivedCatMap;
+    const existing = catMap.get(typeKey) ?? { amount: 0, count: 0 };
+    catMap.set(typeKey, { amount: existing.amount + row.amount, count: existing.count + 1 });
+    if (isSent) {
+      sentAmount += row.amount;
+      sentDetails.push({ id: String(row.id), name: row.name, phone: row.phone || '', type: typeKey, amount: row.amount, date: formatDate(row.date) });
+    } else {
+      receivedAmount += row.amount;
+      receivedDetails.push({ id: String(row.id), name: row.name, phone: row.phone || '', type: typeKey, amount: row.amount, date: formatDate(row.date) });
+    }
+  }
+
+  const toCategories = (map: Map<string, { amount: number; count: number }>): MonthlyStatsCategoryStat[] =>
+    [...map.entries()]
+      .map(([typeKey, data]) => ({
+        type: typeKey as EventTypeKey,
+        label: EVENT_TYPE_LABELS[typeKey as EventTypeKey] ?? typeKey,
+        amount: data.amount,
+        count: data.count,
+      }))
+      .sort((a, b) => {
+        const ai = CATEGORY_ORDER.indexOf(a.type);
+        const bi = CATEGORY_ORDER.indexOf(b.type);
+        return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+      });
+
+  return { sentAmount, receivedAmount, sentCategories: toCategories(sentCatMap), receivedCategories: toCategories(receivedCatMap), sentDetails, receivedDetails };
+}
+
+export async function getAllStats(): Promise<MonthlyStats> {
+  const db = await getDatabase();
+
+  const rows = await db.getAllAsync<{
+    id: number;
+    name: string;
+    phone: string;
+    type: string;
+    date: string;
+    amount: number;
+    amountType: string;
+  }>(
+    `SELECT id, name, phone, type, date, amount, amountType FROM events ORDER BY date DESC`
+  );
+
+  const sentCatMap = new Map<string, { amount: number; count: number }>();
+  const receivedCatMap = new Map<string, { amount: number; count: number }>();
+  const sentDetails: MonthlyStatsDetailStat[] = [];
+  const receivedDetails: MonthlyStatsDetailStat[] = [];
+  let sentAmount = 0;
+  let receivedAmount = 0;
+
+  for (const row of rows) {
+    const typeKey = resolveEventType(row.type);
+    const isSent = row.amountType === 'send';
+    const catMap = isSent ? sentCatMap : receivedCatMap;
+    const existing = catMap.get(typeKey) ?? { amount: 0, count: 0 };
+    catMap.set(typeKey, { amount: existing.amount + row.amount, count: existing.count + 1 });
+    if (isSent) {
+      sentAmount += row.amount;
+      sentDetails.push({ id: String(row.id), name: row.name, phone: row.phone || '', type: typeKey, amount: row.amount, date: formatDate(row.date) });
+    } else {
+      receivedAmount += row.amount;
+      receivedDetails.push({ id: String(row.id), name: row.name, phone: row.phone || '', type: typeKey, amount: row.amount, date: formatDate(row.date) });
+    }
+  }
+
+  const toCategories = (map: Map<string, { amount: number; count: number }>): MonthlyStatsCategoryStat[] =>
+    [...map.entries()]
+      .map(([typeKey, data]) => ({
+        type: typeKey as EventTypeKey,
+        label: EVENT_TYPE_LABELS[typeKey as EventTypeKey] ?? typeKey,
+        amount: data.amount,
+        count: data.count,
+      }))
+      .sort((a, b) => {
+        const ai = CATEGORY_ORDER.indexOf(a.type);
+        const bi = CATEGORY_ORDER.indexOf(b.type);
+        return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+      });
+
+  return { sentAmount, receivedAmount, sentCategories: toCategories(sentCatMap), receivedCategories: toCategories(receivedCatMap), sentDetails, receivedDetails };
 }
 
 export async function insertSchedule(schedule: ScheduleInput): Promise<void> {

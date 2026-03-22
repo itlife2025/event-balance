@@ -39,7 +39,9 @@ export interface MonthlyData {
   received: number;
 }
 
-import { EventTypeKey, resolveEventType } from '../constants/eventTypes';
+import { EventTypeKey, resolveEventType, EVENT_TYPE_LABELS } from '../constants/eventTypes';
+
+const CATEGORY_ORDER: EventTypeKey[] = ['wedding', 'birth', 'firstBirthday', 'birthday', 'funeral', 'other'];
 export type { EventTypeKey };
 
 export interface RecentRecord {
@@ -407,6 +409,160 @@ export interface ScheduleInput {
   date: string;
   relationship?: string;
   memo?: string;
+}
+
+export interface MonthlyStatsCategoryStat {
+  type: EventTypeKey;
+  label: string;
+  amount: number;
+  count: number;
+}
+
+export interface MonthlyStatsDetailStat {
+  id: string;
+  name: string;
+  phone: string;
+  type: EventTypeKey;
+  amount: number;
+  date: string;
+}
+
+export interface MonthlyStats {
+  sentAmount: number;
+  receivedAmount: number;
+  sentCategories: MonthlyStatsCategoryStat[];
+  receivedCategories: MonthlyStatsCategoryStat[];
+  sentDetails: MonthlyStatsDetailStat[];
+  receivedDetails: MonthlyStatsDetailStat[];
+}
+
+export async function getMonthlyStats(year: number, month: number): Promise<MonthlyStats> {
+  const yearMonth = `${year}-${String(month).padStart(2, '0')}`;
+
+  const allRows = [
+    ...(mockEvents as any[]).filter((e: any) => !e.isSchedule && e.date.startsWith(yearMonth)),
+    ...eventsStore.filter(e => e.date.startsWith(yearMonth)),
+  ].sort((a, b) => b.date.localeCompare(a.date));
+
+  const sentCatMap = new Map<string, { amount: number; count: number }>();
+  const receivedCatMap = new Map<string, { amount: number; count: number }>();
+  const sentDetails: MonthlyStatsDetailStat[] = [];
+  const receivedDetails: MonthlyStatsDetailStat[] = [];
+  let sentAmount = 0;
+  let receivedAmount = 0;
+
+  allRows.forEach((row: any, i: number) => {
+    const typeKey = resolveEventType(row.type);
+    const isSent = row.amountType === 'send';
+    const catMap = isSent ? sentCatMap : receivedCatMap;
+    const existing = catMap.get(typeKey) ?? { amount: 0, count: 0 };
+    catMap.set(typeKey, { amount: existing.amount + row.amount, count: existing.count + 1 });
+    const detail = { id: row.id != null ? String(row.id) : `mock-${i}`, name: row.name, phone: (row.phone || '').replace(/[^0-9]/g, ''), type: typeKey, amount: row.amount, date: formatDate(row.date) };
+    if (isSent) {
+      sentAmount += row.amount;
+      sentDetails.push(detail);
+    } else {
+      receivedAmount += row.amount;
+      receivedDetails.push(detail);
+    }
+  });
+
+  const toCategories = (map: Map<string, { amount: number; count: number }>): MonthlyStatsCategoryStat[] =>
+    [...map.entries()]
+      .map(([typeKey, data]) => ({
+        type: typeKey as EventTypeKey,
+        label: EVENT_TYPE_LABELS[typeKey as EventTypeKey] ?? typeKey,
+        amount: data.amount,
+        count: data.count,
+      }))
+      .sort((a, b) => {
+        const ai = CATEGORY_ORDER.indexOf(a.type);
+        const bi = CATEGORY_ORDER.indexOf(b.type);
+        return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+      });
+
+  return {
+    sentAmount,
+    receivedAmount,
+    sentCategories: toCategories(sentCatMap),
+    receivedCategories: toCategories(receivedCatMap),
+    sentDetails,
+    receivedDetails,
+  };
+}
+
+export async function getYearlyStats(year: number): Promise<MonthlyStats> {
+  const yearStr = String(year);
+
+  const allRows = [
+    ...(mockEvents as any[]).filter((e: any) => !e.isSchedule && e.date.startsWith(yearStr)),
+    ...eventsStore.filter(e => e.date.startsWith(yearStr)),
+  ].sort((a, b) => b.date.localeCompare(a.date));
+
+  const sentCatMap = new Map<string, { amount: number; count: number }>();
+  const receivedCatMap = new Map<string, { amount: number; count: number }>();
+  const sentDetails: MonthlyStatsDetailStat[] = [];
+  const receivedDetails: MonthlyStatsDetailStat[] = [];
+  let sentAmount = 0;
+  let receivedAmount = 0;
+
+  allRows.forEach((row: any, i: number) => {
+    const typeKey = resolveEventType(row.type);
+    const isSent = row.amountType === 'send';
+    const catMap = isSent ? sentCatMap : receivedCatMap;
+    const existing = catMap.get(typeKey) ?? { amount: 0, count: 0 };
+    catMap.set(typeKey, { amount: existing.amount + row.amount, count: existing.count + 1 });
+    const detail = { id: row.id != null ? String(row.id) : `mock-${i}`, name: row.name, phone: (row.phone || '').replace(/[^0-9]/g, ''), type: typeKey, amount: row.amount, date: formatDate(row.date) };
+    if (isSent) { sentAmount += row.amount; sentDetails.push(detail); }
+    else { receivedAmount += row.amount; receivedDetails.push(detail); }
+  });
+
+  const toCategories = (map: Map<string, { amount: number; count: number }>): MonthlyStatsCategoryStat[] =>
+    [...map.entries()]
+      .map(([typeKey, data]) => ({ type: typeKey as EventTypeKey, label: EVENT_TYPE_LABELS[typeKey as EventTypeKey] ?? typeKey, amount: data.amount, count: data.count }))
+      .sort((a, b) => {
+        const ai = CATEGORY_ORDER.indexOf(a.type);
+        const bi = CATEGORY_ORDER.indexOf(b.type);
+        return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+      });
+
+  return { sentAmount, receivedAmount, sentCategories: toCategories(sentCatMap), receivedCategories: toCategories(receivedCatMap), sentDetails, receivedDetails };
+}
+
+export async function getAllStats(): Promise<MonthlyStats> {
+  const allRows = [
+    ...(mockEvents as any[]).filter((e: any) => !e.isSchedule),
+    ...eventsStore,
+  ].sort((a, b) => b.date.localeCompare(a.date));
+
+  const sentCatMap = new Map<string, { amount: number; count: number }>();
+  const receivedCatMap = new Map<string, { amount: number; count: number }>();
+  const sentDetails: MonthlyStatsDetailStat[] = [];
+  const receivedDetails: MonthlyStatsDetailStat[] = [];
+  let sentAmount = 0;
+  let receivedAmount = 0;
+
+  allRows.forEach((row: any, i: number) => {
+    const typeKey = resolveEventType(row.type);
+    const isSent = row.amountType === 'send';
+    const catMap = isSent ? sentCatMap : receivedCatMap;
+    const existing = catMap.get(typeKey) ?? { amount: 0, count: 0 };
+    catMap.set(typeKey, { amount: existing.amount + row.amount, count: existing.count + 1 });
+    const detail = { id: row.id != null ? String(row.id) : `mock-${i}`, name: row.name, phone: (row.phone || '').replace(/[^0-9]/g, ''), type: typeKey, amount: row.amount, date: formatDate(row.date) };
+    if (isSent) { sentAmount += row.amount; sentDetails.push(detail); }
+    else { receivedAmount += row.amount; receivedDetails.push(detail); }
+  });
+
+  const toCategories = (map: Map<string, { amount: number; count: number }>): MonthlyStatsCategoryStat[] =>
+    [...map.entries()]
+      .map(([typeKey, data]) => ({ type: typeKey as EventTypeKey, label: EVENT_TYPE_LABELS[typeKey as EventTypeKey] ?? typeKey, amount: data.amount, count: data.count }))
+      .sort((a, b) => {
+        const ai = CATEGORY_ORDER.indexOf(a.type);
+        const bi = CATEGORY_ORDER.indexOf(b.type);
+        return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+      });
+
+  return { sentAmount, receivedAmount, sentCategories: toCategories(sentCatMap), receivedCategories: toCategories(receivedCatMap), sentDetails, receivedDetails };
 }
 
 export async function insertSchedule(schedule: ScheduleInput): Promise<void> {

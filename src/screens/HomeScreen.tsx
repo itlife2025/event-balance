@@ -20,6 +20,7 @@ import { SettingsScreen } from './SettingsScreen';
 import { ListScreen } from './ListScreen';
 import { StatsScreen } from './StatsScreen';
 import { getYearlyTotals, getMonthlyBreakdown, getRecentRecords, getUpcomingEvents, type MonthlyData, type RecentRecord, type UpcomingEvent } from '../database/queries';
+import type { PeriodFilter } from './StatsScreen';
 
 const refreshUpcomingEvents = async (setter: (events: UpcomingEvent[]) => void) => {
   const events = await getUpcomingEvents();
@@ -59,6 +60,13 @@ export const HomeScreen: React.FC = () => {
   const [detailName, setDetailName] = useState('');
   const [detailPhone, setDetailPhone] = useState('');
   const [listSelectedYear, setListSelectedYear] = useState(new Date().getFullYear());
+
+  // Stats screen state — preserved when navigating to detail and back
+  const today = new Date();
+  const [statsActivePeriod, setStatsActivePeriod] = useState<PeriodFilter>('month');
+  const [statsSelectedYear, setStatsSelectedYear] = useState(today.getFullYear());
+  const [statsSelectedMonth, setStatsSelectedMonth] = useState(today.getMonth() + 1);
+  const [statsSelectedYearTab, setStatsSelectedYearTab] = useState(today.getFullYear());
   const [navHistory, setNavHistory] = useState<NavState[]>([]);
 
   const pushNavState = () => {
@@ -175,6 +183,13 @@ export const HomeScreen: React.FC = () => {
     setShowCalendar(false);
     setScheduleInitialData(undefined);
     setRegisterInitialData(undefined);
+    if (tab === 'stats') {
+      const now = new Date();
+      setStatsActivePeriod('month');
+      setStatsSelectedYear(now.getFullYear());
+      setStatsSelectedMonth(now.getMonth() + 1);
+      setStatsSelectedYearTab(now.getFullYear());
+    }
   };
 
   const handleAddPress = () => {
@@ -249,7 +264,23 @@ export const HomeScreen: React.FC = () => {
         );
       case 'stats':
         return (
-          <StatsScreen onBackPress={goBack} />
+          <StatsScreen
+            onBackPress={goBack}
+            onDetailPress={(name, phone) => {
+              pushNavState();
+              setDetailName(name);
+              setDetailPhone(phone);
+              setShowDetailScreen(true);
+            }}
+            initialActivePeriod={statsActivePeriod}
+            onActivePeriodChange={setStatsActivePeriod}
+            initialSelectedYear={statsSelectedYear}
+            onSelectedYearChange={setStatsSelectedYear}
+            initialSelectedMonth={statsSelectedMonth}
+            onSelectedMonthChange={setStatsSelectedMonth}
+            initialSelectedYearTab={statsSelectedYearTab}
+            onSelectedYearTabChange={setStatsSelectedYearTab}
+          />
         );
       case 'list':
         return (

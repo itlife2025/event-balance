@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   ScrollView,
-  Platform,
+  Modal,
+  FlatList,
 } from 'react-native';
 import { WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
 import { EventType } from '../components/UpcomingEvents';
@@ -54,14 +55,22 @@ export const ListScreen: React.FC<ListScreenProps> = ({
   const [transactions, setTransactions] = useState<TransactionRecord[]>([]);
   const [sentAmount, setSentAmount] = useState(0);
   const [receivedAmount, setReceivedAmount] = useState(0);
-  const [showYearDropdown, setShowYearDropdown] = useState(false);
+  const [showYearPicker, setShowYearPicker] = useState(false);
 
   useEffect(() => {
     getAvailableYears().then((years: number[]) => {
-      const merged = [...new Set([currentYear, ...years])].sort((a, b) => b - a);
-      setAvailableYears(merged);
+      if (years.length > 0) setAvailableYears(years);
     });
   }, []);
+
+  const prevYear = () => {
+    const idx = availableYears.indexOf(selectedYear);
+    if (idx < availableYears.length - 1) setSelectedYear(availableYears[idx + 1]);
+  };
+  const nextYear = () => {
+    const idx = availableYears.indexOf(selectedYear);
+    if (idx > 0) setSelectedYear(availableYears[idx - 1]);
+  };
 
   useEffect(() => {
     Promise.all([
@@ -155,60 +164,44 @@ export const ListScreen: React.FC<ListScreenProps> = ({
         {/* Transaction List */}
         <View style={[styles.transactionList, isTablet && styles.transactionListTablet]}>
           {/* Year Selector */}
-          <View style={styles.listDateSelectorContainer}>
-            {Platform.OS === 'web' ? (
-              <View style={styles.listDateSelectorPill}>
-                <select
-                  value={selectedYear}
-                  onChange={e => setSelectedYear(Number(e.target.value))}
-                  style={{
-                    border: 'none',
-                    background: 'transparent',
-                    fontSize: isTablet ? 16 : 14,
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    cursor: 'pointer',
-                    outline: 'none',
-                    appearance: 'none',
-                    WebkitAppearance: 'none',
-                    MozAppearance: 'none',
-                  } as any}
-                >
-                  {availableYears.map(y => (
-                    <option key={y} value={y}>{y}년</option>
-                  ))}
-                </select>
-                <Text style={styles.listDateSelectorArrow}>{'∨'}</Text>
-              </View>
-            ) : (
-              <View>
-                <TouchableOpacity
-                  style={styles.listDateSelectorPill}
-                  onPress={() => setShowYearDropdown(v => !v)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.listDateSelectorText, isTablet && styles.listDateSelectorTextTablet]}>{selectedYear}년</Text>
-                  <Text style={styles.listDateSelectorArrow}>{'∨'}</Text>
-                </TouchableOpacity>
-                {showYearDropdown && (
-                  <View style={styles.yearDropdownList}>
-                    {availableYears.map(y => (
-                      <TouchableOpacity
-                        key={y}
-                        style={[styles.yearDropdownItem, y === selectedYear && styles.yearDropdownItemActive]}
-                        onPress={() => { setSelectedYear(y); setShowYearDropdown(false); }}
-                        activeOpacity={0.7}
-                      >
-                        <Text style={[styles.yearDropdownItemText, y === selectedYear && styles.yearDropdownItemTextActive]}>
-                          {y}년
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-              </View>
-            )}
+          <View style={styles.yearSelectorRow}>
+            <View style={styles.dateSelector}>
+              <TouchableOpacity onPress={prevYear} style={styles.arrowBtn}>
+                <Text style={styles.arrowText}>{'‹'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setShowYearPicker(true)} activeOpacity={0.7} style={styles.dateSelectorTextBtn}>
+                <Text style={[styles.dateSelectorText, isTablet && styles.dateSelectorTextTablet]}>
+                  {selectedYear}년
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={nextYear} style={styles.arrowBtn}>
+                <Text style={styles.arrowText}>{'›'}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
+
+          <Modal transparent visible={showYearPicker} animationType="fade" onRequestClose={() => setShowYearPicker(false)}>
+            <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowYearPicker(false)}>
+              <View style={styles.pickerContainer}>
+                <FlatList
+                  data={availableYears}
+                  keyExtractor={(item) => String(item)}
+                  initialScrollIndex={Math.max(0, availableYears.indexOf(selectedYear))}
+                  getItemLayout={(_, index) => ({ length: 50, offset: 50 * index, index })}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={[styles.pickerItem, item === selectedYear && styles.pickerItemSelected]}
+                      onPress={() => { setSelectedYear(item); setShowYearPicker(false); }}
+                    >
+                      <Text style={[styles.pickerItemText, item === selectedYear && styles.pickerItemTextSelected]}>
+                        {item}년
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            </TouchableOpacity>
+          </Modal>
 
           {filteredTransactions.length === 0 ? (
             <View style={styles.emptyState}>
@@ -332,63 +325,79 @@ const styles = StyleSheet.create({
     color: '#34D399',
   },
 
-  // Year Selector (StatsScreen style)
-  listDateSelectorContainer: {
-    alignItems: 'center',
-    paddingTop: 24,
-    paddingBottom: 0,
+  // Year Selector
+  yearSelectorRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingTop: 20,
+    paddingBottom: 4,
   },
-  listDateSelectorPill: {
+  dateSelector: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F3F4F6',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
     borderRadius: 20,
-    gap: 6,
+    paddingHorizontal: 4,
+    paddingVertical: 6,
   },
-  listDateSelectorText: {
+  arrowBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  arrowText: {
+    fontSize: 18,
+    color: '#6B7280',
+    lineHeight: 22,
+  },
+  dateSelectorTextBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+    alignItems: 'center',
+  },
+  dateSelectorText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#1F2937',
+    textAlign: 'center',
   },
-  listDateSelectorTextTablet: {
+  dateSelectorTextTablet: {
     fontSize: 16,
+    minWidth: 56,
   },
-  listDateSelectorArrow: {
-    fontSize: 12,
-    color: '#9CA3AF',
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  yearDropdownList: {
-    position: 'absolute',
-    top: 40,
-    left: 0,
-    right: 0,
+  pickerContainer: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderRadius: 14,
+    width: 180,
+    maxHeight: 300,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
     elevation: 8,
-    zIndex: 100,
   },
-  yearDropdownItem: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+  pickerItem: {
+    height: 50,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
   },
-  yearDropdownItemActive: {
+  pickerItemSelected: {
     backgroundColor: '#EEF2FF',
   },
-  yearDropdownItemText: {
-    fontSize: 14,
+  pickerItemText: {
+    fontSize: 15,
     color: '#374151',
+    textAlign: 'center',
   },
-  yearDropdownItemTextActive: {
-    fontWeight: '700',
+  pickerItemTextSelected: {
     color: '#6366F1',
+    fontWeight: '700',
   },
 
   // Filter Tabs
