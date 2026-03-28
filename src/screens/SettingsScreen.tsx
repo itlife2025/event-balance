@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,11 +7,12 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   Switch,
-  Alert,
 } from 'react-native';
 import { ChevronRightIcon, BellIcon } from '../components/Icons';
 import { Header } from '../components/Header';
+import { CustomAlert } from '../components/CustomAlert';
 import { resetDatabase } from '../database/database';
+import { getSetting, setSetting } from '../database/queries';
 
 
 interface SettingsScreenProps {
@@ -25,6 +26,58 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
 
   const [notificationEnabled, setNotificationEnabled] = useState(true);
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
+  const [profileName, setProfileName] = useState('');
+  const [promptAlert, setPromptAlert] = useState(false);
+  const [resetConfirmAlert, setResetConfirmAlert] = useState(false);
+  const [resultAlert, setResultAlert] = useState<{ visible: boolean; title: string; message: string }>({ visible: false, title: '', message: '' });
+
+  useEffect(() => {
+    (async () => {
+      const [notif, dark, name] = await Promise.all([
+        getSetting('notification_enabled'),
+        getSetting('dark_mode_enabled'),
+        getSetting('profile_name'),
+      ]);
+      if (notif !== null) setNotificationEnabled(notif === '1');
+      if (dark !== null) setDarkModeEnabled(dark === '1');
+      setProfileName(name || '사용자');
+    })();
+  }, []);
+
+  const handleNotificationToggle = (value: boolean) => {
+    setNotificationEnabled(value);
+    setSetting('notification_enabled', value ? '1' : '0');
+  };
+
+  const handleDarkModeToggle = (value: boolean) => {
+    setDarkModeEnabled(value);
+    setSetting('dark_mode_enabled', value ? '1' : '0');
+  };
+
+  const handleEditProfileName = () => {
+    setPromptAlert(true);
+  };
+
+  const handleProfileNameSubmit = (newName: string) => {
+    setPromptAlert(false);
+    if (newName.trim()) {
+      const trimmed = newName.trim();
+      setProfileName(trimmed);
+      setSetting('profile_name', trimmed);
+    }
+  };
+
+  const handleResetConfirm = async () => {
+    setResetConfirmAlert(false);
+    try {
+      await resetDatabase();
+      setResultAlert({ visible: true, title: '완료', message: '데이터가 초기화되었습니다.' });
+      onDataReset?.();
+    } catch (error) {
+      console.error('Reset failed:', error);
+      setResultAlert({ visible: true, title: '오류', message: '초기화에 실패했습니다.' });
+    }
+  };
 
   const SettingItem = ({
     icon,
@@ -93,13 +146,13 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
         >
           {/* Profile Section */}
           <View style={[styles.section, isTablet && styles.sectionTablet]}>
-            <TouchableOpacity style={[styles.profileCard, isTablet && styles.profileCardTablet]}>
+            <TouchableOpacity style={[styles.profileCard, isTablet && styles.profileCardTablet]} onPress={handleEditProfileName}>
               <View style={[styles.profileAvatar, isTablet && styles.profileAvatarTablet]}>
-                <Text style={styles.profileInitial}>김</Text>
+                <Text style={styles.profileInitial}>{profileName.charAt(0) || '?'}</Text>
               </View>
               <View style={styles.profileInfo}>
                 <Text style={[styles.profileName, isTablet && styles.profileNameTablet]}>
-                  김민수
+                  {profileName}
                 </Text>
                 <Text style={[styles.profileSub, isTablet && styles.profileSubTablet]}>
                   프로필 수정
@@ -119,7 +172,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
               label="알림 설정"
               isToggle={true}
               toggleValue={notificationEnabled}
-              onToggleChange={setNotificationEnabled}
+              onToggleChange={handleNotificationToggle}
             />
             <SettingItem
               icon={
@@ -169,7 +222,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
               label="다크모드"
               isToggle={true}
               toggleValue={darkModeEnabled}
-              onToggleChange={setDarkModeEnabled}
+              onToggleChange={handleDarkModeToggle}
             />
           </View>
 
@@ -206,29 +259,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
           <View style={[styles.section, { marginBottom: 100 }, isTablet && styles.sectionTablet]}>
             <TouchableOpacity
               style={[styles.resetButton, isTablet && styles.resetButtonTablet]}
-              onPress={() => {
-                Alert.alert(
-                  '데이터 초기화',
-                  '모든 데이터가 삭제되고 초기 데이터로 복원됩니다. 계속하시겠습니까?',
-                  [
-                    { text: '취소', style: 'cancel' },
-                    {
-                      text: '초기화',
-                      style: 'destructive',
-                      onPress: async () => {
-                        try {
-                          await resetDatabase();
-                          Alert.alert('완료', '데이터가 초기화되었습니다.');
-                          onDataReset?.();
-                        } catch (error) {
-                          console.error('Reset failed:', error);
-                          Alert.alert('오류', '초기화에 실패했습니다.');
-                        }
-                      },
-                    },
-                  ]
-                );
-              }}
+              onPress={() => setResetConfirmAlert(true)}
               activeOpacity={0.7}
             >
               <Text style={[styles.resetButtonText, isTablet && styles.resetButtonTextTablet]}>
@@ -238,6 +269,35 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
           </View>
         </ScrollView>
       </View>
+
+      <CustomAlert
+        visible={promptAlert}
+        type="prompt"
+        title="프로필 이름 수정"
+        message="새 이름을 입력하세요"
+        inputDefaultValue={profileName}
+        onSubmit={handleProfileNameSubmit}
+        onCancel={() => setPromptAlert(false)}
+      />
+
+      <CustomAlert
+        visible={resetConfirmAlert}
+        type="confirm"
+        title="데이터 초기화"
+        message="모든 데이터가 삭제되고 초기 데이터로 복원됩니다. 계속하시겠습니까?"
+        confirmText="초기화"
+        destructive
+        onConfirm={handleResetConfirm}
+        onCancel={() => setResetConfirmAlert(false)}
+      />
+
+      <CustomAlert
+        visible={resultAlert.visible}
+        type="alert"
+        title={resultAlert.title}
+        message={resultAlert.message}
+        onConfirm={() => setResultAlert({ visible: false, title: '', message: '' })}
+      />
     </View>
   );
 };

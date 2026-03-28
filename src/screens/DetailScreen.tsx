@@ -12,7 +12,8 @@ import {
 } from 'react-native';
 import { WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
 import { Header } from '../components/Header';
-import { getEventsByPhone, type PersonDetail } from '../database/queries';
+import { CustomAlert } from '../components/CustomAlert';
+import { getEventsByPhone, deleteEvent, type PersonDetail } from '../database/queries';
 import { type EventTypeKey, getEventTypeLabel } from '../constants/eventTypes';
 
 interface DetailScreenProps {
@@ -30,21 +31,41 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
   const isTablet = width >= 768;
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<PersonDetail | null>(null);
+  const [deleteAlert, setDeleteAlert] = useState<{ visible: boolean; recordId: string }>({ visible: false, recordId: '' });
+  const [errorAlert, setErrorAlert] = useState(false);
+
+  const loadData = async () => {
+    try {
+      console.log('[DetailScreen] name:', name, 'phone:', phone);
+      const result = await getEventsByPhone(phone);
+      console.log('[DetailScreen] records count:', result.records.length);
+      setData(result);
+    } catch (error) {
+      console.error('Failed to load person detail:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    (async () => {
-      try {
-        console.log('[DetailScreen] name:', name, 'phone:', phone);
-        const result = await getEventsByPhone(phone);
-        console.log('[DetailScreen] records count:', result.records.length);
-        setData(result);
-      } catch (error) {
-        console.error('Failed to load person detail:', error);
-      } finally {
-        setLoading(false);
-      }
-    })();
+    loadData();
   }, [phone]);
+
+  const handleDeleteRecord = (recordId: string) => {
+    setDeleteAlert({ visible: true, recordId });
+  };
+
+  const confirmDelete = async () => {
+    const { recordId } = deleteAlert;
+    setDeleteAlert({ visible: false, recordId: '' });
+    try {
+      await deleteEvent(recordId);
+      await loadData();
+    } catch (error) {
+      console.error('Failed to delete event:', error);
+      setErrorAlert(true);
+    }
+  };
 
   const personName = name;
   const sentAmount = data?.sentTotal ?? 0;
@@ -169,7 +190,12 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
 
               <View style={styles.recordsList}>
                 {records.map((record) => (
-                  <View key={record.id} style={styles.recordItem}>
+                  <TouchableOpacity
+                    key={record.id}
+                    style={styles.recordItem}
+                    onLongPress={() => handleDeleteRecord(record.id)}
+                    activeOpacity={0.7}
+                  >
                     <View style={styles.recordLeft}>
                       <View
                         style={[
@@ -209,7 +235,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
                       {getAmountSign(record.isSent)}
                       {record.amount.toLocaleString()} 원
                     </Text>
-                  </View>
+                  </TouchableOpacity>
                 ))}
               </View>
             </View>
@@ -218,6 +244,25 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
         </View>
 
       </View>
+
+      <CustomAlert
+        visible={deleteAlert.visible}
+        type="confirm"
+        title="삭제 확인"
+        message="이 기록을 삭제하시겠습니까?"
+        confirmText="삭제"
+        destructive
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteAlert({ visible: false, recordId: '' })}
+      />
+
+      <CustomAlert
+        visible={errorAlert}
+        type="alert"
+        title="오류"
+        message="삭제에 실패했습니다."
+        onConfirm={() => setErrorAlert(false)}
+      />
     </SafeAreaView>
   );
 };

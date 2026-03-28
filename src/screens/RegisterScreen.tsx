@@ -11,11 +11,11 @@ import {
   Platform,
   Modal,
   FlatList,
-  Alert,
   KeyboardAvoidingView,
 } from 'react-native';
 import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon, WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
 import { Header } from '../components/Header';
+import { CustomAlert } from '../components/CustomAlert';
 import { EventType } from '../components/UpcomingEvents';
 import { insertEvent, insertSchedule, getAllSchedules, ScheduleRecord } from '../database/queries';
 import { getDatabase } from '../database/database';
@@ -81,6 +81,21 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   const [phone, setPhone] = useState(initialData?.phone || '');
   const [relation, setRelation] = useState(initialData?.relationship || '');
   const [memo, setMemo] = useState(initialData?.memo || '');
+  const [alertState, setAlertState] = useState<{
+    visible: boolean;
+    title: string;
+    message?: string;
+    onConfirm?: () => void;
+  }>({ visible: false, title: '' });
+
+  const showAlert = (title: string, message?: string, onConfirm?: () => void) => {
+    setAlertState({ visible: true, title, message, onConfirm });
+  };
+  const hideAlert = () => {
+    const callback = alertState.onConfirm;
+    setAlertState({ visible: false, title: '' });
+    callback?.();
+  };
 
   const dismissAll = () => {
     Keyboard.dismiss();
@@ -99,7 +114,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
 
     const { status } = await Contacts.requestPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('권한 필요', '연락처에 접근하려면 권한을 허용해주세요.');
+      showAlert('권한 필요', '연락처에 접근하려면 권한을 허용해주세요.');
       return;
     }
 
@@ -114,7 +129,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
       setContactSearch('');
       setContactModalVisible(true);
     } else {
-      Alert.alert('연락처 없음', '저장된 연락처가 없습니다.');
+      showAlert('연락처 없음', '저장된 연락처가 없습니다.');
     }
   };
 
@@ -268,7 +283,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
       setRecallModalVisible(true);
     } catch (error) {
       console.error('Failed to load schedules:', error);
-      Alert.alert('오류', '일정을 불러오는데 실패했습니다.');
+      showAlert('오류', '일정을 불러오는데 실패했습니다.');
     }
   };
 
@@ -369,24 +384,27 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
         });
       }
 
-      if (onSaved) {
-        onSaved();
-      } else if (onClose) {
-        onClose();
-      } else {
-        setEventName('');
-        setPhone('');
-        setAmount('0');
-        setRelation('');
-        setMemo('');
-        setIsDirectInput(false);
-        setIsEventTypeDirectInput(false);
-        setCustomEventType('');
-        setIsRelationDirectInput(false);
-        setRegisterScheduleChecked(false);
-      }
+      showAlert('완료', '저장되었습니다.', () => {
+        if (onSaved) {
+          onSaved();
+        } else if (onClose) {
+          onClose();
+        } else {
+          setEventName('');
+          setPhone('');
+          setAmount('0');
+          setRelation('');
+          setMemo('');
+          setIsDirectInput(false);
+          setIsEventTypeDirectInput(false);
+          setCustomEventType('');
+          setIsRelationDirectInput(false);
+          setRegisterScheduleChecked(false);
+        }
+      });
     } catch (error) {
       console.error('Failed to save transaction:', error);
+      showAlert('오류', '저장에 실패했습니다.');
     }
   };
 
@@ -894,6 +912,14 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
           />
         </View>
       </Modal>
+
+      <CustomAlert
+        visible={alertState.visible}
+        type="alert"
+        title={alertState.title}
+        message={alertState.message}
+        onConfirm={hideAlert}
+      />
 
       {/* 연락처 선택 모달 (모바일 전용) */}
       {isMobile && (
