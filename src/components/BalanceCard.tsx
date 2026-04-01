@@ -120,13 +120,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   label: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 8,
   },
   labelTablet: {
-    fontSize: 16,
+    fontSize: 19,
     marginBottom: 10,
   },
   amount: {
@@ -190,11 +190,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#34D399',
   },
   monthLabel: {
-    fontSize: 10,
+    fontSize: 13,
     color: '#9CA3AF',
     textAlign: 'center',
   },
   monthLabelTablet: {
-    fontSize: 12,
+    fontSize: 15,
   },
 });

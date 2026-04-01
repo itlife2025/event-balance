@@ -114,12 +114,12 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   tabLabel: {
-    fontSize: 11,
+    fontSize: 14,
     marginTop: 4,
     fontWeight: '500',
   },
   tabLabelTablet: {
-    fontSize: 13,
+    fontSize: 16,
     marginTop: 6,
   },
   tabLabelActive: {

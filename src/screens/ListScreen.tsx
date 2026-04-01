@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   summaryLabel: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '600',
     color: '#4B5563',
     marginBottom: 8,
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   arrowText: {
-    fontSize: 18,
+    fontSize: 20,
     color: '#6B7280',
     lineHeight: 22,
   },
@@ -355,13 +355,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dateSelectorText: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '600',
     color: '#1F2937',
     textAlign: 'center',
   },
   dateSelectorTextTablet: {
-    fontSize: 16,
+    fontSize: 19,
     minWidth: 56,
   },
   modalOverlay: {
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#EEF2FF',
   },
   pickerItemText: {
-    fontSize: 15,
+    fontSize: 18,
     color: '#374151',
     textAlign: 'center',
   },
@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   filterTabText: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '500',
     color: '#9CA3AF',
   },
@@ -471,35 +471,35 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   transactionName: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 2,
   },
   transactionNameTablet: {
-    fontSize: 16,
+    fontSize: 19,
     marginBottom: 4,
   },
   transactionDate: {
-    fontSize: 12,
+    fontSize: 15,
     color: '#9CA3AF',
   },
   transactionDateTablet: {
-    fontSize: 14,
+    fontSize: 17,
   },
   transactionAmount: {
-    fontSize: 16,
+    fontSize: 19,
     fontWeight: '700',
   },
   transactionAmountTablet: {
-    fontSize: 18,
+    fontSize: 20,
   },
   emptyState: {
     padding: 32,
     alignItems: 'center',
   },
   emptyStateText: {
-    fontSize: 14,
+    fontSize: 17,
     color: '#9CA3AF',
   },
 });

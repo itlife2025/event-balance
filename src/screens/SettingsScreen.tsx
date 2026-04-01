@@ -197,23 +197,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
             </Text>
             <SettingItem
               icon={
-                <Text style={styles.sectionIcon}>🔊</Text>
-              }
-              label="설정"
-            />
-            <SettingItem
-              icon={
                 <Text style={styles.sectionIcon}>💱</Text>
               }
               label="통화 단위"
               value="원 ( ₩ )"
-            />
-            <SettingItem
-              icon={
-                <Text style={styles.sectionIcon}>💰</Text>
-              }
-              label="금액 표시"
-              value="+ / -, 천단위"
             />
             <SettingItem
               icon={
@@ -340,7 +327,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
   },
   sectionTitle: {
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: '700',
     color: '#1F2937',
     paddingHorizontal: 12,
@@ -348,7 +335,7 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   sectionTitleTablet: {
-    fontSize: 13,
+    fontSize: 16,
     paddingHorizontal: 14,
     paddingTop: 14,
     paddingBottom: 10,
@@ -386,24 +373,24 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   sectionIcon: {
-    fontSize: 16,
+    fontSize: 19,
   },
   settingLabel: {
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: '600',
     color: '#1F2937',
   },
   settingLabelTablet: {
-    fontSize: 14,
+    fontSize: 17,
   },
   settingValue: {
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: '500',
     color: '#9CA3AF',
     marginRight: 6,
   },
   settingValueTablet: {
-    fontSize: 13,
+    fontSize: 16,
   },
   toggle: {
     marginRight: 4,
@@ -441,21 +428,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   profileName: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '600',
     color: '#1F2937',
   },
   profileNameTablet: {
-    fontSize: 15,
+    fontSize: 18,
   },
   profileSub: {
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: '500',
     color: '#9CA3AF',
     marginTop: 2,
   },
   profileSubTablet: {
-    fontSize: 13,
+    fontSize: 16,
   },
   resetButton: {
     marginHorizontal: 12,
@@ -472,11 +459,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   resetButtonText: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '600',
     color: '#9CA3AF',
   },
   resetButtonTextTablet: {
-    fontSize: 15,
+    fontSize: 18,
   },
 });

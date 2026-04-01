@@ -209,12 +209,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   title: {
-    fontSize: 16,
+    fontSize: 19,
     fontWeight: '600',
     color: '#1F2937',
   },
   titleTablet: {
-    fontSize: 18,
+    fontSize: 20,
   },
   eventsContainer: {
     flexDirection: 'row',
@@ -260,22 +260,22 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   eventName: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 4,
   },
   eventNameTablet: {
-    fontSize: 16,
+    fontSize: 19,
     marginBottom: 6,
   },
   eventDate: {
-    fontSize: 12,
+    fontSize: 15,
     color: '#9CA3AF',
     marginBottom: 8,
   },
   eventDateTablet: {
-    fontSize: 14,
+    fontSize: 17,
     marginBottom: 10,
   },
   badge: {
@@ -290,10 +290,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   badgeText: {
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: '700',
   },
   badgeTextTablet: {
-    fontSize: 14,
+    fontSize: 17,
   },
 });

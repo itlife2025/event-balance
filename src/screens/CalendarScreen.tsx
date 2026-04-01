@@ -355,12 +355,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   calendarTitle: {
-    fontSize: 16,
+    fontSize: 19,
     fontWeight: '700',
     color: '#1F2937',
   },
   calendarTitleTablet: {
-    fontSize: 18,
+    fontSize: 20,
   },
   calendarWeekdays: {
     flexDirection: 'row',
@@ -372,12 +372,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   calendarWeekdayText: {
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: '600',
     color: '#9CA3AF',
   },
   calendarWeekdayTextTablet: {
-    fontSize: 13,
+    fontSize: 16,
   },
   calendarDaysGrid: {
     flexDirection: 'row',
@@ -395,12 +395,12 @@ const styles = StyleSheet.create({
     borderColor: '#6366F1',
   },
   calendarDayText: {
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: '500',
     color: '#1F2937',
   },
   calendarDayTextTablet: {
-    fontSize: 14,
+    fontSize: 17,
   },
   calendarDayTextDisabled: {
     color: '#D1D5DB',
@@ -431,12 +431,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   eventsSectionTitle: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '700',
     color: '#1F2937',
   },
   eventsSectionTitleTablet: {
-    fontSize: 16,
+    fontSize: 19,
   },
   registerButton: {
     backgroundColor: '#F59E0B',
@@ -450,12 +450,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   registerButtonText: {
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: '600',
     color: '#FFFFFF',
   },
   registerButtonTextTablet: {
-    fontSize: 13,
+    fontSize: 16,
   },
   emptyEvents: {
     backgroundColor: '#FFFFFF',
@@ -469,7 +469,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   emptyEventsText: {
-    fontSize: 13,
+    fontSize: 16,
     color: '#9CA3AF',
   },
   eventItem: {
@@ -506,28 +506,28 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   eventName: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 2,
   },
   eventNameTablet: {
-    fontSize: 15,
+    fontSize: 18,
   },
   eventDate: {
-    fontSize: 12,
+    fontSize: 15,
     color: '#9CA3AF',
   },
   eventDateTablet: {
-    fontSize: 13,
+    fontSize: 16,
   },
   eventMemo: {
-    fontSize: 11,
+    fontSize: 14,
     color: '#9CA3AF',
     marginTop: 2,
   },
   eventMemoTablet: {
-    fontSize: 12,
+    fontSize: 15,
   },
   eventBadge: {
     paddingHorizontal: 10,
@@ -535,7 +535,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   eventBadgeText: {
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: '700',
     color: '#1F2937',
   },

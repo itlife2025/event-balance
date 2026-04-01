@@ -157,12 +157,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   title: {
-    fontSize: 16,
+    fontSize: 19,
     fontWeight: '600',
     color: '#1F2937',
   },
   titleTablet: {
-    fontSize: 18,
+    fontSize: 20,
   },
   recordsContainer: {
     backgroundColor: '#FFFFFF',
@@ -205,28 +205,28 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   recordName: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 2,
   },
   recordNameTablet: {
-    fontSize: 16,
+    fontSize: 19,
     marginBottom: 4,
   },
   recordDate: {
-    fontSize: 12,
+    fontSize: 15,
     color: '#9CA3AF',
   },
   recordDateTablet: {
-    fontSize: 14,
+    fontSize: 17,
   },
   recordAmount: {
-    fontSize: 16,
+    fontSize: 19,
     fontWeight: '700',
     color: '#1F2937',
   },
   recordAmountTablet: {
-    fontSize: 18,
+    fontSize: 20,
   },
 });

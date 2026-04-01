@@ -450,20 +450,20 @@ const styles = StyleSheet.create({
     color: '#6366F1',
   },
   profileName: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: '700',
     color: '#1F2937',
   },
   profileNameTablet: {
-    fontSize: 18,
+    fontSize: 21,
   },
   profilePhone: {
-    fontSize: 13,
+    fontSize: 17,
     color: '#9CA3AF',
     marginTop: 4,
   },
   profilePhoneTablet: {
-    fontSize: 14,
+    fontSize: 18,
   },
   balanceCard: {
     backgroundColor: '#FFFFFF',
@@ -481,14 +481,14 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
   balanceTitle: {
-    fontSize: 13,
+    fontSize: 17,
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 12,
     textAlign: 'center',
   },
   balanceTitleTablet: {
-    fontSize: 14,
+    fontSize: 18,
     marginBottom: 14,
   },
   balanceRow: {
@@ -500,19 +500,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   balanceLabel: {
-    fontSize: 13,
+    fontSize: 17,
     fontWeight: '500',
     color: '#6B7280',
   },
   balanceLabelTablet: {
-    fontSize: 14,
+    fontSize: 18,
   },
   balanceAmount: {
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: '700',
   },
   balanceAmountTablet: {
-    fontSize: 16,
+    fontSize: 20,
   },
   divider: {
     height: 1,
@@ -526,13 +526,13 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   historyTitle: {
-    fontSize: 13,
+    fontSize: 17,
     fontWeight: '700',
     color: '#1F2937',
     marginBottom: 12,
   },
   historyTitleTablet: {
-    fontSize: 14,
+    fontSize: 18,
     marginBottom: 14,
   },
   recordsList: {
@@ -575,35 +575,35 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   recordName: {
-    fontSize: 13,
+    fontSize: 17,
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 2,
   },
   recordNameTablet: {
-    fontSize: 14,
+    fontSize: 18,
   },
   recordDate: {
-    fontSize: 12,
+    fontSize: 16,
     color: '#9CA3AF',
   },
   recordDateTablet: {
-    fontSize: 13,
+    fontSize: 17,
   },
   recordMemo: {
-    fontSize: 11,
+    fontSize: 15,
     color: '#9CA3AF',
     marginTop: 2,
   },
   recordMemoTablet: {
-    fontSize: 12,
+    fontSize: 16,
   },
   recordAmount: {
-    fontSize: 13,
+    fontSize: 17,
     fontWeight: '700',
   },
   recordAmountTablet: {
-    fontSize: 14,
+    fontSize: 18,
   },
   // Swipe action styles
   swipeActions: {
@@ -631,7 +631,7 @@ const styles = StyleSheet.create({
   },
   swipeButtonText: {
     color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: '600',
   },
 });

@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   description: {
-    fontSize: 15,
+    fontSize: 18,
     color: '#6B7280',
     textAlign: 'center',
     lineHeight: 22,
@@ -145,13 +145,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   featureBullet: {
-    fontSize: 14,
+    fontSize: 17,
     color: '#6366F1',
     marginRight: 8,
     marginTop: 1,
   },
   featureText: {
-    fontSize: 14,
+    fontSize: 17,
     color: '#374151',
     lineHeight: 20,
   },
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   },
   allowButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 19,
     fontWeight: '600',
   },
   skipButton: {
@@ -175,6 +175,6 @@ const styles = StyleSheet.create({
   },
   skipButtonText: {
     color: '#9CA3AF',
-    fontSize: 14,
+    fontSize: 17,
   },
 });

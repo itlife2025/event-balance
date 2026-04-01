@@ -1109,10 +1109,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#EEF2FF',
   },
   tabIcon: {
-    fontSize: 16,
+    fontSize: 19,
   },
   tabLabel: {
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: '600',
     color: '#6B7280',
   },
@@ -1143,11 +1143,11 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   searchIconText: {
-    fontSize: 14,
+    fontSize: 17,
   },
   searchInput: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 16,
     color: '#1F2937',
   },
   sectionContainer: {
@@ -1157,13 +1157,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sectionLabel: {
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 8,
   },
   sectionLabelTablet: {
-    fontSize: 13,
+    fontSize: 16,
     marginBottom: 10,
   },
   typeButtonsContainer: {
@@ -1189,7 +1189,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#EEF2FF',
   },
   typeButtonText: {
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: '500',
     color: '#6B7280',
   },
@@ -1205,7 +1205,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderWidth: 1,
     borderColor: '#6366F1',
-    fontSize: 13,
+    fontSize: 16,
     color: '#1F2937',
     height: 40,
   },
@@ -1242,12 +1242,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   calendarTitle: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '700',
     color: '#1F2937',
   },
   calendarTitleTablet: {
-    fontSize: 17,
+    fontSize: 20,
   },
   calendarWeekdays: {
     flexDirection: 'row',
@@ -1259,12 +1259,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   calendarWeekdayText: {
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: '600',
     color: '#9CA3AF',
   },
   calendarWeekdayTextTablet: {
-    fontSize: 13,
+    fontSize: 16,
   },
   calendarDaysGrid: {
     flexDirection: 'row',
@@ -1282,12 +1282,12 @@ const styles = StyleSheet.create({
     borderColor: '#6366F1',
   },
   calendarDayText: {
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: '500',
     color: '#1F2937',
   },
   calendarDayTextTablet: {
-    fontSize: 14,
+    fontSize: 17,
   },
   calendarDayTextDisabled: {
     color: '#D1D5DB',
@@ -1315,12 +1315,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   recallButtonText: {
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: '600',
     color: '#FFFFFF',
   },
   recallButtonTextTablet: {
-    fontSize: 13,
+    fontSize: 16,
   },
   scheduleIconContainer: {
     width: 36,
@@ -1359,13 +1359,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#6366F1',
   },
   checkmark: {
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: '700',
     color: '#FFFFFF',
     lineHeight: 14,
   },
   checkboxLabel: {
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: '500',
     color: '#6B7280',
   },
@@ -1381,17 +1381,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scheduleItemName: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '600',
     color: '#1F2937',
   },
   scheduleItemMeta: {
-    fontSize: 12,
+    fontSize: 15,
     color: '#6B7280',
     marginTop: 2,
   },
   scheduleItemDate: {
-    fontSize: 13,
+    fontSize: 16,
     color: '#9CA3AF',
     marginLeft: 12,
   },
@@ -1417,25 +1417,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   inputText: {
-    fontSize: 13,
+    fontSize: 16,
     color: '#1F2937',
     fontWeight: '500',
   },
   inputTextTablet: {
-    fontSize: 14,
+    fontSize: 17,
   },
   placeholderText: {
-    fontSize: 13,
+    fontSize: 16,
     color: '#9CA3AF',
   },
   amountDisplay: {
-    fontSize: 16,
+    fontSize: 19,
     fontWeight: '700',
     color: '#1F2937',
     marginBottom: 10,
   },
   amountDisplayTablet: {
-    fontSize: 18,
+    fontSize: 20,
     marginBottom: 12,
   },
   quickAmountContainer: {
@@ -1465,7 +1465,7 @@ const styles = StyleSheet.create({
     borderColor: '#6366F1',
   },
   quickAmountText: {
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: '600',
     color: '#6366F1',
   },
@@ -1483,12 +1483,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   amountResetText: {
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: '600',
     color: '#6B7280',
   },
   quickAmountTextTablet: {
-    fontSize: 13,
+    fontSize: 16,
   },
   memoInput: {
     backgroundColor: '#FFFFFF',
@@ -1497,7 +1497,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderWidth: 1,
     borderColor: '#F3F4F6',
-    fontSize: 13,
+    fontSize: 16,
     color: '#1F2937',
     textAlignVertical: 'top',
     minHeight: 80,
@@ -1508,7 +1508,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   memoInputTablet: {
-    fontSize: 14,
+    fontSize: 17,
     paddingHorizontal: 14,
     paddingVertical: 12,
     minHeight: 100,
@@ -1540,12 +1540,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   resetButtonText: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '600',
     color: '#6B7280',
   },
   resetButtonTextTablet: {
-    fontSize: 15,
+    fontSize: 18,
   },
   saveButton: {
     marginHorizontal: 12,
@@ -1571,7 +1571,7 @@ const styles = StyleSheet.create({
     opacity: 0.5, // Reduce opacity
   },
   saveButtonText: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '600',
     color: '#FFFFFF',
   },
@@ -1579,7 +1579,7 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
   },
   saveButtonTextTablet: {
-    fontSize: 15,
+    fontSize: 18,
   },
   // 연락처 모달 스타일
   modalContainer: {
@@ -1597,12 +1597,12 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E5E7EB',
   },
   modalTitle: {
-    fontSize: 17,
+    fontSize: 20,
     fontWeight: '700',
     color: '#1F2937',
   },
   modalCloseText: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '600',
     color: '#6366F1',
   },
@@ -1619,12 +1619,12 @@ const styles = StyleSheet.create({
     height: 42,
   },
   modalSearchIcon: {
-    fontSize: 14,
+    fontSize: 17,
     marginRight: 8,
   },
   modalSearchInput: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 17,
     color: '#1F2937',
   },
   contactList: {
@@ -1647,7 +1647,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   contactAvatarText: {
-    fontSize: 16,
+    fontSize: 19,
     fontWeight: '600',
     color: '#6366F1',
   },
@@ -1655,12 +1655,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contactName: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '500',
     color: '#1F2937',
   },
   contactPhone: {
-    fontSize: 13,
+    fontSize: 16,
     color: '#6B7280',
     marginTop: 2,
   },
@@ -1669,7 +1669,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyText: {
-    fontSize: 14,
+    fontSize: 17,
     color: '#9CA3AF',
   },
 });

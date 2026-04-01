@@ -528,13 +528,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sectionLabel: {
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 8,
   },
   sectionLabelTablet: {
-    fontSize: 13,
+    fontSize: 16,
     marginBottom: 10,
   },
   searchContainer: {
@@ -557,12 +557,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   searchIcon: {
-    fontSize: 14,
+    fontSize: 17,
     marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 16,
     color: '#1F2937',
   },
   typeButtonsContainer: {
@@ -588,7 +588,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#EEF2FF',
   },
   typeButtonText: {
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: '500',
     color: '#6B7280',
   },
@@ -604,7 +604,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderWidth: 1,
     borderColor: '#6366F1',
-    fontSize: 13,
+    fontSize: 16,
     color: '#1F2937',
     height: 40,
   },
@@ -630,15 +630,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   inputText: {
-    fontSize: 13,
+    fontSize: 16,
     color: '#1F2937',
     fontWeight: '500',
   },
   inputTextTablet: {
-    fontSize: 14,
+    fontSize: 17,
   },
   placeholderText: {
-    fontSize: 13,
+    fontSize: 16,
     color: '#9CA3AF',
   },
 
@@ -675,12 +675,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   calendarTitle: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '700',
     color: '#1F2937',
   },
   calendarTitleTablet: {
-    fontSize: 17,
+    fontSize: 20,
   },
   calendarWeekdays: {
     flexDirection: 'row',
@@ -692,12 +692,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   calendarWeekdayText: {
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: '600',
     color: '#9CA3AF',
   },
   calendarWeekdayTextTablet: {
-    fontSize: 13,
+    fontSize: 16,
   },
   calendarDaysGrid: {
     flexDirection: 'row',
@@ -715,12 +715,12 @@ const styles = StyleSheet.create({
     borderColor: '#6366F1',
   },
   calendarDayText: {
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: '500',
     color: '#1F2937',
   },
   calendarDayTextTablet: {
-    fontSize: 14,
+    fontSize: 17,
   },
   calendarDayTextDisabled: {
     color: '#D1D5DB',
@@ -746,12 +746,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   registerEventButtonText: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '600',
     color: '#FFFFFF',
   },
   registerEventButtonTextTablet: {
-    fontSize: 15,
+    fontSize: 18,
   },
 
   memoInput: {
@@ -761,7 +761,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderWidth: 1,
     borderColor: '#F3F4F6',
-    fontSize: 13,
+    fontSize: 16,
     color: '#1F2937',
     textAlignVertical: 'top',
     minHeight: 80,
@@ -772,7 +772,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   memoInputTablet: {
-    fontSize: 14,
+    fontSize: 17,
     paddingHorizontal: 14,
     paddingVertical: 12,
     minHeight: 100,
@@ -811,7 +811,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   saveButtonText: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '600',
     color: '#FFFFFF',
   },
@@ -819,6 +819,6 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
   },
   saveButtonTextTablet: {
-    fontSize: 15,
+    fontSize: 18,
   },
 });

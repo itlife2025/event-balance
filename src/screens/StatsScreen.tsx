@@ -634,7 +634,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#34D399',
   },
   summaryLabel: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '600',
     color: '#4B5563',
     marginBottom: 8,
@@ -669,7 +669,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   filterTabText: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '500',
     color: '#9CA3AF',
   },
@@ -716,7 +716,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   arrowText: {
-    fontSize: 18,
+    fontSize: 20,
     color: '#6B7280',
     lineHeight: 22,
   },
@@ -726,13 +726,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dateSelectorText: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '600',
     color: '#1F2937',
     textAlign: 'center',
   },
   dateSelectorTextTablet: {
-    fontSize: 16,
+    fontSize: 19,
     minWidth: 56,
   },
 
@@ -764,7 +764,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#EEF2FF',
   },
   pickerItemText: {
-    fontSize: 15,
+    fontSize: 18,
     color: '#374151',
     textAlign: 'center',
   },
@@ -788,20 +788,20 @@ donutCenter: {
     alignItems: 'center',
   },
   donutCenterAmount: {
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: '700',
     color: '#1F2937',
   },
   donutCenterAmountTablet: {
-    fontSize: 15,
+    fontSize: 18,
   },
   donutCenterLabel: {
-    fontSize: 10,
+    fontSize: 13,
     color: '#9CA3AF',
     marginTop: 2,
   },
   donutCenterLabelTablet: {
-    fontSize: 12,
+    fontSize: 15,
   },
 
   // Chart Legend
@@ -811,13 +811,13 @@ donutCenter: {
     paddingTop: 4,
   },
   legendTitle: {
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: '600',
     color: '#6B7280',
     marginBottom: 4,
   },
   legendTitleTablet: {
-    fontSize: 14,
+    fontSize: 17,
   },
   legendAmount: {
     fontSize: 20,
@@ -828,13 +828,13 @@ donutCenter: {
     fontSize: 24,
   },
   legendSubLabel: {
-    fontSize: 11,
+    fontSize: 14,
     color: '#9CA3AF',
     marginTop: 14,
     marginBottom: 12,
   },
   legendSubLabelTablet: {
-    fontSize: 12,
+    fontSize: 15,
   },
   legendItem: {
     marginBottom: 10,
@@ -851,20 +851,20 @@ donutCenter: {
     marginRight: 6,
   },
   legendCategoryName: {
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: '600',
     color: '#1F2937',
     marginRight: 8,
   },
   legendCategoryNameTablet: {
-    fontSize: 14,
+    fontSize: 17,
   },
   legendCategoryAmount: {
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: '700',
   },
   legendCategoryAmountTablet: {
-    fontSize: 14,
+    fontSize: 17,
   },
   legendBarRow: {
     flexDirection: 'row',
@@ -883,7 +883,7 @@ donutCenter: {
     borderRadius: 3,
   },
   legendCount: {
-    fontSize: 11,
+    fontSize: 14,
     color: '#9CA3AF',
   },
 
@@ -896,18 +896,18 @@ donutCenter: {
 
   // Section Title
   sectionTitle: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '600',
     color: '#6B7280',
     marginBottom: 12,
   },
   sectionTitleTablet: {
-    fontSize: 16,
+    fontSize: 19,
     marginBottom: 14,
   },
 
   emptyText: {
-    fontSize: 13,
+    fontSize: 16,
     color: '#9CA3AF',
     textAlign: 'center',
     paddingVertical: 12,
@@ -945,26 +945,26 @@ donutCenter: {
     marginLeft: 12,
   },
   detailItemLabel: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 2,
   },
   detailItemLabelTablet: {
-    fontSize: 16,
+    fontSize: 19,
   },
   detailItemDate: {
-    fontSize: 12,
+    fontSize: 15,
     color: '#9CA3AF',
   },
   detailItemDateTablet: {
-    fontSize: 13,
+    fontSize: 16,
   },
   detailItemAmount: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '700',
   },
   detailItemAmountTablet: {
-    fontSize: 17,
+    fontSize: 20,
   },
 });

@@ -169,16 +169,16 @@ const styles = StyleSheet.create({
     padding: 28,
   },
   title: {
-    fontSize: 17,
+    fontSize: 20,
     fontWeight: '600',
     color: '#1F2937',
     textAlign: 'center',
   },
   titleTablet: {
-    fontSize: 18,
+    fontSize: 20,
   },
   message: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '400',
     color: '#6B7280',
     marginTop: 8,
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   messageTablet: {
-    fontSize: 15,
+    fontSize: 18,
     lineHeight: 22,
   },
   input: {
@@ -196,11 +196,11 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
     borderRadius: 10,
     padding: 12,
-    fontSize: 14,
+    fontSize: 17,
     color: '#1F2937',
   },
   inputTablet: {
-    fontSize: 15,
+    fontSize: 18,
     padding: 14,
   },
   buttonContainer: {
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
   },
   cancelButtonText: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '600',
     color: '#6B7280',
   },
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#6366F1',
   },
   confirmButtonText: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '600',
     color: '#FFFFFF',
   },
@@ -242,6 +242,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#EF4444',
   },
   buttonTextTablet: {
-    fontSize: 16,
+    fontSize: 19,
   },
 });
