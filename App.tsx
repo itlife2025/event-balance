@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { TransactionProvider } from './src/context/TransactionContext';
@@ -37,8 +38,10 @@ export default function App() {
   }
 
   return (
-    <TransactionProvider>
-      <HomeScreen />
-    </TransactionProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <TransactionProvider>
+        <HomeScreen />
+      </TransactionProvider>
+    </GestureHandlerRootView>
   );
 }

@@ -219,7 +219,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
 
   return (
     <View style={styles.container}>
-      <Header title="일정 등록" onBackPress={onClose} />
+      <Header title="일정 등록" />
 
       <View style={styles.contentArea}>
         <ScrollView

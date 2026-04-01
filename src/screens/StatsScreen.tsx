@@ -211,7 +211,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
       <View style={[styles.container, isTablet && styles.containerTablet]}>
-        <Header title="통계" onBackPress={onBackPress} />
+        <Header title="통계" />
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={[

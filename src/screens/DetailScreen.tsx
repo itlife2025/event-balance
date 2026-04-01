@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,23 +9,40 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   ActivityIndicator,
+  Animated,
 } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
 import { Header } from '../components/Header';
 import { CustomAlert } from '../components/CustomAlert';
-import { getEventsByPhone, deleteEvent, type PersonDetail } from '../database/queries';
+import { getEventsByPhone, getEventsByNameAndPhone, deleteEvent, type PersonDetail } from '../database/queries';
 import { type EventTypeKey, getEventTypeLabel } from '../constants/eventTypes';
+
+interface EditEventData {
+  id: string;
+  name: string;
+  phone: string;
+  type: EventTypeKey;
+  typeName: string;
+  date: string;
+  amount: number;
+  isSent: boolean;
+  relationship: string;
+  memo: string;
+}
 
 interface DetailScreenProps {
   name: string;
   phone: string;
   onClose?: () => void;
+  onEdit?: (data: EditEventData) => void;
 }
 
 export const DetailScreen: React.FC<DetailScreenProps> = ({
   name,
   phone,
   onClose,
+  onEdit,
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -34,10 +51,14 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
   const [deleteAlert, setDeleteAlert] = useState<{ visible: boolean; recordId: string }>({ visible: false, recordId: '' });
   const [errorAlert, setErrorAlert] = useState(false);
 
+  // 열린 Swipeable을 추적하여 다른 행 스와이프 시 닫기
+  const openSwipeableRef = useRef<Swipeable | null>(null);
+  const swipeableRefs = useRef<Map<string, Swipeable>>(new Map());
+
   const loadData = async () => {
     try {
       console.log('[DetailScreen] name:', name, 'phone:', phone);
-      const result = await getEventsByPhone(phone);
+      const result = await getEventsByNameAndPhone(name, phone);
       console.log('[DetailScreen] records count:', result.records.length);
       setData(result);
     } catch (error) {
@@ -49,9 +70,31 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
 
   useEffect(() => {
     loadData();
-  }, [phone]);
+  }, [name, phone]);
 
-  const handleDeleteRecord = (recordId: string) => {
+  const handleEdit = (record: PersonDetail['records'][0]) => {
+    openSwipeableRef.current?.close();
+    openSwipeableRef.current = null;
+    console.log('[DetailScreen] edit record:', JSON.stringify({ id: record.id, name: record.name, phone: record.phone }));
+    if (onEdit) {
+      onEdit({
+        id: record.id,
+        name: record.name,
+        phone: record.phone,
+        type: record.type,
+        typeName: record.typeName,
+        date: record.date,
+        amount: record.amount,
+        isSent: record.isSent,
+        relationship: record.relationship,
+        memo: record.memo,
+      });
+    }
+  };
+
+  const handleDelete = (recordId: string) => {
+    openSwipeableRef.current?.close();
+    openSwipeableRef.current = null;
     setDeleteAlert({ visible: true, recordId });
   };
 
@@ -60,7 +103,12 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
     setDeleteAlert({ visible: false, recordId: '' });
     try {
       await deleteEvent(recordId);
-      await loadData();
+      const result = await getEventsByNameAndPhone(name, phone);
+      if (result.records.length === 0) {
+        onClose?.();
+      } else {
+        setData(result);
+      }
     } catch (error) {
       console.error('Failed to delete event:', error);
       setErrorAlert(true);
@@ -72,8 +120,6 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
   const receivedAmount = data?.receivedTotal ?? 0;
   const balance = sentAmount - receivedAmount;
   const records = data?.records ?? [];
-
-
 
   const getEventIcon = (type: EventTypeKey) => {
     if (type === 'wedding') return <WeddingIcon size={isTablet ? 32 : 28} color="#EC4899" />;
@@ -87,6 +133,31 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
 
   const getAmountSign = (isSent: boolean) => {
     return isSent ? '-' : '+';
+  };
+
+  const renderRightActions = (
+    _progress: Animated.AnimatedInterpolation<number>,
+    _dragX: Animated.AnimatedInterpolation<number>,
+    record: PersonDetail['records'][0],
+  ) => {
+    return (
+      <View style={styles.swipeActions}>
+        <TouchableOpacity
+          style={styles.swipeEditButton}
+          onPress={() => handleEdit(record)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.swipeButtonText}>수정</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.swipeDeleteButton}
+          onPress={() => handleDelete(record.id)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.swipeButtonText}>삭제</Text>
+        </TouchableOpacity>
+      </View>
+    );
   };
 
   return (
@@ -176,7 +247,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
                       { color: '#EF4444' },
                     ]}
                   >
-                    {balance > 0 ? '-' : '+'}{Math.abs(balance).toLocaleString()} 원 ({balance > 0 ? '손해' : balance < 0 ? '이득' : '균형'})
+                    {balance > 0 ? '-' : '+'}{Math.abs(balance).toLocaleString()} 원
                   </Text>
                 </View>
               </View>
@@ -190,52 +261,75 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
 
               <View style={styles.recordsList}>
                 {records.map((record) => (
-                  <TouchableOpacity
+                  <Swipeable
                     key={record.id}
-                    style={styles.recordItem}
-                    onLongPress={() => handleDeleteRecord(record.id)}
-                    activeOpacity={0.7}
+                    renderRightActions={(progress, dragX) =>
+                      renderRightActions(progress, dragX, record)
+                    }
+                    rightThreshold={40}
+                    overshootRight={false}
+                    ref={(ref) => {
+                      if (ref) swipeableRefs.current.set(record.id, ref);
+                      else swipeableRefs.current.delete(record.id);
+                    }}
+                    onSwipeableWillOpen={() => {
+                      const me = swipeableRefs.current.get(record.id);
+                      if (openSwipeableRef.current && openSwipeableRef.current !== me) {
+                        openSwipeableRef.current.close();
+                      }
+                    }}
+                    onSwipeableOpen={() => {
+                      openSwipeableRef.current = swipeableRefs.current.get(record.id) || null;
+                    }}
+                    onSwipeableClose={() => {
+                      const me = swipeableRefs.current.get(record.id);
+                      if (openSwipeableRef.current === me) {
+                        openSwipeableRef.current = null;
+                      }
+                    }}
                   >
-                    <View style={styles.recordLeft}>
-                      <View
+                    <View style={styles.recordItem}>
+                      <View style={styles.recordLeft}>
+                        <View
+                          style={[
+                            styles.recordIcon,
+                            isTablet && styles.recordIconTablet,
+                          ]}
+                        >
+                          {getEventIcon(record.type)}
+                        </View>
+                        <View style={styles.recordInfo}>
+                          <Text
+                            style={[
+                              styles.recordName,
+                              isTablet && styles.recordNameTablet,
+                            ]}
+                            numberOfLines={1}
+                          >
+                            {getEventTypeLabel(record.typeName)}{record.relationship ? ` (${record.relationship})` : ''}
+                          </Text>
+                          <Text
+                            style={[
+                              styles.recordDate,
+                              isTablet && styles.recordDateTablet,
+                            ]}
+                          >
+                            {record.date}
+                          </Text>
+                        </View>
+                      </View>
+                      <Text
                         style={[
-                          styles.recordIcon,
-                          isTablet && styles.recordIconTablet,
+                          styles.recordAmount,
+                          isTablet && styles.recordAmountTablet,
+                          { color: getAmountColor(record.isSent) },
                         ]}
                       >
-                        {getEventIcon(record.type)}
-                      </View>
-                      <View style={styles.recordInfo}>
-                        <Text
-                          style={[
-                            styles.recordName,
-                            isTablet && styles.recordNameTablet,
-                          ]}
-                          numberOfLines={1}
-                        >
-                          {getEventTypeLabel(record.typeName)}{record.relationship ? ` (${record.relationship})` : ''}
-                        </Text>
-                        <Text
-                          style={[
-                            styles.recordDate,
-                            isTablet && styles.recordDateTablet,
-                          ]}
-                        >
-                          {record.date}
-                        </Text>
-                      </View>
+                        {getAmountSign(record.isSent)}
+                        {record.amount.toLocaleString()} 원
+                      </Text>
                     </View>
-                    <Text
-                      style={[
-                        styles.recordAmount,
-                        isTablet && styles.recordAmountTablet,
-                        { color: getAmountColor(record.isSent) },
-                      ]}
-                    >
-                      {getAmountSign(record.isSent)}
-                      {record.amount.toLocaleString()} 원
-                    </Text>
-                  </TouchableOpacity>
+                  </Swipeable>
                 ))}
               </View>
             </View>
@@ -467,5 +561,34 @@ const styles = StyleSheet.create({
   },
   recordAmountTablet: {
     fontSize: 14,
+  },
+  // Swipe action styles
+  swipeActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginLeft: 8,
+  },
+  swipeEditButton: {
+    backgroundColor: '#6366F1',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 60,
+    height: '100%',
+  },
+  swipeDeleteButton: {
+    backgroundColor: '#EF4444',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 60,
+    height: '100%',
+    borderTopRightRadius: 10,
+    borderBottomRightRadius: 10,
+  },
+  swipeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });

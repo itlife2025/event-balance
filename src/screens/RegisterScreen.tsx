@@ -17,7 +17,7 @@ import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon, WeddingIcon, FuneralIc
 import { Header } from '../components/Header';
 import { CustomAlert } from '../components/CustomAlert';
 import { EventType } from '../components/UpcomingEvents';
-import { insertEvent, insertSchedule, getAllSchedules, ScheduleRecord } from '../database/queries';
+import { insertEvent, updateEvent, insertSchedule, getAllSchedules, ScheduleRecord } from '../database/queries';
 import { getDatabase } from '../database/database';
 import { resolveEventType, getEventTypeLabel } from '../constants/eventTypes';
 
@@ -36,17 +36,22 @@ export interface RegisterInitialData {
   date: string; // "YYYY.MM.DD (요일)" format
   relationship?: string;
   memo?: string;
+  editId?: string;
+  amount?: number;       // in won (DB value)
+  amountType?: 'send' | 'received';
 }
 
 interface RegisterScreenProps {
   onClose?: () => void;
   onSaved?: () => void;
+  onGoToList?: () => void;
   initialData?: RegisterInitialData;
 }
 
 export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   onClose,
   onSaved,
+  onGoToList,
   initialData,
 }) => {
   const { width } = useWindowDimensions();
@@ -69,14 +74,22 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
     return new Date();
   }, [initialData]);
 
-  const [activeTab, setActiveTab] = useState<TabType>('pay');
-  const [selectedType, setSelectedType] = useState<EventType>(initialData?.type || 'wedding');
+  const isEditMode = !!initialData?.editId;
+
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    if (initialData?.amountType === 'received') return 'pay';
+    return 'receive';
+  });
+  const [selectedType, setSelectedType] = useState<EventType | null>(initialData?.type || null);
   const [eventName, setEventName] = useState(initialData?.name || '');
   const [selectedDate, setSelectedDate] = useState<Date>(initialDate);
   const [calendarYear, setCalendarYear] = useState(initialDate.getFullYear());
   const [calendarMonth, setCalendarMonth] = useState(initialDate.getMonth());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [amount, setAmount] = useState('0'); // Start with 0
+  const [amount, setAmount] = useState(() => {
+    if (initialData?.amount) return String(initialData.amount / 10000);
+    return '0';
+  });
   const [isDirectInput, setIsDirectInput] = useState(false);
   const [phone, setPhone] = useState(initialData?.phone || '');
   const [relation, setRelation] = useState(initialData?.relationship || '');
@@ -85,11 +98,15 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
     visible: boolean;
     title: string;
     message?: string;
+    type?: 'alert' | 'confirm';
+    confirmText?: string;
+    cancelText?: string;
     onConfirm?: () => void;
+    onCancel?: () => void;
   }>({ visible: false, title: '' });
 
   const showAlert = (title: string, message?: string, onConfirm?: () => void) => {
-    setAlertState({ visible: true, title, message, onConfirm });
+    setAlertState({ visible: true, title, message, type: 'alert', onConfirm });
   };
   const hideAlert = () => {
     const callback = alertState.onConfirm;
@@ -328,7 +345,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
 
   const handleEventTypeDirectInput = () => {
     setIsEventTypeDirectInput(true);
-    setSelectedType('custom');
+    setSelectedType(null);
     setCustomEventType('');
   };
 
@@ -347,7 +364,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
     setAmount(''); // Clear for direct input
   };
 
-  const isValid = Boolean(eventName && phone && amount && selectedDate);
+  const isValid = Boolean(eventName.trim() && amount && selectedDate && (selectedType || (isEventTypeDirectInput && customEventType.trim())));
 
   const handleSave = async () => {
     if (!isValid) return;
@@ -359,11 +376,11 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
     const eventType = isEventTypeDirectInput
       ? (customEventType.trim() || 'other')
       : (selectedType || 'other');
-    const amountType = activeTab === 'pay' ? 'received' : 'send';
+    const amountType: 'send' | 'received' = activeTab === 'pay' ? 'received' : 'send';
 
     try {
-      await insertEvent({
-        name: eventName,
+      const eventData = {
+        name: eventName.trim(),
         phone,
         type: eventType,
         date: dbDate,
@@ -371,25 +388,31 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
         amountType,
         relationship: relation,
         memo,
-      });
+      };
 
-      if (registerScheduleChecked) {
-        await insertSchedule({
-          name: eventName,
-          phone,
-          type: eventType,
-          date: dbDate,
-          relationship: relation,
-          memo,
-        });
+      if (isEditMode && initialData?.editId) {
+        await updateEvent(initialData.editId, eventData);
+      } else {
+        await insertEvent(eventData);
+
+        if (registerScheduleChecked) {
+          await insertSchedule({
+            name: eventName,
+            phone,
+            type: eventType,
+            date: dbDate,
+            relationship: relation,
+            memo,
+          });
+        }
       }
 
-      showAlert('완료', '저장되었습니다.', () => {
-        if (onSaved) {
-          onSaved();
-        } else if (onClose) {
-          onClose();
-        } else {
+      if (isEditMode) {
+        showAlert('수정 완료', '수정되었습니다.', () => {
+          onClose?.();
+        });
+      } else {
+        const resetForm = () => {
           setEventName('');
           setPhone('');
           setAmount('0');
@@ -400,8 +423,27 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
           setCustomEventType('');
           setIsRelationDirectInput(false);
           setRegisterScheduleChecked(false);
-        }
-      });
+          setSelectedType(null);
+          setActiveTab('receive');
+        };
+
+        setAlertState({
+          visible: true,
+          title: '저장 완료',
+          message: '저장되었습니다.',
+          type: 'confirm',
+          confirmText: '계속 저장',
+          cancelText: '내역보기',
+          onConfirm: () => {
+            setAlertState({ visible: false, title: '' });
+            resetForm();
+          },
+          onCancel: () => {
+            setAlertState({ visible: false, title: '' });
+            onGoToList?.();
+          },
+        });
+      }
     } catch (error) {
       console.error('Failed to save transaction:', error);
       showAlert('오류', '저장에 실패했습니다.');
@@ -411,7 +453,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   return (
     <View style={styles.container}>
       {/* Header */}
-      <Header title="등록" onBackPress={onClose} />
+      <Header title={isEditMode ? "수정" : "등록"} onBackPress={isEditMode ? onClose : undefined} />
 
       {/* Content Area */}
       <KeyboardAvoidingView
@@ -436,24 +478,6 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
             <TouchableOpacity
               style={[
                 styles.tabButton,
-                activeTab === 'pay' && styles.tabButtonActive,
-              ]}
-              onPress={() => setActiveTab('pay')}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.tabIcon}>🎁</Text>
-              <Text
-                style={[
-                  styles.tabLabel,
-                  activeTab === 'pay' && styles.tabLabelActive,
-                ]}
-              >
-                받기
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.tabButton,
                 activeTab === 'receive' && styles.tabButtonActive,
               ]}
               onPress={() => setActiveTab('receive')}
@@ -467,6 +491,24 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                 ]}
               >
                 보내기
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                activeTab === 'pay' && styles.tabButtonActive,
+              ]}
+              onPress={() => setActiveTab('pay')}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.tabIcon}>🎁</Text>
+              <Text
+                style={[
+                  styles.tabLabel,
+                  activeTab === 'pay' && styles.tabLabelActive,
+                ]}
+              >
+                받기
               </Text>
             </TouchableOpacity>
           </View>
@@ -789,6 +831,23 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                   직접입력
                 </Text>
               </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.amountResetButton,
+                  isTablet && styles.quickAmountButtonTablet,
+                ]}
+                onPress={() => { setAmount('0'); setIsDirectInput(false); }}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.amountResetText,
+                    isTablet && styles.quickAmountTextTablet,
+                  ]}
+                >
+                  초기화
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -812,9 +871,9 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
           </View>
 
           {/* Reset + Save Buttons */}
-          <View style={{ marginBottom: 40, gap: 10 }}>
+          <View style={{ marginBottom: 40, flexDirection: 'row', gap: 10 }}>
             <TouchableOpacity
-              style={[styles.resetButton, isTablet && styles.resetButtonTablet]}
+              style={[styles.resetButton, isTablet && styles.resetButtonTablet, { flex: 1 }]}
               onPress={() => {
                 setEventName('');
                 setPhone('');
@@ -826,7 +885,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                 setCustomEventType('');
                 setIsRelationDirectInput(false);
                 setRegisterScheduleChecked(false);
-                setSelectedType('wedding');
+                setSelectedType(null);
                 setSelectedDate(new Date());
                 setCalendarYear(new Date().getFullYear());
                 setCalendarMonth(new Date().getMonth());
@@ -844,6 +903,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                 styles.saveButtonStandalone,
                 !isValid && styles.saveButtonDisabled,
                 isTablet && styles.saveButtonTablet,
+                { flex: 1 },
               ]}
               onPress={handleSave}
               activeOpacity={0.7}
@@ -856,7 +916,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                   isTablet && styles.saveButtonTextTablet,
                 ]}
               >
-                저장하기
+                {isEditMode ? '수정하기' : '저장하기'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -915,10 +975,13 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
 
       <CustomAlert
         visible={alertState.visible}
-        type="alert"
+        type={alertState.type || 'alert'}
         title={alertState.title}
         message={alertState.message}
-        onConfirm={hideAlert}
+        confirmText={alertState.confirmText}
+        cancelText={alertState.cancelText}
+        onConfirm={alertState.onConfirm || hideAlert}
+        onCancel={alertState.onCancel}
       />
 
       {/* 연락처 선택 모달 (모바일 전용) */}
@@ -1408,6 +1471,21 @@ const styles = StyleSheet.create({
   },
   quickAmountTextActive: {
     color: '#6366F1',
+  },
+  amountResetButton: {
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#D1D5DB',
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  amountResetText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#6B7280',
   },
   quickAmountTextTablet: {
     fontSize: 13,

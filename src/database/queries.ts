@@ -250,12 +250,15 @@ export async function getTransactionsByYear(year: number): Promise<TransactionRe
 export interface PersonDetail {
   records: {
     id: string;
+    name: string;
+    phone: string;
     type: EventTypeKey;
     typeName: string;
     date: string;
     amount: number;
     isSent: boolean;
     relationship: string;
+    memo: string;
   }[];
   sentTotal: number;
   receivedTotal: number;
@@ -267,13 +270,16 @@ export async function getEventsByPhone(phone: string): Promise<PersonDetail> {
 
   const rows = await db.getAllAsync<{
     id: number;
+    name: string;
+    phone: string;
     type: string;
     date: string;
     amount: number;
     amountType: string;
     relationship: string;
+    memo: string;
   }>(
-    `SELECT id, type, date, amount, amountType, relationship FROM events
+    `SELECT id, name, phone, type, date, amount, amountType, relationship, memo FROM events
      WHERE phone = ?
      ORDER BY date DESC`,
     [normalized]
@@ -290,12 +296,72 @@ export async function getEventsByPhone(phone: string): Promise<PersonDetail> {
     }
     return {
       id: String(row.id),
+      name: row.name,
+      phone: row.phone || '',
       type: resolveEventType(row.type),
       typeName: row.type,
       date: formatDate(row.date),
       amount: row.amount,
       isSent,
       relationship: row.relationship || '',
+      memo: row.memo || '',
+    };
+  });
+
+  return {
+    records,
+    sentTotal,
+    receivedTotal,
+  };
+}
+
+export async function getEventsByNameAndPhone(name: string, phone: string): Promise<PersonDetail> {
+  const db = await getDatabase();
+  const normalized = normalizePhone(phone);
+
+  // phone 있음: 같은 이름 + (해당 전화번호 또는 전화번호 없는) 내역
+  // phone 없음: 같은 이름의 모든 내역 (동명이인 포함)
+  const query = normalized
+    ? `SELECT id, name, phone, type, date, amount, amountType, relationship, memo FROM events
+       WHERE name = ? AND (phone = ? OR phone = '')
+       ORDER BY date DESC`
+    : `SELECT id, name, phone, type, date, amount, amountType, relationship, memo FROM events
+       WHERE name = ?
+       ORDER BY date DESC`;
+  const params = normalized ? [name, normalized] : [name];
+
+  const rows = await db.getAllAsync<{
+    id: number;
+    name: string;
+    phone: string;
+    type: string;
+    date: string;
+    amount: number;
+    amountType: string;
+    relationship: string;
+    memo: string;
+  }>(query, params);
+
+  let sentTotal = 0;
+  let receivedTotal = 0;
+  const records = rows.map(row => {
+    const isSent = row.amountType === 'send';
+    if (isSent) {
+      sentTotal += row.amount;
+    } else {
+      receivedTotal += row.amount;
+    }
+    return {
+      id: String(row.id),
+      name: row.name,
+      phone: row.phone || '',
+      type: resolveEventType(row.type),
+      typeName: row.type,
+      date: formatDate(row.date),
+      amount: row.amount,
+      isSent,
+      relationship: row.relationship || '',
+      memo: row.memo || '',
     };
   });
 
@@ -322,6 +388,14 @@ export async function insertEvent(event: EventInput): Promise<void> {
   await db.runAsync(
     'INSERT INTO events (name, phone, type, date, amount, amountType, relationship, eventRole, memo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
     [event.name, normalizePhone(event.phone || ''), event.type, event.date, event.amount, event.amountType, event.relationship, '', event.memo || '']
+  );
+}
+
+export async function updateEvent(id: string, event: EventInput): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync(
+    'UPDATE events SET name = ?, phone = ?, type = ?, date = ?, amount = ?, amountType = ?, relationship = ?, memo = ? WHERE id = ?',
+    [event.name, normalizePhone(event.phone || ''), event.type, event.date, event.amount, event.amountType, event.relationship, event.memo || '', id]
   );
 }
 

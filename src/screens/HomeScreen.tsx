@@ -12,7 +12,7 @@ import { BalanceCard } from '../components/BalanceCard';
 import { UpcomingEvents, Event } from '../components/UpcomingEvents';
 import { RecentRecords, Record } from '../components/RecentRecords';
 import { BottomNavigation } from '../components/BottomNavigation';
-import { RegisterScreen } from './RegisterScreen';
+import { RegisterScreen, type RegisterInitialData } from './RegisterScreen';
 import { RegisterScheduleScreen, type ScheduleData } from './RegisterScheduleScreen';
 import { CalendarScreen } from './CalendarScreen';
 import { DetailScreen } from './DetailScreen';
@@ -37,7 +37,7 @@ interface NavState {
   showRegisterSchedule: boolean;
   showCalendar: boolean;
   scheduleInitialData?: ScheduleData;
-  registerInitialData?: ScheduleData;
+  registerInitialData?: RegisterInitialData;
 }
 
 const getDefaultNavState = (): NavState => ({
@@ -56,7 +56,7 @@ export const HomeScreen: React.FC = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [showSettingsScreen, setShowSettingsScreen] = useState(false);
   const [scheduleInitialData, setScheduleInitialData] = useState<ScheduleData | undefined>(undefined);
-  const [registerInitialData, setRegisterInitialData] = useState<ScheduleData | undefined>(undefined);
+  const [registerInitialData, setRegisterInitialData] = useState<RegisterInitialData | undefined>(undefined);
   const [detailName, setDetailName] = useState('');
   const [detailPhone, setDetailPhone] = useState('');
   const [listSelectedYear, setListSelectedYear] = useState(new Date().getFullYear());
@@ -255,6 +255,9 @@ export const HomeScreen: React.FC = () => {
             onSaved={() => {
               goBack();
             }}
+            onGoToList={() => {
+              setActiveTab('list');
+            }}
             initialData={registerInitialData}
           />
         );
@@ -346,6 +349,22 @@ export const HomeScreen: React.FC = () => {
           name={detailName}
           phone={detailPhone}
           onClose={goBack}
+          onEdit={(data) => {
+            pushNavState();
+            setRegisterInitialData({
+              name: data.name,
+              phone: data.phone,
+              type: data.type,
+              date: data.date,
+              relationship: data.relationship,
+              memo: data.memo,
+              editId: data.id,
+              amount: data.amount,
+              amountType: data.isSent ? 'send' : 'received',
+            });
+            setShowDetailScreen(false);
+            setActiveTab('register');
+          }}
         />
       ) : (
         <>

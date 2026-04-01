@@ -109,7 +109,7 @@ export const ListScreen: React.FC<ListScreenProps> = ({
 
   return (
     <View style={styles.container}>
-      <Header title="리스트" onBackPress={onBackPress} />
+      <Header title="리스트" />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={[

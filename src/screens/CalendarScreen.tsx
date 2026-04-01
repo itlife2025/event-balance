@@ -169,7 +169,7 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
 
   return (
     <View style={styles.container}>
-      <Header title="일정" onBackPress={onBackPress} />
+      <Header title="일정" />
 
       <ScrollView
         style={styles.scrollView}

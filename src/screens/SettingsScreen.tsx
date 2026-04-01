@@ -132,7 +132,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
   return (
     <View style={styles.container}>
       {/* Header */}
-      <Header title="설정" onBackPress={onBackPress} />
+      <Header title="설정" />
 
       {/* Content */}
       <View style={styles.contentWrapper}>
