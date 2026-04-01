@@ -18,6 +18,17 @@ import { CustomAlert } from '../components/CustomAlert';
 import { getEventsByPhone, getEventsByNameAndPhone, deleteEvent, type PersonDetail } from '../database/queries';
 import { type EventTypeKey, getEventTypeLabel } from '../constants/eventTypes';
 
+const formatPhone = (num: string): string => {
+  const digits = num.replace(/\D/g, '');
+  if (digits.startsWith('02')) {
+    if (digits.length === 10) return digits.replace(/(\d{2})(\d{4})(\d{4})/, '$1-$2-$3');
+    return digits.replace(/(\d{2})(\d{3,4})(\d{4})/, '$1-$2-$3');
+  }
+  if (digits.length === 11) return digits.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+  if (digits.length === 10) return digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+  return num;
+};
+
 interface EditEventData {
   id: string;
   name: string;
@@ -195,6 +206,11 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
               <Text style={[styles.profileName, isTablet && styles.profileNameTablet]}>
                 {personName}
               </Text>
+              {phone ? (
+                <Text style={[styles.profilePhone, isTablet && styles.profilePhoneTablet]}>
+                  {formatPhone(phone)}
+                </Text>
+              ) : null}
             </View>
 
             {/* Balance Card */}
@@ -316,6 +332,17 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
                           >
                             {record.date}
                           </Text>
+                          {record.memo ? (
+                            <Text
+                              style={[
+                                styles.recordMemo,
+                                isTablet && styles.recordMemoTablet,
+                              ]}
+                              numberOfLines={1}
+                            >
+                              {record.memo}
+                            </Text>
+                          ) : null}
                         </View>
                       </View>
                       <Text
@@ -429,6 +456,14 @@ const styles = StyleSheet.create({
   },
   profileNameTablet: {
     fontSize: 18,
+  },
+  profilePhone: {
+    fontSize: 13,
+    color: '#9CA3AF',
+    marginTop: 4,
+  },
+  profilePhoneTablet: {
+    fontSize: 14,
   },
   balanceCard: {
     backgroundColor: '#FFFFFF',
@@ -554,6 +589,14 @@ const styles = StyleSheet.create({
   },
   recordDateTablet: {
     fontSize: 13,
+  },
+  recordMemo: {
+    fontSize: 11,
+    color: '#9CA3AF',
+    marginTop: 2,
+  },
+  recordMemoTablet: {
+    fontSize: 12,
   },
   recordAmount: {
     fontSize: 13,

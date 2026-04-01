@@ -27,7 +27,7 @@ if (Platform.OS !== 'web') {
   Contacts = require('expo-contacts');
 }
 
-type TabType = 'pay' | 'receive';
+type TabType = 'send' | 'receive';
 
 export interface RegisterInitialData {
   name: string;
@@ -77,8 +77,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   const isEditMode = !!initialData?.editId;
 
   const [activeTab, setActiveTab] = useState<TabType>(() => {
-    if (initialData?.amountType === 'received') return 'pay';
-    return 'receive';
+    if (initialData?.amountType === 'received') return 'receive';
+    return 'send';
   });
   const [selectedType, setSelectedType] = useState<EventType | null>(initialData?.type || null);
   const [eventName, setEventName] = useState(initialData?.name || '');
@@ -354,7 +354,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   const handleQuickAmount = (quickAmount: number) => {
     setIsDirectInput(false);
     setAmount((prev) => {
-      const current = prev ? parseInt(prev) : 0;
+      const current = parseInt(prev) || 0;
       return String(current + quickAmount);
     });
   };
@@ -376,7 +376,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
     const eventType = isEventTypeDirectInput
       ? (customEventType.trim() || 'other')
       : (selectedType || 'other');
-    const amountType: 'send' | 'received' = activeTab === 'pay' ? 'received' : 'send';
+    const amountType: 'send' | 'received' = activeTab === 'receive' ? 'received' : 'send';
 
     try {
       const eventData = {
@@ -384,7 +384,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
         phone,
         type: eventType,
         date: dbDate,
-        amount: parseInt(amount) * 10000,
+        amount: (parseInt(amount) || 0) * 10000,
         amountType,
         relationship: relation,
         memo,
@@ -424,7 +424,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
           setIsRelationDirectInput(false);
           setRegisterScheduleChecked(false);
           setSelectedType(null);
-          setActiveTab('receive');
+          setActiveTab('send');
         };
 
         setAlertState({
@@ -478,16 +478,16 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
             <TouchableOpacity
               style={[
                 styles.tabButton,
-                activeTab === 'receive' && styles.tabButtonActive,
+                activeTab === 'send' && styles.tabButtonActive,
               ]}
-              onPress={() => setActiveTab('receive')}
+              onPress={() => setActiveTab('send')}
               activeOpacity={0.7}
             >
               <Text style={styles.tabIcon}>🌸</Text>
               <Text
                 style={[
                   styles.tabLabel,
-                  activeTab === 'receive' && styles.tabLabelActive,
+                  activeTab === 'send' && styles.tabLabelActive,
                 ]}
               >
                 보내기
@@ -496,16 +496,16 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
             <TouchableOpacity
               style={[
                 styles.tabButton,
-                activeTab === 'pay' && styles.tabButtonActive,
+                activeTab === 'receive' && styles.tabButtonActive,
               ]}
-              onPress={() => setActiveTab('pay')}
+              onPress={() => setActiveTab('receive')}
               activeOpacity={0.7}
             >
               <Text style={styles.tabIcon}>🎁</Text>
               <Text
                 style={[
                   styles.tabLabel,
-                  activeTab === 'pay' && styles.tabLabelActive,
+                  activeTab === 'receive' && styles.tabLabelActive,
                 ]}
               >
                 받기
