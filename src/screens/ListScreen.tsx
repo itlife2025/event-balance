@@ -6,8 +6,10 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   ScrollView,
+  RefreshControl,
   Modal,
   FlatList,
+  TextInput,
 } from 'react-native';
 import { WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
 import { EventType } from '../components/UpcomingEvents';
@@ -29,6 +31,10 @@ interface ListScreenProps {
   onBackPress?: () => void;
   selectedYear?: number;
   onYearChange?: (year: number) => void;
+  activeFilter?: FilterKey;
+  onFilterChange?: (filter: FilterKey) => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 }
 
 const currentYear = new Date().getFullYear();
@@ -40,11 +46,26 @@ export const ListScreen: React.FC<ListScreenProps> = ({
   onBackPress,
   selectedYear: selectedYearProp,
   onYearChange,
+  activeFilter: activeFilterProp,
+  onFilterChange,
+  searchQuery: searchQueryProp,
+  onSearchChange,
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
 
-  const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
+  const [activeFilter, setActiveFilterInternal] = useState<FilterKey>(activeFilterProp ?? 'all');
+
+  const setActiveFilter = (filter: FilterKey) => {
+    setActiveFilterInternal(filter);
+    onFilterChange?.(filter);
+  };
+
+  const [searchQuery, setSearchQueryInternal] = useState(searchQueryProp ?? '');
+  const setSearchQuery = (query: string) => {
+    setSearchQueryInternal(query);
+    onSearchChange?.(query);
+  };
   const [selectedYear, setSelectedYearInternal] = useState<number>(selectedYearProp ?? currentYear);
 
   const setSelectedYear = (year: number) => {
@@ -56,6 +77,7 @@ export const ListScreen: React.FC<ListScreenProps> = ({
   const [sentAmount, setSentAmount] = useState(0);
   const [receivedAmount, setReceivedAmount] = useState(0);
   const [showYearPicker, setShowYearPicker] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     getAvailableYears().then((years: number[]) => {
@@ -72,20 +94,39 @@ export const ListScreen: React.FC<ListScreenProps> = ({
     if (idx > 0) setSelectedYear(availableYears[idx - 1]);
   };
 
-  useEffect(() => {
-    Promise.all([
+  const loadData = async () => {
+    const [txs, totals] = await Promise.all([
       getTransactionsByYear(selectedYear),
       getYearlyTotals(selectedYear),
-    ]).then(([txs, totals]) => {
-      setTransactions(txs);
-      setSentAmount(totals.sentAmount);
-      setReceivedAmount(totals.receivedAmount);
-    });
+    ]);
+    setTransactions(txs);
+    setSentAmount(totals.sentAmount);
+    setReceivedAmount(totals.receivedAmount);
+  };
+
+  useEffect(() => {
+    loadData();
   }, [selectedYear]);
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    setActiveFilter('all');
+    setSearchQuery('');
+    setSelectedYear(currentYear);
+    const [txs, totals] = await Promise.all([
+      getTransactionsByYear(currentYear),
+      getYearlyTotals(currentYear),
+    ]);
+    setTransactions(txs);
+    setSentAmount(totals.sentAmount);
+    setReceivedAmount(totals.receivedAmount);
+    setRefreshing(false);
+  };
+
   const filteredTransactions = transactions.filter(t => {
-    if (activeFilter === 'received') return !t.isSent;
-    if (activeFilter === 'sent') return t.isSent;
+    if (activeFilter === 'received' && t.isSent) return false;
+    if (activeFilter === 'sent' && !t.isSent) return false;
+    if (searchQuery.trim() !== '' && !t.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
   });
 
@@ -117,6 +158,7 @@ export const ListScreen: React.FC<ListScreenProps> = ({
           isTablet && styles.scrollContentTablet,
         ]}
         showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {/* Summary Card */}
         <View style={[styles.summaryCard, isTablet && styles.summaryCardTablet]}>
@@ -163,7 +205,7 @@ export const ListScreen: React.FC<ListScreenProps> = ({
 
         {/* Transaction List */}
         <View style={[styles.transactionList, isTablet && styles.transactionListTablet]}>
-          {/* Year Selector */}
+          {/* Year Selector + Search */}
           <View style={styles.yearSelectorRow}>
             <View style={styles.dateSelector}>
               <TouchableOpacity onPress={prevYear} style={styles.arrowBtn}>
@@ -177,6 +219,16 @@ export const ListScreen: React.FC<ListScreenProps> = ({
               <TouchableOpacity onPress={nextYear} style={styles.arrowBtn}>
                 <Text style={styles.arrowText}>{'›'}</Text>
               </TouchableOpacity>
+            </View>
+            <View style={styles.searchBox}>
+              <TextInput
+                style={[styles.searchInput, isTablet && styles.searchInputTablet]}
+                placeholder="이름 검색"
+                placeholderTextColor="#9CA3AF"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              <Text style={styles.searchIcon}>🔍</Text>
             </View>
           </View>
 
@@ -328,9 +380,33 @@ const styles = StyleSheet.create({
   // Year Selector
   yearSelectorRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
     paddingTop: 20,
     paddingBottom: 4,
+    gap: 8,
+  },
+  searchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 20,
+    padding: 6,
+  },
+  searchInput: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#1F2937',
+    paddingHorizontal: 12,
+    height: 34,
+    minWidth: 80,
+  },
+  searchInputTablet: {
+    fontSize: 19,
+  },
+  searchIcon: {
+    fontSize: 17,
+    paddingHorizontal: 10,
   },
   dateSelector: {
     flexDirection: 'row',

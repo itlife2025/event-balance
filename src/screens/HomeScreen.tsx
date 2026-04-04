@@ -60,6 +60,8 @@ export const HomeScreen: React.FC = () => {
   const [detailName, setDetailName] = useState('');
   const [detailPhone, setDetailPhone] = useState('');
   const [listSelectedYear, setListSelectedYear] = useState(new Date().getFullYear());
+  const [listActiveFilter, setListActiveFilter] = useState<'all' | 'received' | 'sent'>('all');
+  const [listSearchQuery, setListSearchQuery] = useState('');
 
   // Stats screen state — preserved when navigating to detail and back
   const today = new Date();
@@ -67,6 +69,7 @@ export const HomeScreen: React.FC = () => {
   const [statsSelectedYear, setStatsSelectedYear] = useState(today.getFullYear());
   const [statsSelectedMonth, setStatsSelectedMonth] = useState(today.getMonth() + 1);
   const [statsSelectedYearTab, setStatsSelectedYearTab] = useState(today.getFullYear());
+  const [statsAmountTab, setStatsAmountTab] = useState<'sent' | 'received'>('sent');
   const [navHistory, setNavHistory] = useState<NavState[]>([]);
 
   const pushNavState = () => {
@@ -183,13 +186,6 @@ export const HomeScreen: React.FC = () => {
     setShowCalendar(false);
     setScheduleInitialData(undefined);
     setRegisterInitialData(undefined);
-    if (tab === 'stats') {
-      const now = new Date();
-      setStatsActivePeriod('month');
-      setStatsSelectedYear(now.getFullYear());
-      setStatsSelectedMonth(now.getMonth() + 1);
-      setStatsSelectedYearTab(now.getFullYear());
-    }
   };
 
   const handleAddPress = () => {
@@ -283,6 +279,8 @@ export const HomeScreen: React.FC = () => {
             onSelectedMonthChange={setStatsSelectedMonth}
             initialSelectedYearTab={statsSelectedYearTab}
             onSelectedYearTabChange={setStatsSelectedYearTab}
+            initialAmountTab={statsAmountTab}
+            onAmountTabChange={setStatsAmountTab}
           />
         );
       case 'list':
@@ -290,6 +288,10 @@ export const HomeScreen: React.FC = () => {
           <ListScreen
             selectedYear={listSelectedYear}
             onYearChange={setListSelectedYear}
+            activeFilter={listActiveFilter}
+            onFilterChange={setListActiveFilter}
+            searchQuery={listSearchQuery}
+            onSearchChange={setListSearchQuery}
             onTransactionPress={(transaction) => {
               console.log('[HomeScreen] transaction:', JSON.stringify(transaction));
               pushNavState();

@@ -10,6 +10,7 @@ import {
   useWindowDimensions,
   Modal,
   FlatList,
+  RefreshControl,
 } from 'react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { Header } from '../components/Header';
@@ -77,6 +78,8 @@ interface StatsScreenProps {
   onSelectedMonthChange?: (m: number) => void;
   initialSelectedYearTab?: number;
   onSelectedYearTabChange?: (y: number) => void;
+  initialAmountTab?: AmountTab;
+  onAmountTabChange?: (tab: AmountTab) => void;
 }
 
 export const StatsScreen: React.FC<StatsScreenProps> = ({
@@ -92,6 +95,8 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
   onSelectedMonthChange,
   initialSelectedYearTab,
   onSelectedYearTabChange,
+  initialAmountTab,
+  onAmountTabChange,
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -112,7 +117,9 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
   const handleSelectedYear = (y: number) => { setSelectedYear(y); onSelectedYearChange?.(y); };
   const handleSelectedMonth = (m: number) => { setSelectedMonth(m); onSelectedMonthChange?.(m); };
   const handleSelectedYearTab = (y: number) => { setSelectedYearTab(y); onSelectedYearTabChange?.(y); };
-  const [amountTab, setAmountTab] = useState<AmountTab>('sent');
+  const [amountTab, setAmountTabInternal] = useState<AmountTab>(initialAmountTab ?? 'sent');
+  const setAmountTab = (tab: AmountTab) => { setAmountTabInternal(tab); onAmountTabChange?.(tab); };
+  const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState<MonthlyStats>({
     sentAmount: 0,
     receivedAmount: 0,
@@ -149,6 +156,21 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
   useEffect(() => {
     loadStats();
   }, [loadStats]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    const defaultPeriod: PeriodFilter = 'month';
+    const defaultYear = today.getFullYear();
+    const defaultMonth = today.getMonth() + 1;
+    handleActivePeriod(defaultPeriod);
+    handleSelectedYear(defaultYear);
+    handleSelectedMonth(defaultMonth);
+    handleSelectedYearTab(defaultYear);
+    setAmountTab('sent');
+    const data = await getMonthlyStats(defaultYear, defaultMonth);
+    setStats(data);
+    setRefreshing(false);
+  };
 
   const sentCategories: CategoryData[] = stats.sentCategories.map(c => ({
     ...c,
@@ -219,6 +241,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
             isTablet && styles.scrollContentTablet,
           ]}
           showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
           {/* Summary Cards */}
           <View style={[styles.summaryContainer, isTablet && styles.summaryContainerTablet]}>

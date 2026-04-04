@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,13 +7,35 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   Switch,
+  Linking,
+  Platform,
+  AppState,
+  AppStateStatus,
+  Modal,
+  FlatList,
 } from 'react-native';
+import * as Notifications from 'expo-notifications';
 import { ChevronRightIcon, BellIcon } from '../components/Icons';
 import { Header } from '../components/Header';
 import { CustomAlert } from '../components/CustomAlert';
 import { resetDatabase } from '../database/database';
 import { getSetting, setSetting } from '../database/queries';
 
+type TimingKey = 'd7' | 'd1' | 'dday';
+
+const TIMING_OPTIONS: { key: TimingKey; label: string }[] = [
+  { key: 'd7', label: 'D-7' },
+  { key: 'd1', label: 'D-1' },
+  { key: 'dday', label: '당일' },
+];
+
+const HOUR_OPTIONS = Array.from({ length: 17 }, (_, i) => i + 6); // 6~22
+
+function formatHour(h: number): string {
+  if (h < 12) return `오전 ${h}시`;
+  if (h === 12) return `오후 12시`;
+  return `오후 ${h - 12}시`;
+}
 
 interface SettingsScreenProps {
   onBackPress?: () => void;
@@ -24,29 +46,100 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
 
-  const [notificationEnabled, setNotificationEnabled] = useState(true);
+  const [notificationEnabled, setNotificationEnabled] = useState(false);
+  const [permissionGranted, setPermissionGranted] = useState(false);
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
   const [profileName, setProfileName] = useState('');
+
+  // Notification time settings
+  const [repeatYearly, setRepeatYearly] = useState(true);
+  const [notifTimings, setNotifTimings] = useState<TimingKey[]>(['dday']);
+  const [notifHour, setNotifHour] = useState(9);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+
+  // Alerts
   const [promptAlert, setPromptAlert] = useState(false);
   const [resetConfirmAlert, setResetConfirmAlert] = useState(false);
   const [resultAlert, setResultAlert] = useState<{ visible: boolean; title: string; message: string }>({ visible: false, title: '', message: '' });
+  const [notifPermAlert, setNotifPermAlert] = useState(false);
+
+  const appState = useRef<AppStateStatus>(AppState.currentState);
+
+  const checkPermission = async () => {
+    const { status } = await Notifications.getPermissionsAsync();
+    setPermissionGranted(status === 'granted');
+    return status === 'granted';
+  };
 
   useEffect(() => {
     (async () => {
-      const [notif, dark, name] = await Promise.all([
+      const [notif, dark, name, repeat, timings, hour] = await Promise.all([
         getSetting('notification_enabled'),
         getSetting('dark_mode_enabled'),
         getSetting('profile_name'),
+        getSetting('notif_repeat_yearly'),
+        getSetting('notif_timings'),
+        getSetting('notif_hour'),
       ]);
-      if (notif !== null) setNotificationEnabled(notif === '1');
       if (dark !== null) setDarkModeEnabled(dark === '1');
       setProfileName(name || '사용자');
+      if (repeat !== null) setRepeatYearly(repeat === '1');
+      if (timings) setNotifTimings(timings.split(',') as TimingKey[]);
+      if (hour) setNotifHour(parseInt(hour, 10));
+
+      const granted = await checkPermission();
+      if (notif !== null) setNotificationEnabled(notif === '1' && granted);
     })();
+
+    const subscription = AppState.addEventListener('change', async (nextState: AppStateStatus) => {
+      if (appState.current.match(/inactive|background/) && nextState === 'active') {
+        await checkPermission();
+      }
+      appState.current = nextState;
+    });
+
+    return () => subscription.remove();
   }, []);
 
-  const handleNotificationToggle = (value: boolean) => {
+  const handleNotificationToggle = async (value: boolean) => {
+    if (value) {
+      const granted = await checkPermission();
+      if (!granted) {
+        setNotifPermAlert(true);
+        return;
+      }
+    }
     setNotificationEnabled(value);
     setSetting('notification_enabled', value ? '1' : '0');
+  };
+
+  const handleOpenNotificationSettings = () => {
+    setNotifPermAlert(false);
+    if (Platform.OS === 'ios') {
+      Linking.openURL('app-settings:');
+    } else {
+      Linking.openSettings();
+    }
+  };
+
+  const handleRepeatToggle = (value: boolean) => {
+    setRepeatYearly(value);
+    setSetting('notif_repeat_yearly', value ? '1' : '0');
+  };
+
+  const toggleTiming = (key: TimingKey) => {
+    const next = notifTimings.includes(key)
+      ? notifTimings.filter(t => t !== key)
+      : [...notifTimings, key];
+    if (next.length === 0) return; // at least one must be selected
+    setNotifTimings(next);
+    setSetting('notif_timings', next.join(','));
+  };
+
+  const handleSelectHour = (h: number) => {
+    setNotifHour(h);
+    setSetting('notif_hour', String(h));
+    setShowTimePicker(false);
   };
 
   const handleDarkModeToggle = (value: boolean) => {
@@ -129,12 +222,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
     </TouchableOpacity>
   );
 
+  const showNotifTimeMenu = notificationEnabled && permissionGranted;
+
   return (
     <View style={styles.container}>
-      {/* Header */}
       <Header title="설정" />
 
-      {/* Content */}
       <View style={styles.contentWrapper}>
         <ScrollView
           style={styles.scrollView}
@@ -174,20 +267,71 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
               toggleValue={notificationEnabled}
               onToggleChange={handleNotificationToggle}
             />
-            <SettingItem
-              icon={
-                <Text style={styles.sectionIcon}>🌐</Text>
-              }
-              label="알림 시점"
-              value="D-1, 당일"
-            />
-            <SettingItem
-              icon={
-                <Text style={styles.sectionIcon}>🕐</Text>
-              }
-              label="알림 시간"
-              value="오전 9시"
-            />
+
+            {showNotifTimeMenu && (
+              <>
+                {/* Repeat yearly */}
+                <SettingItem
+                  icon={<Text style={styles.sectionIcon}>🔁</Text>}
+                  label="매년 반복"
+                  isToggle={true}
+                  toggleValue={repeatYearly}
+                  onToggleChange={handleRepeatToggle}
+                />
+
+                {/* Timing multi-select */}
+                <View style={[styles.settingItem, isTablet && styles.settingItemTablet]}>
+                  <View style={styles.settingLeft}>
+                    <View style={[styles.settingIcon, isTablet && styles.settingIconTablet]}>
+                      <Text style={styles.sectionIcon}>📅</Text>
+                    </View>
+                    <Text style={[styles.settingLabel, isTablet && styles.settingLabelTablet]}>
+                      알림 시점
+                    </Text>
+                  </View>
+                  <View style={styles.timingChips}>
+                    {TIMING_OPTIONS.map(opt => (
+                      <TouchableOpacity
+                        key={opt.key}
+                        style={[
+                          styles.timingChip,
+                          notifTimings.includes(opt.key) && styles.timingChipActive,
+                        ]}
+                        onPress={() => toggleTiming(opt.key)}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[
+                          styles.timingChipText,
+                          notifTimings.includes(opt.key) && styles.timingChipTextActive,
+                        ]}>
+                          {opt.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+
+                {/* Notification time */}
+                <TouchableOpacity
+                  style={[styles.settingItem, isTablet && styles.settingItemTablet]}
+                  onPress={() => setShowTimePicker(true)}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.settingLeft}>
+                    <View style={[styles.settingIcon, isTablet && styles.settingIconTablet]}>
+                      <Text style={styles.sectionIcon}>🕐</Text>
+                    </View>
+                    <Text style={[styles.settingLabel, isTablet && styles.settingLabelTablet]}>
+                      알림 시간
+                    </Text>
+                  </View>
+                  <Text style={[styles.settingValue, isTablet && styles.settingValueTablet]}>
+                    {formatHour(notifHour)}
+                  </Text>
+                  <ChevronRightIcon size={isTablet ? 22 : 20} color="#D1D5DB" />
+                </TouchableOpacity>
+              </>
+            )}
           </View>
 
           {/* App Settings Section */}
@@ -196,16 +340,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
               앱 설정
             </Text>
             <SettingItem
-              icon={
-                <Text style={styles.sectionIcon}>💱</Text>
-              }
+              icon={<Text style={styles.sectionIcon}>💱</Text>}
               label="통화 단위"
               value="원 ( ₩ )"
             />
             <SettingItem
-              icon={
-                <Text style={styles.sectionIcon}>🌙</Text>
-              }
+              icon={<Text style={styles.sectionIcon}>🌙</Text>}
               label="다크모드"
               isToggle={true}
               toggleValue={darkModeEnabled}
@@ -218,28 +358,13 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
             <Text style={[styles.sectionTitle, isTablet && styles.sectionTitleTablet]}>
               데이터
             </Text>
-            <SettingItem
-              icon={
-                <Text style={styles.sectionIcon}>☁️</Text>
-              }
-              label="데이터"
-            />
-            <SettingItem
-              icon={
-                <Text style={styles.sectionIcon}>💾</Text>
-              }
-              label="데이터 백업하기"
-            />
+            <SettingItem icon={<Text style={styles.sectionIcon}>☁️</Text>} label="데이터" />
+            <SettingItem icon={<Text style={styles.sectionIcon}>💾</Text>} label="데이터 백업하기" />
           </View>
 
           {/* Info Section */}
           <View style={[styles.section, isTablet && styles.sectionTablet]}>
-            <SettingItem
-              icon={
-                <Text style={styles.sectionIcon}>ℹ️</Text>
-              }
-              label="앱 정보"
-            />
+            <SettingItem icon={<Text style={styles.sectionIcon}>ℹ️</Text>} label="앱 정보" />
           </View>
 
           {/* Reset Button */}
@@ -256,6 +381,30 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
           </View>
         </ScrollView>
       </View>
+
+      {/* Time Picker Modal */}
+      <Modal transparent visible={showTimePicker} animationType="fade" onRequestClose={() => setShowTimePicker(false)}>
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowTimePicker(false)}>
+          <View style={styles.pickerContainer}>
+            <FlatList
+              data={HOUR_OPTIONS}
+              keyExtractor={(item) => String(item)}
+              initialScrollIndex={Math.max(0, HOUR_OPTIONS.indexOf(notifHour))}
+              getItemLayout={(_, index) => ({ length: 50, offset: 50 * index, index })}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[styles.pickerItem, item === notifHour && styles.pickerItemSelected]}
+                  onPress={() => handleSelectHour(item)}
+                >
+                  <Text style={[styles.pickerItemText, item === notifHour && styles.pickerItemTextSelected]}>
+                    {formatHour(item)}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       <CustomAlert
         visible={promptAlert}
@@ -284,6 +433,17 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
         title={resultAlert.title}
         message={resultAlert.message}
         onConfirm={() => setResultAlert({ visible: false, title: '', message: '' })}
+      />
+
+      <CustomAlert
+        visible={notifPermAlert}
+        type="confirm"
+        title="알림 권한 필요"
+        message="이 앱의 알림이 허용되어 있지 않습니다. 휴대폰 설정에서 알림을 허용해 주세요."
+        confirmText="설정"
+        cancelText="취소"
+        onConfirm={handleOpenNotificationSettings}
+        onCancel={() => setNotifPermAlert(false)}
       />
     </View>
   );
@@ -395,6 +555,70 @@ const styles = StyleSheet.create({
   toggle: {
     marginRight: 4,
   },
+
+  // Timing chips
+  timingChips: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  timingChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    backgroundColor: '#F3F4F6',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  timingChipActive: {
+    backgroundColor: '#EEF2FF',
+    borderColor: '#6366F1',
+  },
+  timingChipText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#9CA3AF',
+  },
+  timingChipTextActive: {
+    color: '#6366F1',
+  },
+
+  // Picker Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  pickerContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    width: 180,
+    maxHeight: 300,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  pickerItem: {
+    height: 50,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  pickerItemSelected: {
+    backgroundColor: '#EEF2FF',
+  },
+  pickerItemText: {
+    fontSize: 18,
+    color: '#374151',
+    textAlign: 'center',
+  },
+  pickerItemTextSelected: {
+    color: '#6366F1',
+    fontWeight: '700',
+  },
+
   profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
