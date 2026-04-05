@@ -11,6 +11,7 @@ import {
   FlatList,
   TextInput,
 } from 'react-native';
+import { useTheme } from '../theme/ThemeContext';
 import { WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
 import { EventType } from '../components/UpcomingEvents';
 import { Header } from '../components/Header';
@@ -53,6 +54,7 @@ export const ListScreen: React.FC<ListScreenProps> = ({
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+  const { colors } = useTheme();
 
   const [activeFilter, setActiveFilterInternal] = useState<FilterKey>(activeFilterProp ?? 'all');
 
@@ -143,13 +145,13 @@ export const ListScreen: React.FC<ListScreenProps> = ({
   };
 
   const getIconBg = (type: EventType) => {
-    if (type === 'wedding') return '#FDF2F8';
-    if (type === 'funeral') return '#EFF6FF';
-    return '#FFFBEB';
+    if (type === 'wedding') return colors.eventWeddingBg;
+    if (type === 'funeral') return colors.eventFuneralBg;
+    return colors.eventBirthdayBg;
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header title="리스트" />
       <ScrollView
         style={styles.scrollView}
@@ -161,18 +163,18 @@ export const ListScreen: React.FC<ListScreenProps> = ({
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {/* Summary Card */}
-        <View style={[styles.summaryCard, isTablet && styles.summaryCardTablet]}>
+        <View style={[styles.summaryCard, isTablet && styles.summaryCardTablet, { backgroundColor: colors.card }]}>
           <View style={styles.summaryRow}>
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>보낸 금액</Text>
-              <Text style={[styles.summaryAmount, styles.sentAmountText]} numberOfLines={1} adjustsFontSizeToFit>
+              <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>보낸 금액</Text>
+              <Text style={[styles.summaryAmount, { color: colors.sent }]} numberOfLines={1} adjustsFontSizeToFit>
                 ₩{sentAmount.toLocaleString()}
               </Text>
             </View>
-            <View style={styles.summaryDivider} />
+            <View style={[styles.summaryDivider, { backgroundColor: colors.border }]} />
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>받은 금액</Text>
-              <Text style={[styles.summaryAmount, styles.receivedAmountText]} numberOfLines={1} adjustsFontSizeToFit>
+              <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>받은 금액</Text>
+              <Text style={[styles.summaryAmount, { color: colors.received }]} numberOfLines={1} adjustsFontSizeToFit>
                 ₩{receivedAmount.toLocaleString()}
               </Text>
             </View>
@@ -186,7 +188,7 @@ export const ListScreen: React.FC<ListScreenProps> = ({
               key={filter.key}
               style={[
                 styles.filterTab,
-                activeFilter === filter.key && styles.filterTabActive,
+                activeFilter === filter.key && [styles.filterTabActive, { backgroundColor: colors.card, borderBottomColor: colors.primary }],
               ]}
               onPress={() => setActiveFilter(filter.key)}
               activeOpacity={0.7}
@@ -194,7 +196,8 @@ export const ListScreen: React.FC<ListScreenProps> = ({
               <Text
                 style={[
                   styles.filterTabText,
-                  activeFilter === filter.key && styles.filterTabTextActive,
+                  { color: colors.textTertiary },
+                  activeFilter === filter.key && { color: colors.text, fontWeight: '600' },
                 ]}
               >
                 {filter.label}
@@ -204,27 +207,27 @@ export const ListScreen: React.FC<ListScreenProps> = ({
         </View>
 
         {/* Transaction List */}
-        <View style={[styles.transactionList, isTablet && styles.transactionListTablet]}>
+        <View style={[styles.transactionList, isTablet && styles.transactionListTablet, { backgroundColor: colors.card }]}>
           {/* Year Selector + Search */}
           <View style={styles.yearSelectorRow}>
-            <View style={styles.dateSelector}>
+            <View style={[styles.dateSelector, { backgroundColor: colors.iconButtonBg }]}>
               <TouchableOpacity onPress={prevYear} style={styles.arrowBtn}>
-                <Text style={styles.arrowText}>{'‹'}</Text>
+                <Text style={[styles.arrowText, { color: colors.textSecondary }]}>{'‹'}</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setShowYearPicker(true)} activeOpacity={0.7} style={styles.dateSelectorTextBtn}>
-                <Text style={[styles.dateSelectorText, isTablet && styles.dateSelectorTextTablet]}>
+                <Text style={[styles.dateSelectorText, isTablet && styles.dateSelectorTextTablet, { color: colors.text }]}>
                   {selectedYear}년
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={nextYear} style={styles.arrowBtn}>
-                <Text style={styles.arrowText}>{'›'}</Text>
+                <Text style={[styles.arrowText, { color: colors.textSecondary }]}>{'›'}</Text>
               </TouchableOpacity>
             </View>
-            <View style={styles.searchBox}>
+            <View style={[styles.searchBox, { backgroundColor: colors.iconButtonBg }]}>
               <TextInput
-                style={[styles.searchInput, isTablet && styles.searchInputTablet]}
+                style={[styles.searchInput, isTablet && styles.searchInputTablet, { color: colors.text }]}
                 placeholder="이름 검색"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.textTertiary}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
               />
@@ -233,8 +236,8 @@ export const ListScreen: React.FC<ListScreenProps> = ({
           </View>
 
           <Modal transparent visible={showYearPicker} animationType="fade" onRequestClose={() => setShowYearPicker(false)}>
-            <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowYearPicker(false)}>
-              <View style={styles.pickerContainer}>
+            <TouchableOpacity style={[styles.modalOverlay, { backgroundColor: colors.overlay }]} activeOpacity={1} onPress={() => setShowYearPicker(false)}>
+              <View style={[styles.pickerContainer, { backgroundColor: colors.card }]}>
                 <FlatList
                   data={availableYears}
                   keyExtractor={(item) => String(item)}
@@ -242,10 +245,10 @@ export const ListScreen: React.FC<ListScreenProps> = ({
                   getItemLayout={(_, index) => ({ length: 50, offset: 50 * index, index })}
                   renderItem={({ item }) => (
                     <TouchableOpacity
-                      style={[styles.pickerItem, item === selectedYear && styles.pickerItemSelected]}
+                      style={[styles.pickerItem, item === selectedYear && { backgroundColor: colors.primaryLight }]}
                       onPress={() => { setSelectedYear(item); setShowYearPicker(false); }}
                     >
-                      <Text style={[styles.pickerItemText, item === selectedYear && styles.pickerItemTextSelected]}>
+                      <Text style={[styles.pickerItemText, { color: colors.text }, item === selectedYear && { color: colors.primary, fontWeight: '700' }]}>
                         {item}년
                       </Text>
                     </TouchableOpacity>
@@ -257,7 +260,7 @@ export const ListScreen: React.FC<ListScreenProps> = ({
 
           {filteredTransactions.length === 0 ? (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyStateText}>{selectedYear}년 내역이 없습니다.</Text>
+              <Text style={[styles.emptyStateText, { color: colors.textTertiary }]}>{selectedYear}년 내역이 없습니다.</Text>
             </View>
           ) : (
             filteredTransactions.map((transaction, index) => (
@@ -266,7 +269,7 @@ export const ListScreen: React.FC<ListScreenProps> = ({
                 style={[
                   styles.transactionItem,
                   isTablet && styles.transactionItemTablet,
-                  index < filteredTransactions.length - 1 && styles.transactionItemBorder,
+                  index < filteredTransactions.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.borderLight },
                 ]}
                 onPress={() => onTransactionPress?.(transaction)}
                 activeOpacity={0.7}
@@ -282,12 +285,12 @@ export const ListScreen: React.FC<ListScreenProps> = ({
                 </View>
                 <View style={styles.transactionInfo}>
                   <Text
-                    style={[styles.transactionName, isTablet && styles.transactionNameTablet]}
+                    style={[styles.transactionName, isTablet && styles.transactionNameTablet, { color: colors.text }]}
                     numberOfLines={1}
                   >
                     {transaction.name}
                   </Text>
-                  <Text style={[styles.transactionDate, isTablet && styles.transactionDateTablet]}>
+                  <Text style={[styles.transactionDate, isTablet && styles.transactionDateTablet, { color: colors.textTertiary }]}>
                     {transaction.date}
                   </Text>
                 </View>
@@ -295,7 +298,7 @@ export const ListScreen: React.FC<ListScreenProps> = ({
                   style={[
                     styles.transactionAmount,
                     isTablet && styles.transactionAmountTablet,
-                    { color: '#1F2937' },
+                    { color: colors.text },
                   ]}
                 >
                   {transaction.isSent ? '-' : '+'}₩{transaction.amount.toLocaleString()}

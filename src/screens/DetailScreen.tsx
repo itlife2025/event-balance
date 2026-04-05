@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Animated,
 } from 'react-native';
+import { useTheme } from '../theme/ThemeContext';
 import { Swipeable } from 'react-native-gesture-handler';
 import { WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
 import { Header } from '../components/Header';
@@ -57,6 +58,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+  const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<PersonDetail | null>(null);
   const [deleteAlert, setDeleteAlert] = useState<{ visible: boolean; recordId: string }>({ visible: false, recordId: '' });
@@ -139,7 +141,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
   };
 
   const getAmountColor = (isSent: boolean) => {
-    return isSent ? '#818CF8' : '#34D399';
+    return isSent ? colors.sent : colors.received;
   };
 
   const getAmountSign = (isSent: boolean) => {
@@ -154,14 +156,14 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
     return (
       <View style={styles.swipeActions}>
         <TouchableOpacity
-          style={styles.swipeEditButton}
+          style={[styles.swipeEditButton, { backgroundColor: colors.primary }]}
           onPress={() => handleEdit(record)}
           activeOpacity={0.7}
         >
           <Text style={styles.swipeButtonText}>수정</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.swipeDeleteButton}
+          style={[styles.swipeDeleteButton, { backgroundColor: colors.danger }]}
           onPress={() => handleDelete(record.id)}
           activeOpacity={0.7}
         >
@@ -172,9 +174,9 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
-      <View style={styles.container}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         {/* Header */}
         <Header title={personName} onBackPress={onClose} />
 
@@ -182,7 +184,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
         <View style={styles.contentWrapper}>
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#6366F1" />
+              <ActivityIndicator size="large" color={colors.primary} />
             </View>
           ) : (
           <ScrollView
@@ -199,35 +201,36 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
                 style={[
                   styles.profileAvatar,
                   isTablet && styles.profileAvatarTablet,
+                  { backgroundColor: colors.profileAvatarBg },
                 ]}
               >
-                <Text style={styles.profileInitial}>{personName.charAt(0)}</Text>
+                <Text style={[styles.profileInitial, { color: colors.primary }]}>{personName.charAt(0)}</Text>
               </View>
-              <Text style={[styles.profileName, isTablet && styles.profileNameTablet]}>
+              <Text style={[styles.profileName, isTablet && styles.profileNameTablet, { color: colors.text }]}>
                 {personName}
               </Text>
               {phone ? (
-                <Text style={[styles.profilePhone, isTablet && styles.profilePhoneTablet]}>
+                <Text style={[styles.profilePhone, isTablet && styles.profilePhoneTablet, { color: colors.textTertiary }]}>
                   {formatPhone(phone)}
                 </Text>
               ) : null}
             </View>
 
             {/* Balance Card */}
-            <View style={[styles.balanceCard, isTablet && styles.balanceCardTablet]}>
-              <Text style={[styles.balanceTitle, isTablet && styles.balanceTitleTablet]}>
+            <View style={[styles.balanceCard, isTablet && styles.balanceCardTablet, { backgroundColor: colors.card }]}>
+              <Text style={[styles.balanceTitle, isTablet && styles.balanceTitleTablet, { color: colors.text }]}>
                 주고받은 합계 (Total)
               </Text>
               <View style={styles.balanceRow}>
                 <View style={styles.balanceItem}>
-                  <Text style={[styles.balanceLabel, isTablet && styles.balanceLabelTablet]}>
+                  <Text style={[styles.balanceLabel, isTablet && styles.balanceLabelTablet, { color: colors.textSecondary }]}>
                     내가 줌:
                   </Text>
                   <Text
                     style={[
                       styles.balanceAmount,
                       isTablet && styles.balanceAmountTablet,
-                      { color: '#818CF8' },
+                      { color: colors.sent },
                     ]}
                   >
                     -{sentAmount.toLocaleString()} 원
@@ -236,31 +239,31 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
               </View>
               <View style={styles.balanceRow}>
                 <View style={styles.balanceItem}>
-                  <Text style={[styles.balanceLabel, isTablet && styles.balanceLabelTablet]}>
+                  <Text style={[styles.balanceLabel, isTablet && styles.balanceLabelTablet, { color: colors.textSecondary }]}>
                     내가 받음:
                   </Text>
                   <Text
                     style={[
                       styles.balanceAmount,
                       isTablet && styles.balanceAmountTablet,
-                      { color: '#34D399' },
+                      { color: colors.received },
                     ]}
                   >
                     +{receivedAmount.toLocaleString()} 원
                   </Text>
                 </View>
               </View>
-              <View style={styles.divider} />
+              <View style={[styles.divider, { backgroundColor: colors.border }]} />
               <View style={styles.balanceRow}>
                 <View style={styles.balanceItem}>
-                  <Text style={[styles.balanceLabel, isTablet && styles.balanceLabelTablet]}>
+                  <Text style={[styles.balanceLabel, isTablet && styles.balanceLabelTablet, { color: colors.textSecondary }]}>
                     차액:
                   </Text>
                   <Text
                     style={[
                       styles.balanceAmount,
                       isTablet && styles.balanceAmountTablet,
-                      { color: '#EF4444' },
+                      { color: colors.danger },
                     ]}
                   >
                     {balance > 0 ? '-' : '+'}{Math.abs(balance).toLocaleString()} 원
@@ -271,7 +274,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
 
             {/* History Section */}
             <View style={[styles.historySection, isTablet && styles.historySectionTablet]}>
-              <Text style={[styles.historyTitle, isTablet && styles.historyTitleTablet]}>
+              <Text style={[styles.historyTitle, isTablet && styles.historyTitleTablet, { color: colors.text }]}>
                 [ 히스토리 (History) ]
               </Text>
 
@@ -304,12 +307,13 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
                       }
                     }}
                   >
-                    <View style={styles.recordItem}>
+                    <View style={[styles.recordItem, { backgroundColor: colors.card }]}>
                       <View style={styles.recordLeft}>
                         <View
                           style={[
                             styles.recordIcon,
                             isTablet && styles.recordIconTablet,
+                            { backgroundColor: colors.iconButtonBg },
                           ]}
                         >
                           {getEventIcon(record.type)}
@@ -319,6 +323,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
                             style={[
                               styles.recordName,
                               isTablet && styles.recordNameTablet,
+                              { color: colors.text },
                             ]}
                             numberOfLines={1}
                           >
@@ -328,6 +333,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
                             style={[
                               styles.recordDate,
                               isTablet && styles.recordDateTablet,
+                              { color: colors.textTertiary },
                             ]}
                           >
                             {record.date}
@@ -337,6 +343,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
                               style={[
                                 styles.recordMemo,
                                 isTablet && styles.recordMemoTablet,
+                                { color: colors.textTertiary },
                               ]}
                               numberOfLines={1}
                             >

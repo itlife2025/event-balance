@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { NavTabKey } from '../types/navigation';
 import { HomeIcon, ChartIcon, ListIcon, SettingsIcon, PlusIcon } from './Icons';
+import { useTheme } from '../theme/ThemeContext';
 
 interface BottomNavigationProps {
   activeTab?: NavTabKey;
@@ -16,6 +17,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+  const { colors } = useTheme();
 
   const renderTab = (
     key: NavTabKey,
@@ -23,7 +25,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
     Icon: React.FC<{ size: number; color: string }>
   ) => {
     const isActive = activeTab === key;
-    const color = isActive ? '#6366F1' : '#9CA3AF';
+    const color = isActive ? colors.primary : colors.textTertiary;
 
     return (
       <TouchableOpacity
@@ -44,14 +46,14 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
           {label}
         </Text>
         {isActive && (
-          <View style={[styles.activeIndicator, isTablet && styles.activeIndicatorTablet]} />
+          <View style={[styles.activeIndicator, isTablet && styles.activeIndicatorTablet, { backgroundColor: colors.primary }]} />
         )}
       </TouchableOpacity>
     );
   };
 
   return (
-    <View style={[styles.container, isTablet && styles.containerTablet]}>
+    <View style={[styles.container, isTablet && styles.containerTablet, { backgroundColor: colors.card, borderTopColor: colors.borderLight }]}>
       <View style={[styles.navigation, isTablet && styles.navigationTablet]}>
         {renderTab('home', '홈', HomeIcon)}
         {renderTab('list', '리스트', ListIcon)}
@@ -63,7 +65,8 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
             style={[
               styles.addButton,
               isTablet && styles.addButtonTablet,
-              activeTab === 'register' && styles.addButtonActive
+              { backgroundColor: colors.primary, shadowColor: colors.primary },
+              activeTab === 'register' && { backgroundColor: colors.primaryDark },
             ]}
           >
             <PlusIcon size={isTablet ? 28 : 24} color="#FFFFFF" />
@@ -84,9 +87,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     width: '100%',
-    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
     paddingBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
@@ -130,7 +131,6 @@ const styles = StyleSheet.create({
     top: 0,
     width: 24,
     height: 3,
-    backgroundColor: '#6366F1',
     borderRadius: 2,
   },
   activeIndicatorTablet: {
@@ -146,11 +146,11 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: '#6366F1',
+    backgroundColor: '#6366F1', // keep consistent brand color
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: -26,
-    shadowColor: '#6366F1',
+    shadowColor: '#6366F1', // keep consistent brand color
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     marginTop: -30,
   },
   addButtonActive: {
-    backgroundColor: '#4338CA', // Darker indigo for active state
+    backgroundColor: '#4338CA',
     transform: [{ scale: 1.05 }],
   },
 });

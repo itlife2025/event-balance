@@ -3,6 +3,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { TransactionProvider } from './src/context/TransactionContext';
+import { ThemeProvider } from './src/theme/ThemeContext';
 import { initDatabase } from './src/database/database';
 import { isOnboardingCompleted, setOnboardingCompleted } from './src/database/queries';
 
@@ -39,9 +40,11 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <TransactionProvider>
-        <HomeScreen />
-      </TransactionProvider>
+      <ThemeProvider>
+        <TransactionProvider>
+          <HomeScreen />
+        </TransactionProvider>
+      </ThemeProvider>
     </GestureHandlerRootView>
   );
 }

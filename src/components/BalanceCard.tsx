@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, useWindowDimensions } from 'react-native';
+import { useTheme } from '../theme/ThemeContext';
 
 interface MonthlyData {
   month: string;
@@ -20,6 +21,7 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+  const { colors } = useTheme();
 
   const formatCurrency = (amount: number) => {
     return `₩${amount.toLocaleString()}`;
@@ -33,18 +35,18 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
   const totalMinWidth = MIN_BAR_GROUP_WIDTH * monthlyData.length;
 
   return (
-    <View style={[styles.container, isTablet && styles.containerTablet]}>
+    <View style={[styles.container, isTablet && styles.containerTablet, { backgroundColor: colors.card }]}>
       <View style={[styles.balanceSection, isTablet && styles.balanceSectionTablet]}>
         <View style={styles.amountItem}>
-          <Text style={[styles.label, isTablet && styles.labelTablet]}>보낸 금액</Text>
-          <Text style={[styles.amount, styles.sentAmount, isTablet && styles.amountTablet]}>
+          <Text style={[styles.label, isTablet && styles.labelTablet, { color: colors.text }]}>보낸 금액</Text>
+          <Text style={[styles.amount, { color: colors.sent }, isTablet && styles.amountTablet]}>
             {formatCurrency(sentAmount)}
           </Text>
         </View>
-        <View style={[styles.divider, isTablet && styles.dividerTablet]} />
+        <View style={[styles.divider, isTablet && styles.dividerTablet, { backgroundColor: colors.border }]} />
         <View style={styles.amountItem}>
-          <Text style={[styles.label, isTablet && styles.labelTablet]}>받은 금액</Text>
-          <Text style={[styles.amount, styles.receivedAmount, isTablet && styles.amountTablet]}>
+          <Text style={[styles.label, isTablet && styles.labelTablet, { color: colors.text }]}>받은 금액</Text>
+          <Text style={[styles.amount, { color: colors.received }, isTablet && styles.amountTablet]}>
             {formatCurrency(receivedAmount)}
           </Text>
         </View>
@@ -63,19 +65,17 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
                   <View
                     style={[
                       styles.bar,
-                      styles.sentBar,
-                      { height: maxValue > 0 ? (data.sent / maxValue) * (isTablet ? 80 : 60) : 0 },
+                      { backgroundColor: colors.sent, height: maxValue > 0 ? (data.sent / maxValue) * (isTablet ? 80 : 60) : 0 },
                     ]}
                   />
                   <View
                     style={[
                       styles.bar,
-                      styles.receivedBar,
-                      { height: maxValue > 0 ? (data.received / maxValue) * (isTablet ? 80 : 60) : 0 },
+                      { backgroundColor: colors.received, height: maxValue > 0 ? (data.received / maxValue) * (isTablet ? 80 : 60) : 0 },
                     ]}
                   />
                 </View>
-                <Text style={[styles.monthLabel, isTablet && styles.monthLabelTablet]}>
+                <Text style={[styles.monthLabel, isTablet && styles.monthLabelTablet, { color: colors.textTertiary }]}>
                   {data.month}
                 </Text>
               </View>

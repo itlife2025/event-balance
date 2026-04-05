@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { ListIcon, WeddingIcon, FuneralIcon, GiftIcon, ChevronRightIcon } from './Icons';
+import { useTheme } from '../theme/ThemeContext';
 import { EventType } from './UpcomingEvents';
 
 export interface Record {
@@ -47,6 +48,7 @@ export const RecentRecords: React.FC<RecentRecordsProps> = ({
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+  const { colors } = useTheme();
 
   const formatCurrency = (amount: number) => {
     return `₩${amount.toLocaleString()}`;
@@ -61,11 +63,11 @@ export const RecentRecords: React.FC<RecentRecordsProps> = ({
   };
 
   const getIconBgColor = (type: EventType) => {
-    if (type === 'wedding') return '#FDF2F8';
-    if (type === 'funeral') return '#EFF6FF';
-    if (type === 'birthday') return '#FFFBEB';
-    if (type === 'firstBirthday') return '#FFFBEB';
-    return '#F5F3FF';
+    if (type === 'wedding') return colors.eventWeddingBg;
+    if (type === 'funeral') return colors.eventFuneralBg;
+    if (type === 'birthday') return colors.eventBirthdayBg;
+    if (type === 'firstBirthday') return colors.eventBirthdayBg;
+    return colors.eventOtherBg;
   };
 
   const getEventTypeLabel = (type: EventType) => {
@@ -84,22 +86,22 @@ export const RecentRecords: React.FC<RecentRecordsProps> = ({
         activeOpacity={0.7}
       >
         <View style={styles.headerLeft}>
-          <ListIcon size={isTablet ? 22 : 18} color="#6B7280" />
-          <Text style={[styles.title, isTablet && styles.titleTablet]}>
+          <ListIcon size={isTablet ? 22 : 18} color={colors.textSecondary} />
+          <Text style={[styles.title, isTablet && styles.titleTablet, { color: colors.text }]}>
             최근 기록
           </Text>
         </View>
-        <ChevronRightIcon size={isTablet ? 28 : 24} color="#9CA3AF" />
+        <ChevronRightIcon size={isTablet ? 28 : 24} color={colors.textTertiary} />
       </TouchableOpacity>
 
-      <View style={[styles.recordsContainer, isTablet && styles.recordsContainerTablet]}>
+      <View style={[styles.recordsContainer, isTablet && styles.recordsContainerTablet, { backgroundColor: colors.card }]}>
         {records.map((record, index) => (
           <TouchableOpacity
             key={record.id}
             style={[
               styles.recordItem,
               isTablet && styles.recordItemTablet,
-              index < records.length - 1 && styles.recordItemBorder,
+              index < records.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.borderLight },
             ]}
             onPress={() => onRecordPress?.(record)}
             activeOpacity={0.7}
@@ -114,14 +116,14 @@ export const RecentRecords: React.FC<RecentRecordsProps> = ({
               {getRecordIcon(record.type)}
             </View>
             <View style={styles.recordInfo}>
-              <Text style={[styles.recordName, isTablet && styles.recordNameTablet]}>
+              <Text style={[styles.recordName, isTablet && styles.recordNameTablet, { color: colors.text }]}>
                 {record.name} {getEventTypeLabel(record.type)}
               </Text>
-              <Text style={[styles.recordDate, isTablet && styles.recordDateTablet]}>
+              <Text style={[styles.recordDate, isTablet && styles.recordDateTablet, { color: colors.textTertiary }]}>
                 {record.date}
               </Text>
             </View>
-            <Text style={[styles.recordAmount, isTablet && styles.recordAmountTablet]}>
+            <Text style={[styles.recordAmount, isTablet && styles.recordAmountTablet, { color: colors.text }]}>
               {record.isSent ? '-' : '+'}{formatCurrency(record.amount)}
             </Text>
           </TouchableOpacity>

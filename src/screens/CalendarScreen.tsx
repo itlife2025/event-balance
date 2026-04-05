@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { ChevronRightIcon, ChevronLeftIcon, WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
 import { Header } from '../components/Header';
+import { useTheme } from '../theme/ThemeContext';
 import { getUpcomingEvents, type UpcomingEvent } from '../database/queries';
 import { type EventTypeKey } from '../constants/eventTypes';
 
@@ -53,6 +54,7 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+  const { colors } = useTheme();
 
   const today = useMemo(() => {
     const d = new Date();
@@ -160,15 +162,15 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
   };
 
   const getEventIconBg = (type: EventTypeKey) => {
-    if (type === 'wedding') return '#FDF2F8';
-    if (type === 'funeral') return '#EFF6FF';
-    return '#FFFBEB';
+    if (type === 'wedding') return colors.eventWeddingBg;
+    if (type === 'funeral') return colors.eventFuneralBg;
+    return colors.eventBirthdayBg;
   };
 
   const cellSize = 32;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header title="일정" />
 
       <ScrollView
@@ -180,17 +182,17 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
         showsVerticalScrollIndicator={false}
       >
         {/* Calendar */}
-        <View style={[styles.calendarContainer, isTablet && styles.calendarContainerTablet]}>
+        <View style={[styles.calendarContainer, isTablet && styles.calendarContainerTablet, { backgroundColor: colors.card }]}>
           {/* Calendar Header */}
           <View style={styles.calendarHeader}>
-            <TouchableOpacity onPress={goToPrevMonth} style={styles.calendarNavButton}>
-              <ChevronLeftIcon size={20} color="#6B7280" />
+            <TouchableOpacity onPress={goToPrevMonth} style={[styles.calendarNavButton, { backgroundColor: colors.iconButtonBg }]}>
+              <ChevronLeftIcon size={20} color={colors.textSecondary} />
             </TouchableOpacity>
-            <Text style={[styles.calendarTitle, isTablet && styles.calendarTitleTablet]}>
+            <Text style={[styles.calendarTitle, isTablet && styles.calendarTitleTablet, { color: colors.text }]}>
               {calendarYear}년 {calendarMonth + 1}월
             </Text>
-            <TouchableOpacity onPress={goToNextMonth} style={styles.calendarNavButton}>
-              <ChevronRightIcon size={20} color="#6B7280" />
+            <TouchableOpacity onPress={goToNextMonth} style={[styles.calendarNavButton, { backgroundColor: colors.iconButtonBg }]}>
+              <ChevronRightIcon size={20} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
 
@@ -198,7 +200,7 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
           <View style={styles.calendarWeekdays}>
             {WEEKDAYS.map((day) => (
               <View key={day} style={[styles.calendarCell, { height: cellSize * 0.7 }]}>
-                <Text style={[styles.calendarWeekdayText, isTablet && styles.calendarWeekdayTextTablet]}>
+                <Text style={[styles.calendarWeekdayText, isTablet && styles.calendarWeekdayTextTablet, { color: colors.textTertiary }]}>
                   {day}
                 </Text>
               </View>
@@ -223,20 +225,21 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
                   <View style={[
                     styles.calendarDayInner,
                     { width: cellSize, height: cellSize, borderRadius: cellSize / 2 },
-                    selected && styles.calendarDaySelected,
-                    isToday && !selected && styles.calendarDayToday,
+                    selected && [styles.calendarDaySelected, { backgroundColor: colors.primary }],
+                    isToday && !selected && [styles.calendarDayToday, { borderColor: colors.primary }],
                   ]}>
                     <Text style={[
                       styles.calendarDayText,
                       isTablet && styles.calendarDayTextTablet,
-                      !item.currentMonth && styles.calendarDayTextDisabled,
+                      { color: colors.calendarDayText },
+                      !item.currentMonth && { color: colors.calendarDayDisabled },
                       selected && styles.calendarDayTextSelected,
                     ]}>
                       {item.day}
                     </Text>
                   </View>
                   {eventDay && (
-                    <View style={styles.eventDot} />
+                    <View style={[styles.eventDot, { backgroundColor: colors.primary }]} />
                   )}
                 </TouchableOpacity>
               );
@@ -247,7 +250,7 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
         {/* Selected Date Events */}
         <View style={[styles.eventsSection, isTablet && styles.eventsSectionTablet]}>
           <View style={styles.eventsSectionHeader}>
-            <Text style={[styles.eventsSectionTitle, isTablet && styles.eventsSectionTitleTablet]}>
+            <Text style={[styles.eventsSectionTitle, isTablet && styles.eventsSectionTitleTablet, { color: colors.text }]}>
               {selectedDate.getFullYear()}년 {selectedDate.getMonth() + 1}월 {selectedDate.getDate()}일 일정
             </Text>
             <TouchableOpacity
@@ -262,14 +265,14 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
           </View>
 
           {selectedDateEvents.length === 0 ? (
-            <View style={styles.emptyEvents}>
-              <Text style={styles.emptyEventsText}>등록된 일정이 없습니다.</Text>
+            <View style={[styles.emptyEvents, { backgroundColor: colors.card }]}>
+              <Text style={[styles.emptyEventsText, { color: colors.textTertiary }]}>등록된 일정이 없습니다.</Text>
             </View>
           ) : (
             selectedDateEvents.map((event) => (
               <TouchableOpacity
                 key={event.id}
-                style={[styles.eventItem, isTablet && styles.eventItemTablet]}
+                style={[styles.eventItem, isTablet && styles.eventItemTablet, { backgroundColor: colors.card }]}
                 onPress={() => onEventPress?.(event)}
                 activeOpacity={0.7}
               >
@@ -281,20 +284,20 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
                   {getEventIcon(event.type)}
                 </View>
                 <View style={styles.eventInfo}>
-                  <Text style={[styles.eventName, isTablet && styles.eventNameTablet]} numberOfLines={1}>
+                  <Text style={[styles.eventName, isTablet && styles.eventNameTablet, { color: colors.text }]} numberOfLines={1}>
                     {event.name}
                   </Text>
-                  <Text style={[styles.eventDate, isTablet && styles.eventDateTablet]}>
+                  <Text style={[styles.eventDate, isTablet && styles.eventDateTablet, { color: colors.textTertiary }]}>
                     {event.date}{event.relationship ? ` · ${event.relationship}` : ''}
                   </Text>
                   {!!event.memo && (
-                    <Text style={[styles.eventMemo, isTablet && styles.eventMemoTablet]} numberOfLines={2}>
+                    <Text style={[styles.eventMemo, isTablet && styles.eventMemoTablet, { color: colors.textTertiary }]} numberOfLines={2}>
                       {event.memo}
                     </Text>
                   )}
                 </View>
                 <View style={[styles.eventBadge, { backgroundColor: getEventIconBg(event.type) }]}>
-                  <Text style={styles.eventBadgeText}>D-{event.daysLeft}</Text>
+                  <Text style={[styles.eventBadgeText, { color: colors.text }]}>D-{event.daysLeft}</Text>
                 </View>
               </TouchableOpacity>
             ))

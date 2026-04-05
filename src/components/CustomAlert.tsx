@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { useTheme } from '../theme/ThemeContext';
 
 interface CustomAlertProps {
   visible: boolean;
@@ -42,6 +43,7 @@ export const CustomAlert: React.FC<CustomAlertProps> = ({
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+  const { colors } = useTheme();
   const [inputValue, setInputValue] = useState(inputDefaultValue);
 
   useEffect(() => {
@@ -87,25 +89,26 @@ export const CustomAlert: React.FC<CustomAlertProps> = ({
           style={[
             styles.container,
             isTablet && styles.containerTablet,
+            { backgroundColor: colors.card },
           ]}
         >
-          <Text style={[styles.title, isTablet && styles.titleTablet]}>
+          <Text style={[styles.title, isTablet && styles.titleTablet, { color: colors.text }]}>
             {title}
           </Text>
 
           {message ? (
-            <Text style={[styles.message, isTablet && styles.messageTablet]}>
+            <Text style={[styles.message, isTablet && styles.messageTablet, { color: colors.textSecondary }]}>
               {message}
             </Text>
           ) : null}
 
           {type === 'prompt' && (
             <TextInput
-              style={[styles.input, isTablet && styles.inputTablet]}
+              style={[styles.input, isTablet && styles.inputTablet, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
               value={inputValue}
               onChangeText={setInputValue}
               placeholder={inputPlaceholder}
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.textTertiary}
               autoFocus
               returnKeyType="done"
               onSubmitEditing={handleConfirm}
@@ -118,11 +121,11 @@ export const CustomAlert: React.FC<CustomAlertProps> = ({
           ]}>
             {(type === 'confirm' || type === 'prompt') && (
               <TouchableOpacity
-                style={[styles.button, styles.cancelButton, isTablet && styles.buttonTablet, (type === 'confirm' || type === 'prompt') && styles.buttonFlex]}
+                style={[styles.button, styles.cancelButton, isTablet && styles.buttonTablet, (type === 'confirm' || type === 'prompt') && styles.buttonFlex, { backgroundColor: colors.iconButtonBg }]}
                 onPress={handleCancel}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.cancelButtonText, isTablet && styles.buttonTextTablet]}>
+                <Text style={[styles.cancelButtonText, isTablet && styles.buttonTextTablet, { color: colors.textSecondary }]}>
                   {getCancelText()}
                 </Text>
               </TouchableOpacity>
@@ -132,7 +135,8 @@ export const CustomAlert: React.FC<CustomAlertProps> = ({
               style={[
                 styles.button,
                 styles.confirmButton,
-                destructive && styles.destructiveButton,
+                { backgroundColor: colors.primary },
+                destructive && { backgroundColor: colors.danger },
                 isTablet && styles.buttonTablet,
                 (type === 'confirm' || type === 'prompt') && styles.buttonFlex,
               ]}

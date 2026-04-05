@@ -12,6 +12,7 @@ import {
   FlatList,
   RefreshControl,
 } from 'react-native';
+import { useTheme } from '../theme/ThemeContext';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { Header } from '../components/Header';
 import { WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
@@ -100,6 +101,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+  const { colors, isDark } = useTheme();
 
   const today = new Date();
   const [selectedYear, setSelectedYear] = useState(initialSelectedYear ?? today.getFullYear());
@@ -190,7 +192,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
   const currentDetails = amountTab === 'sent' ? sentDetails : receivedDetails;
   const currentTotal = amountTab === 'sent' ? sentAmount : receivedAmount;
   const currentLabel = amountTab === 'sent' ? '보낸 내역' : '받은 내역';
-  const currentColor = amountTab === 'sent' ? '#818CF8' : '#34D399';
+  const currentColor = amountTab === 'sent' ? colors.sent : colors.received;
 
   const periods: { key: PeriodFilter; label: string }[] = [
     { key: 'month', label: '월' },
@@ -209,9 +211,9 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
   };
 
   const getCategoryIconBg = (type: EventTypeKey) => {
-    if (type === 'wedding') return '#FDF2F8';
-    if (type === 'funeral') return '#EFF6FF';
-    return '#FFFBEB';
+    if (type === 'wedding') return colors.eventWeddingBg;
+    if (type === 'funeral') return colors.eventFuneralBg;
+    return colors.eventBirthdayBg;
   };
 
   const svgCx = chartSize / 2;
@@ -230,9 +232,9 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
   })();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
-      <View style={[styles.container, isTablet && styles.containerTablet]}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
+      <View style={[styles.container, isTablet && styles.containerTablet, { backgroundColor: colors.background }]}>
         <Header title="통계" />
         <ScrollView
           style={styles.scrollView}
@@ -248,14 +250,15 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
             <TouchableOpacity
               style={[
                 styles.summaryCard,
-                amountTab === 'sent' && styles.summaryCardActiveSent,
+                { backgroundColor: colors.card },
+                amountTab === 'sent' && { borderBottomColor: colors.sent },
               ]}
               onPress={() => setAmountTab('sent')}
               activeOpacity={0.7}
             >
-              <Text style={styles.summaryLabel}>보낸 금액</Text>
+              <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>보낸 금액</Text>
               <Text
-                style={[styles.summaryAmount, styles.sentAmountText]}
+                style={[styles.summaryAmount, { color: colors.sent }]}
                 numberOfLines={1}
                 adjustsFontSizeToFit
               >
@@ -265,14 +268,15 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
             <TouchableOpacity
               style={[
                 styles.summaryCard,
-                amountTab === 'received' && styles.summaryCardActiveReceived,
+                { backgroundColor: colors.card },
+                amountTab === 'received' && { borderBottomColor: colors.received },
               ]}
               onPress={() => setAmountTab('received')}
               activeOpacity={0.7}
             >
-              <Text style={styles.summaryLabel}>받은 금액</Text>
+              <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>받은 금액</Text>
               <Text
-                style={[styles.summaryAmount, styles.receivedAmountText]}
+                style={[styles.summaryAmount, { color: colors.received }]}
                 numberOfLines={1}
                 adjustsFontSizeToFit
               >
@@ -288,8 +292,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
                 key={period.key}
                 style={[
                   styles.filterTab,
-                  activePeriod === period.key && styles.filterTabActive,
-                  activePeriod === period.key && { borderBottomColor: currentColor },
+                  activePeriod === period.key && [styles.filterTabActive, { backgroundColor: colors.card, borderBottomColor: currentColor }],
                 ]}
                 onPress={() => handleActivePeriod(period.key)}
                 activeOpacity={0.7}
@@ -297,7 +300,8 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
                 <Text
                   style={[
                     styles.filterTabText,
-                    activePeriod === period.key && styles.filterTabTextActive,
+                    { color: colors.textTertiary },
+                    activePeriod === period.key && { color: colors.text, fontWeight: '600' },
                   ]}
                 >
                   {period.label}
@@ -307,42 +311,42 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
           </View>
 
           {/* Combined Card */}
-          <View style={[styles.combinedCard, isTablet && styles.combinedCardTablet]}>
+          <View style={[styles.combinedCard, isTablet && styles.combinedCardTablet, { backgroundColor: colors.card }]}>
             {/* Date Selectors — hidden on 전체 tab */}
             {activePeriod !== 'all' && <View style={styles.dateSelectorRow}>
               {activePeriod === 'year' ? (
                 /* Year tab: independent year selector */
-                <View style={styles.dateSelector}>
+                <View style={[styles.dateSelector, { backgroundColor: colors.iconButtonBg }]}>
                   <TouchableOpacity onPress={() => prevYearInOptions(selectedYearTab, handleSelectedYearTab)} style={styles.arrowBtn}>
-                    <Text style={styles.arrowText}>{'‹'}</Text>
+                    <Text style={[styles.arrowText, { color: colors.textSecondary }]}>{'‹'}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => setShowYearTabPicker(true)} activeOpacity={0.7} style={styles.dateSelectorTextBtn}>
-                    <Text style={[styles.dateSelectorText, isTablet && styles.dateSelectorTextTablet]}>
+                    <Text style={[styles.dateSelectorText, isTablet && styles.dateSelectorTextTablet, { color: colors.text }]}>
                       {selectedYearTab}년
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => nextYearInOptions(selectedYearTab, handleSelectedYearTab)} style={styles.arrowBtn}>
-                    <Text style={styles.arrowText}>{'›'}</Text>
+                    <Text style={[styles.arrowText, { color: colors.textSecondary }]}>{'›'}</Text>
                   </TouchableOpacity>
                 </View>
               ) : (
                 /* Month/All tab: year selector + month selector */
                 <>
-                  <View style={styles.dateSelector}>
+                  <View style={[styles.dateSelector, { backgroundColor: colors.iconButtonBg }]}>
                     <TouchableOpacity onPress={() => prevYearInOptions(selectedYear, handleSelectedYear)} style={styles.arrowBtn}>
-                      <Text style={styles.arrowText}>{'‹'}</Text>
+                      <Text style={[styles.arrowText, { color: colors.textSecondary }]}>{'‹'}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => { setShowMonthPicker(false); setShowYearPicker(true); }} activeOpacity={0.7} style={styles.dateSelectorTextBtn}>
-                      <Text style={[styles.dateSelectorText, isTablet && styles.dateSelectorTextTablet]}>
+                      <Text style={[styles.dateSelectorText, isTablet && styles.dateSelectorTextTablet, { color: colors.text }]}>
                         {selectedYear}년
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => nextYearInOptions(selectedYear, handleSelectedYear)} style={styles.arrowBtn}>
-                      <Text style={styles.arrowText}>{'›'}</Text>
+                      <Text style={[styles.arrowText, { color: colors.textSecondary }]}>{'›'}</Text>
                     </TouchableOpacity>
                   </View>
 
-                  <View style={styles.dateSelector}>
+                  <View style={[styles.dateSelector, { backgroundColor: colors.iconButtonBg }]}>
                     <TouchableOpacity
                       onPress={() => {
                         if (selectedMonth === 1) { prevYearInOptions(selectedYear, handleSelectedYear); handleSelectedMonth(12); }
@@ -350,10 +354,10 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
                       }}
                       style={styles.arrowBtn}
                     >
-                      <Text style={styles.arrowText}>{'‹'}</Text>
+                      <Text style={[styles.arrowText, { color: colors.textSecondary }]}>{'‹'}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => { setShowYearPicker(false); setShowMonthPicker(true); }} activeOpacity={0.7} style={styles.dateSelectorTextBtn}>
-                      <Text style={[styles.dateSelectorText, isTablet && styles.dateSelectorTextTablet]}>
+                      <Text style={[styles.dateSelectorText, isTablet && styles.dateSelectorTextTablet, { color: colors.text }]}>
                         {selectedMonth}월
                       </Text>
                     </TouchableOpacity>
@@ -364,7 +368,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
                       }}
                       style={styles.arrowBtn}
                     >
-                      <Text style={styles.arrowText}>{'›'}</Text>
+                      <Text style={[styles.arrowText, { color: colors.textSecondary }]}>{'›'}</Text>
                     </TouchableOpacity>
                   </View>
                 </>
@@ -373,8 +377,8 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
 
             {/* Year tab picker modal */}
             <Modal transparent visible={showYearTabPicker} animationType="fade" onRequestClose={() => setShowYearTabPicker(false)}>
-              <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowYearTabPicker(false)}>
-                <View style={styles.pickerContainer}>
+              <TouchableOpacity style={[styles.modalOverlay, { backgroundColor: colors.overlay }]} activeOpacity={1} onPress={() => setShowYearTabPicker(false)}>
+                <View style={[styles.pickerContainer, { backgroundColor: colors.card }]}>
                   <FlatList
                     data={yearOptions}
                     keyExtractor={(item) => String(item)}
@@ -382,10 +386,10 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
                     getItemLayout={(_, index) => ({ length: 50, offset: 50 * index, index })}
                     renderItem={({ item }) => (
                       <TouchableOpacity
-                        style={[styles.pickerItem, item === selectedYearTab && styles.pickerItemSelected]}
+                        style={[styles.pickerItem, item === selectedYearTab && { backgroundColor: colors.primaryLight }]}
                         onPress={() => { handleSelectedYearTab(item); setShowYearTabPicker(false); }}
                       >
-                        <Text style={[styles.pickerItemText, item === selectedYearTab && styles.pickerItemTextSelected]}>
+                        <Text style={[styles.pickerItemText, { color: colors.text }, item === selectedYearTab && { color: colors.primary, fontWeight: '700' }]}>
                           {item}년
                         </Text>
                       </TouchableOpacity>
@@ -397,8 +401,8 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
 
             {/* Month tab year picker modal */}
             <Modal transparent visible={showYearPicker} animationType="fade" onRequestClose={() => setShowYearPicker(false)}>
-              <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowYearPicker(false)}>
-                <View style={styles.pickerContainer}>
+              <TouchableOpacity style={[styles.modalOverlay, { backgroundColor: colors.overlay }]} activeOpacity={1} onPress={() => setShowYearPicker(false)}>
+                <View style={[styles.pickerContainer, { backgroundColor: colors.card }]}>
                   <FlatList
                     data={yearOptions}
                     keyExtractor={(item) => String(item)}
@@ -406,10 +410,10 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
                     getItemLayout={(_, index) => ({ length: 50, offset: 50 * index, index })}
                     renderItem={({ item }) => (
                       <TouchableOpacity
-                        style={[styles.pickerItem, item === selectedYear && styles.pickerItemSelected]}
+                        style={[styles.pickerItem, item === selectedYear && { backgroundColor: colors.primaryLight }]}
                         onPress={() => { handleSelectedYear(item); setShowYearPicker(false); }}
                       >
-                        <Text style={[styles.pickerItemText, item === selectedYear && styles.pickerItemTextSelected]}>
+                        <Text style={[styles.pickerItemText, { color: colors.text }, item === selectedYear && { color: colors.primary, fontWeight: '700' }]}>
                           {item}년
                         </Text>
                       </TouchableOpacity>
@@ -421,17 +425,17 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
 
             {/* Month picker modal */}
             <Modal transparent visible={showMonthPicker} animationType="fade" onRequestClose={() => setShowMonthPicker(false)}>
-              <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowMonthPicker(false)}>
-                <View style={styles.pickerContainer}>
+              <TouchableOpacity style={[styles.modalOverlay, { backgroundColor: colors.overlay }]} activeOpacity={1} onPress={() => setShowMonthPicker(false)}>
+                <View style={[styles.pickerContainer, { backgroundColor: colors.card }]}>
                   <FlatList
                     data={monthOptions}
                     keyExtractor={(item) => String(item)}
                     renderItem={({ item }) => (
                       <TouchableOpacity
-                        style={[styles.pickerItem, item === selectedMonth && styles.pickerItemSelected]}
+                        style={[styles.pickerItem, item === selectedMonth && { backgroundColor: colors.primaryLight }]}
                         onPress={() => { handleSelectedMonth(item); setShowMonthPicker(false); }}
                       >
-                        <Text style={[styles.pickerItemText, item === selectedMonth && styles.pickerItemTextSelected]}>
+                        <Text style={[styles.pickerItemText, { color: colors.text }, item === selectedMonth && { color: colors.primary, fontWeight: '700' }]}>
                           {item}월
                         </Text>
                       </TouchableOpacity>
@@ -442,7 +446,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
             </Modal>
 
             {currentCategories.length === 0 ? (
-              <Text style={styles.emptyText}>내역이 없습니다</Text>
+              <Text style={[styles.emptyText, { color: colors.textTertiary }]}>내역이 없습니다</Text>
             ) : (
               <>
                 {/* Chart Row */}
@@ -453,7 +457,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
                       {/* Background ring */}
                       <Circle
                         cx={svgCx} cy={svgCy} r={svgR}
-                        stroke="#E5E7EB" strokeWidth={strokeWidth} fill="none"
+                        stroke={colors.border} strokeWidth={strokeWidth} fill="none"
                       />
                       {/* Segments */}
                       {donutSegments.map((seg, i) => (
@@ -469,7 +473,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
                     </Svg>
                     <View style={styles.donutCenter}>
                       <Text
-                        style={[styles.donutCenterAmount, isTablet && styles.donutCenterAmountTablet]}
+                        style={[styles.donutCenterAmount, isTablet && styles.donutCenterAmountTablet, { color: colors.text }]}
                         numberOfLines={1}
                         adjustsFontSizeToFit
                       >
@@ -489,7 +493,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
                     >
                       ₩{currentTotal.toLocaleString()}
                     </Text>
-                    <Text style={[styles.legendSubLabel, isTablet && styles.legendSubLabelTablet]}>
+                    <Text style={[styles.legendSubLabel, isTablet && styles.legendSubLabelTablet, { color: colors.textTertiary }]}>
                       총 경조사비
                     </Text>
 
@@ -501,6 +505,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
                             style={[
                               styles.legendCategoryName,
                               isTablet && styles.legendCategoryNameTablet,
+                              { color: colors.text },
                             ]}
                           >
                             {cat.label}
@@ -516,7 +521,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
                           </Text>
                         </View>
                         <View style={styles.legendBarRow}>
-                          <View style={styles.legendBarBg}>
+                          <View style={[styles.legendBarBg, { backgroundColor: colors.border }]}>
                             <View
                               style={[
                                 styles.legendBarFill,
@@ -527,16 +532,16 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
                               ]}
                             />
                           </View>
-                          <Text style={styles.legendCount}>({cat.count}회)</Text>
+                          <Text style={[styles.legendCount, { color: colors.textTertiary }]}>({cat.count}회)</Text>
                         </View>
                       </View>
                     ))}
                   </View>
                 </View>
 
-                <View style={styles.sectionDivider} />
+                <View style={[styles.sectionDivider, { backgroundColor: colors.border }]} />
 
-                <Text style={[styles.sectionTitle, isTablet && styles.sectionTitleTablet]}>
+                <Text style={[styles.sectionTitle, isTablet && styles.sectionTitleTablet, { color: colors.textSecondary }]}>
                   {currentLabel}
                 </Text>
 
@@ -547,7 +552,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
                     activeOpacity={0.7}
                     style={[
                       styles.detailItem,
-                      index < currentDetails.length - 1 && styles.detailItemBorder,
+                      index < currentDetails.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.borderLight },
                     ]}
                   >
                     <View style={styles.detailItemLeft}>
@@ -565,6 +570,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
                           style={[
                             styles.detailItemLabel,
                             isTablet && styles.detailItemLabelTablet,
+                            { color: colors.text },
                           ]}
                         >
                           {item.name}
@@ -573,6 +579,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
                           style={[
                             styles.detailItemDate,
                             isTablet && styles.detailItemDateTablet,
+                            { color: colors.textTertiary },
                           ]}
                         >
                           {item.date}
@@ -583,7 +590,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
                       style={[
                         styles.detailItemAmount,
                         isTablet && styles.detailItemAmountTablet,
-                        { color: '#000000' },
+                        { color: colors.text },
                       ]}
                     >
                       ₩{item.amount.toLocaleString()}

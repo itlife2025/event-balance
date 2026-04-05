@@ -14,6 +14,7 @@ import {
   Modal,
   FlatList,
 } from 'react-native';
+import { useTheme } from '../theme/ThemeContext';
 import * as Notifications from 'expo-notifications';
 import { ChevronRightIcon, BellIcon } from '../components/Icons';
 import { Header } from '../components/Header';
@@ -45,6 +46,7 @@ interface SettingsScreenProps {
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onDataReset }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+  const { colors, toggleTheme, isDark } = useTheme();
 
   const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [permissionGranted, setPermissionGranted] = useState(false);
@@ -144,7 +146,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
 
   const handleDarkModeToggle = (value: boolean) => {
     setDarkModeEnabled(value);
-    setSetting('dark_mode_enabled', value ? '1' : '0');
+    toggleTheme();
   };
 
   const handleEditProfileName = () => {
@@ -190,16 +192,16 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
     onToggleChange?: (value: boolean) => void;
   }) => (
     <TouchableOpacity
-      style={[styles.settingItem, isTablet && styles.settingItemTablet]}
+      style={[styles.settingItem, isTablet && styles.settingItemTablet, { borderTopColor: colors.borderLight }]}
       onPress={onPress}
       activeOpacity={0.7}
       disabled={isToggle}
     >
       <View style={styles.settingLeft}>
-        <View style={[styles.settingIcon, isTablet && styles.settingIconTablet]}>
+        <View style={[styles.settingIcon, isTablet && styles.settingIconTablet, { backgroundColor: colors.iconButtonBg }]}>
           {icon}
         </View>
-        <Text style={[styles.settingLabel, isTablet && styles.settingLabelTablet]}>
+        <Text style={[styles.settingLabel, isTablet && styles.settingLabelTablet, { color: colors.text }]}>
           {label}
         </Text>
       </View>
@@ -212,11 +214,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
       ) : (
         <>
           {value && (
-            <Text style={[styles.settingValue, isTablet && styles.settingValueTablet]}>
+            <Text style={[styles.settingValue, isTablet && styles.settingValueTablet, { color: colors.textTertiary }]}>
               {value}
             </Text>
           )}
-          <ChevronRightIcon size={isTablet ? 22 : 20} color="#D1D5DB" />
+          <ChevronRightIcon size={isTablet ? 22 : 20} color={colors.placeholder} />
         </>
       )}
     </TouchableOpacity>
@@ -225,7 +227,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
   const showNotifTimeMenu = notificationEnabled && permissionGranted;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header title="설정" />
 
       <View style={styles.contentWrapper}>
@@ -238,30 +240,30 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
           showsVerticalScrollIndicator={false}
         >
           {/* Profile Section */}
-          <View style={[styles.section, isTablet && styles.sectionTablet]}>
+          <View style={[styles.section, isTablet && styles.sectionTablet, { backgroundColor: colors.card }]}>
             <TouchableOpacity style={[styles.profileCard, isTablet && styles.profileCardTablet]} onPress={handleEditProfileName}>
-              <View style={[styles.profileAvatar, isTablet && styles.profileAvatarTablet]}>
-                <Text style={styles.profileInitial}>{profileName.charAt(0) || '?'}</Text>
+              <View style={[styles.profileAvatar, isTablet && styles.profileAvatarTablet, { backgroundColor: colors.profileAvatarBg }]}>
+                <Text style={[styles.profileInitial, { color: colors.primary }]}>{profileName.charAt(0) || '?'}</Text>
               </View>
               <View style={styles.profileInfo}>
-                <Text style={[styles.profileName, isTablet && styles.profileNameTablet]}>
+                <Text style={[styles.profileName, isTablet && styles.profileNameTablet, { color: colors.text }]}>
                   {profileName}
                 </Text>
-                <Text style={[styles.profileSub, isTablet && styles.profileSubTablet]}>
+                <Text style={[styles.profileSub, isTablet && styles.profileSubTablet, { color: colors.textTertiary }]}>
                   프로필 수정
                 </Text>
               </View>
-              <ChevronRightIcon size={isTablet ? 24 : 20} color="#D1D5DB" />
+              <ChevronRightIcon size={isTablet ? 24 : 20} color={colors.placeholder} />
             </TouchableOpacity>
           </View>
 
           {/* Notification Section */}
-          <View style={[styles.section, isTablet && styles.sectionTablet]}>
-            <Text style={[styles.sectionTitle, isTablet && styles.sectionTitleTablet]}>
+          <View style={[styles.section, isTablet && styles.sectionTablet, { backgroundColor: colors.card }]}>
+            <Text style={[styles.sectionTitle, isTablet && styles.sectionTitleTablet, { color: colors.text }]}>
               알림 설정
             </Text>
             <SettingItem
-              icon={<BellIcon size={isTablet ? 22 : 20} color="#6366F1" />}
+              icon={<BellIcon size={isTablet ? 22 : 20} color={colors.primary} />}
               label="알림 설정"
               isToggle={true}
               toggleValue={notificationEnabled}
@@ -280,12 +282,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
                 />
 
                 {/* Timing multi-select */}
-                <View style={[styles.settingItem, isTablet && styles.settingItemTablet]}>
+                <View style={[styles.settingItem, isTablet && styles.settingItemTablet, { borderTopColor: colors.borderLight }]}>
                   <View style={styles.settingLeft}>
-                    <View style={[styles.settingIcon, isTablet && styles.settingIconTablet]}>
+                    <View style={[styles.settingIcon, isTablet && styles.settingIconTablet, { backgroundColor: colors.iconButtonBg }]}>
                       <Text style={styles.sectionIcon}>📅</Text>
                     </View>
-                    <Text style={[styles.settingLabel, isTablet && styles.settingLabelTablet]}>
+                    <Text style={[styles.settingLabel, isTablet && styles.settingLabelTablet, { color: colors.text }]}>
                       알림 시점
                     </Text>
                   </View>
@@ -295,14 +297,16 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
                         key={opt.key}
                         style={[
                           styles.timingChip,
-                          notifTimings.includes(opt.key) && styles.timingChipActive,
+                          { backgroundColor: colors.iconButtonBg, borderColor: colors.border },
+                          notifTimings.includes(opt.key) && { backgroundColor: colors.primaryLight, borderColor: colors.primary },
                         ]}
                         onPress={() => toggleTiming(opt.key)}
                         activeOpacity={0.7}
                       >
                         <Text style={[
                           styles.timingChipText,
-                          notifTimings.includes(opt.key) && styles.timingChipTextActive,
+                          { color: colors.textTertiary },
+                          notifTimings.includes(opt.key) && { color: colors.primary },
                         ]}>
                           {opt.label}
                         </Text>
@@ -313,30 +317,30 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
 
                 {/* Notification time */}
                 <TouchableOpacity
-                  style={[styles.settingItem, isTablet && styles.settingItemTablet]}
+                  style={[styles.settingItem, isTablet && styles.settingItemTablet, { borderTopColor: colors.borderLight }]}
                   onPress={() => setShowTimePicker(true)}
                   activeOpacity={0.7}
                 >
                   <View style={styles.settingLeft}>
-                    <View style={[styles.settingIcon, isTablet && styles.settingIconTablet]}>
+                    <View style={[styles.settingIcon, isTablet && styles.settingIconTablet, { backgroundColor: colors.iconButtonBg }]}>
                       <Text style={styles.sectionIcon}>🕐</Text>
                     </View>
-                    <Text style={[styles.settingLabel, isTablet && styles.settingLabelTablet]}>
+                    <Text style={[styles.settingLabel, isTablet && styles.settingLabelTablet, { color: colors.text }]}>
                       알림 시간
                     </Text>
                   </View>
-                  <Text style={[styles.settingValue, isTablet && styles.settingValueTablet]}>
+                  <Text style={[styles.settingValue, isTablet && styles.settingValueTablet, { color: colors.textTertiary }]}>
                     {formatHour(notifHour)}
                   </Text>
-                  <ChevronRightIcon size={isTablet ? 22 : 20} color="#D1D5DB" />
+                  <ChevronRightIcon size={isTablet ? 22 : 20} color={colors.placeholder} />
                 </TouchableOpacity>
               </>
             )}
           </View>
 
           {/* App Settings Section */}
-          <View style={[styles.section, isTablet && styles.sectionTablet]}>
-            <Text style={[styles.sectionTitle, isTablet && styles.sectionTitleTablet]}>
+          <View style={[styles.section, isTablet && styles.sectionTablet, { backgroundColor: colors.card }]}>
+            <Text style={[styles.sectionTitle, isTablet && styles.sectionTitleTablet, { color: colors.text }]}>
               앱 설정
             </Text>
             <SettingItem
@@ -354,8 +358,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
           </View>
 
           {/* Data Section */}
-          <View style={[styles.section, isTablet && styles.sectionTablet]}>
-            <Text style={[styles.sectionTitle, isTablet && styles.sectionTitleTablet]}>
+          <View style={[styles.section, isTablet && styles.sectionTablet, { backgroundColor: colors.card }]}>
+            <Text style={[styles.sectionTitle, isTablet && styles.sectionTitleTablet, { color: colors.text }]}>
               데이터
             </Text>
             <SettingItem icon={<Text style={styles.sectionIcon}>☁️</Text>} label="데이터" />
@@ -363,18 +367,18 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
           </View>
 
           {/* Info Section */}
-          <View style={[styles.section, isTablet && styles.sectionTablet]}>
+          <View style={[styles.section, isTablet && styles.sectionTablet, { backgroundColor: colors.card }]}>
             <SettingItem icon={<Text style={styles.sectionIcon}>ℹ️</Text>} label="앱 정보" />
           </View>
 
           {/* Reset Button */}
-          <View style={[styles.section, { marginBottom: 100 }, isTablet && styles.sectionTablet]}>
+          <View style={[styles.section, { marginBottom: 100 }, isTablet && styles.sectionTablet, { backgroundColor: colors.card }]}>
             <TouchableOpacity
-              style={[styles.resetButton, isTablet && styles.resetButtonTablet]}
+              style={[styles.resetButton, isTablet && styles.resetButtonTablet, { backgroundColor: colors.iconButtonBg }]}
               onPress={() => setResetConfirmAlert(true)}
               activeOpacity={0.7}
             >
-              <Text style={[styles.resetButtonText, isTablet && styles.resetButtonTextTablet]}>
+              <Text style={[styles.resetButtonText, isTablet && styles.resetButtonTextTablet, { color: colors.textTertiary }]}>
                 초기화
               </Text>
             </TouchableOpacity>
@@ -384,8 +388,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
 
       {/* Time Picker Modal */}
       <Modal transparent visible={showTimePicker} animationType="fade" onRequestClose={() => setShowTimePicker(false)}>
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowTimePicker(false)}>
-          <View style={styles.pickerContainer}>
+        <TouchableOpacity style={[styles.modalOverlay, { backgroundColor: colors.overlay }]} activeOpacity={1} onPress={() => setShowTimePicker(false)}>
+          <View style={[styles.pickerContainer, { backgroundColor: colors.card }]}>
             <FlatList
               data={HOUR_OPTIONS}
               keyExtractor={(item) => String(item)}
@@ -393,10 +397,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
               getItemLayout={(_, index) => ({ length: 50, offset: 50 * index, index })}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={[styles.pickerItem, item === notifHour && styles.pickerItemSelected]}
+                  style={[styles.pickerItem, item === notifHour && { backgroundColor: colors.primaryLight }]}
                   onPress={() => handleSelectHour(item)}
                 >
-                  <Text style={[styles.pickerItemText, item === notifHour && styles.pickerItemTextSelected]}>
+                  <Text style={[styles.pickerItemText, { color: colors.text }, item === notifHour && { color: colors.primary, fontWeight: '700' }]}>
                     {formatHour(item)}
                   </Text>
                 </TouchableOpacity>

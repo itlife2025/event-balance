@@ -7,6 +7,7 @@ import {
   StatusBar,
   useWindowDimensions,
 } from 'react-native';
+import { useTheme } from '../theme/ThemeContext';
 import { Header } from '../components/Header';
 import { BalanceCard } from '../components/BalanceCard';
 import { UpcomingEvents, Event } from '../components/UpcomingEvents';
@@ -113,6 +114,7 @@ export const HomeScreen: React.FC = () => {
   const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([]);
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+  const { colors, isDark } = useTheme();
 
   const currentYear = new Date().getFullYear();
 
@@ -306,7 +308,7 @@ export const HomeScreen: React.FC = () => {
       default:
         // 기본 홈 화면 컨텐츠
         return (
-          <View style={[styles.container, isTablet && styles.containerTablet]}>
+          <View style={[styles.container, isTablet && styles.containerTablet, { backgroundColor: colors.background }]}>
             <Header onNotificationPress={handleNotificationPress} />
             <ScrollView
               style={styles.scrollView}
@@ -344,8 +346,8 @@ export const HomeScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
       {showDetailScreen ? (
         <DetailScreen
           name={detailName}

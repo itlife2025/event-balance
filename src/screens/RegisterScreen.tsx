@@ -13,6 +13,7 @@ import {
   FlatList,
   KeyboardAvoidingView,
 } from 'react-native';
+import { useTheme } from '../theme/ThemeContext';
 import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon, WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
 import { Header } from '../components/Header';
 import { CustomAlert } from '../components/CustomAlert';
@@ -56,6 +57,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+  const { colors } = useTheme();
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -287,10 +289,10 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
 
   const getScheduleIconBg = (type: string): string => {
     const t = resolveEventType(type);
-    if (t === 'wedding') return '#FDF2F8';
-    if (t === 'funeral') return '#EFF6FF';
-    if (t === 'birthday' || t === 'firstBirthday') return '#FFFBEB';
-    return '#F5F3FF';
+    if (t === 'wedding') return colors.eventWeddingBg;
+    if (t === 'funeral') return colors.eventFuneralBg;
+    if (t === 'birthday' || t === 'firstBirthday') return colors.eventBirthdayBg;
+    return colors.eventOtherBg;
   };
 
   const openRecallModal = async () => {
@@ -451,7 +453,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <Header title={isEditMode ? "수정" : "등록"} onBackPress={isEditMode ? onClose : undefined} />
 
@@ -474,11 +476,12 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
           keyboardDismissMode="on-drag"
         >
           {/* Tab Buttons */}
-          <View style={[styles.tabContainer, isTablet && styles.tabContainerTablet]}>
+          <View style={[styles.tabContainer, isTablet && styles.tabContainerTablet, { backgroundColor: colors.card }]}>
             <TouchableOpacity
               style={[
                 styles.tabButton,
-                activeTab === 'send' && styles.tabButtonActive,
+                { backgroundColor: colors.card, borderColor: colors.border },
+                activeTab === 'send' && { borderColor: colors.primary, backgroundColor: colors.primaryLight },
               ]}
               onPress={() => setActiveTab('send')}
               activeOpacity={0.7}
@@ -487,7 +490,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               <Text
                 style={[
                   styles.tabLabel,
-                  activeTab === 'send' && styles.tabLabelActive,
+                  { color: colors.textSecondary },
+                  activeTab === 'send' && { color: colors.primary },
                 ]}
               >
                 보내기
@@ -496,7 +500,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
             <TouchableOpacity
               style={[
                 styles.tabButton,
-                activeTab === 'receive' && styles.tabButtonActive,
+                { backgroundColor: colors.card, borderColor: colors.border },
+                activeTab === 'receive' && { borderColor: colors.primary, backgroundColor: colors.primaryLight },
               ]}
               onPress={() => setActiveTab('receive')}
               activeOpacity={0.7}
@@ -505,7 +510,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               <Text
                 style={[
                   styles.tabLabel,
-                  activeTab === 'receive' && styles.tabLabelActive,
+                  { color: colors.textSecondary },
+                  activeTab === 'receive' && { color: colors.primary },
                 ]}
               >
                 받기
@@ -514,11 +520,11 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
           </View>
 
           {/* Search Bar */}
-          <View style={[styles.searchContainer, isTablet && styles.searchContainerTablet]}>
+          <View style={[styles.searchContainer, isTablet && styles.searchContainerTablet, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
             <TextInput
-              style={styles.searchInput}
+              style={[styles.searchInput, { color: colors.text }]}
               placeholder="이름을 입력하세요"
-              placeholderTextColor="#D1D5DB"
+              placeholderTextColor={colors.placeholder}
               value={eventName}
               onChangeText={setEventName}
             />
@@ -532,11 +538,11 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
           </View>
 
           {/* Phone */}
-          <View style={[styles.searchContainer, isTablet && styles.searchContainerTablet]}>
+          <View style={[styles.searchContainer, isTablet && styles.searchContainerTablet, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
             <TextInput
-              style={styles.searchInput}
+              style={[styles.searchInput, { color: colors.text }]}
               placeholder="전화번호를 입력하세요"
-              placeholderTextColor="#D1D5DB"
+              placeholderTextColor={colors.placeholder}
               value={phone}
               onChangeText={setPhone}
               keyboardType="phone-pad"
@@ -546,7 +552,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
 
           {/* Relation */}
           <View style={[styles.sectionContainer, isTablet && styles.sectionContainerTablet]}>
-            <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet]}>
+            <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet, { color: colors.text }]}>
               관계
             </Text>
             <View style={styles.typeButtonsContainer}>
@@ -555,7 +561,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                   key={opt}
                   style={[
                     styles.typeButton,
-                    relation === opt && !isRelationDirectInput && styles.typeButtonActive,
+                    { backgroundColor: colors.card, borderColor: colors.placeholder },
+                    relation === opt && !isRelationDirectInput && { borderColor: colors.primary, backgroundColor: colors.primaryLight },
                   ]}
                   onPress={() => handleRelationSelect(opt)}
                   activeOpacity={0.7}
@@ -563,7 +570,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                   <Text
                     style={[
                       styles.typeButtonText,
-                      relation === opt && !isRelationDirectInput && styles.typeButtonTextActive,
+                      { color: colors.textSecondary },
+                      relation === opt && !isRelationDirectInput && { color: colors.primary, fontWeight: '600' },
                     ]}
                   >
                     {opt}
@@ -573,7 +581,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               <TouchableOpacity
                 style={[
                   styles.typeButton,
-                  isRelationDirectInput && styles.typeButtonActive,
+                  { backgroundColor: colors.card, borderColor: colors.placeholder },
+                  isRelationDirectInput && { borderColor: colors.primary, backgroundColor: colors.primaryLight },
                 ]}
                 onPress={handleRelationDirectInput}
                 activeOpacity={0.7}
@@ -581,7 +590,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                 <Text
                   style={[
                     styles.typeButtonText,
-                    isRelationDirectInput && styles.typeButtonTextActive,
+                    { color: colors.textSecondary },
+                    isRelationDirectInput && { color: colors.primary, fontWeight: '600' },
                   ]}
                 >
                   직접입력
@@ -590,9 +600,9 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
             </View>
             {isRelationDirectInput && (
               <TextInput
-                style={[styles.relationDirectInput, isTablet && styles.inputTextTablet]}
+                style={[styles.relationDirectInput, isTablet && styles.inputTextTablet, { backgroundColor: colors.card, color: colors.text, borderColor: colors.primary }]}
                 placeholder="관계를 입력하세요"
-                placeholderTextColor="#D1D5DB"
+                placeholderTextColor={colors.placeholder}
                 value={relation}
                 onChangeText={setRelation}
                 autoFocus
@@ -604,7 +614,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
 
           {/* Event Type Selection */}
           <View style={[styles.sectionContainer, isTablet && styles.sectionContainerTablet]}>
-            <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet]}>
+            <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet, { color: colors.text }]}>
               종류
             </Text>
             <View style={styles.typeButtonsContainer}>
@@ -613,7 +623,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                   key={type.key}
                   style={[
                     styles.typeButton,
-                    selectedType === type.key && !isEventTypeDirectInput && styles.typeButtonActive,
+                    { backgroundColor: colors.card, borderColor: colors.placeholder },
+                    selectedType === type.key && !isEventTypeDirectInput && { borderColor: colors.primary, backgroundColor: colors.primaryLight },
                   ]}
                   onPress={() => handleEventTypeSelect(type.key as EventType)}
                   activeOpacity={0.7}
@@ -621,7 +632,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                   <Text
                     style={[
                       styles.typeButtonText,
-                      selectedType === type.key && !isEventTypeDirectInput && styles.typeButtonTextActive,
+                      { color: colors.textSecondary },
+                      selectedType === type.key && !isEventTypeDirectInput && { color: colors.primary, fontWeight: '600' },
                     ]}
                   >
                     {type.label}
@@ -631,7 +643,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               <TouchableOpacity
                 style={[
                   styles.typeButton,
-                  isEventTypeDirectInput && styles.typeButtonActive,
+                  { backgroundColor: colors.card, borderColor: colors.placeholder },
+                  isEventTypeDirectInput && { borderColor: colors.primary, backgroundColor: colors.primaryLight },
                 ]}
                 onPress={handleEventTypeDirectInput}
                 activeOpacity={0.7}
@@ -639,7 +652,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                 <Text
                   style={[
                     styles.typeButtonText,
-                    isEventTypeDirectInput && styles.typeButtonTextActive,
+                    { color: colors.textSecondary },
+                    isEventTypeDirectInput && { color: colors.primary, fontWeight: '600' },
                   ]}
                 >
                   직접입력
@@ -648,9 +662,9 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
             </View>
             {isEventTypeDirectInput && (
               <TextInput
-                style={[styles.relationDirectInput, isTablet && styles.inputTextTablet]}
+                style={[styles.relationDirectInput, isTablet && styles.inputTextTablet, { backgroundColor: colors.card, color: colors.text, borderColor: colors.primary }]}
                 placeholder="종류를 입력하세요"
-                placeholderTextColor="#D1D5DB"
+                placeholderTextColor={colors.placeholder}
                 value={customEventType}
                 onChangeText={setCustomEventType}
                 autoFocus
@@ -662,23 +676,23 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
 
           {/* Date */}
           <View style={[styles.sectionContainer, isTablet && styles.sectionContainerTablet]}>
-            <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet]}>
+            <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet, { color: colors.text }]}>
               날짜
             </Text>
             <View style={styles.dateRow}>
               <TouchableOpacity
-                style={[styles.inputBox, isTablet && styles.inputBoxTablet, { flex: 1 }]}
+                style={[styles.inputBox, isTablet && styles.inputBoxTablet, { flex: 1, backgroundColor: colors.card, borderColor: colors.borderLight }]}
                 onPress={() => setIsCalendarOpen(!isCalendarOpen)}
               >
-                <Text style={[styles.inputText, isTablet && styles.inputTextTablet]}>
+                <Text style={[styles.inputText, isTablet && styles.inputTextTablet, { color: colors.text }]}>
                   {formatDisplayDate(selectedDate)}
                 </Text>
-                <CalendarIcon size={isTablet ? 20 : 18} color="#6B7280" />
+                <CalendarIcon size={isTablet ? 20 : 18} color={colors.textSecondary} />
               </TouchableOpacity>
 
               {/* Recall Schedule — text button */}
               <TouchableOpacity
-                style={[styles.recallButton, isTablet && styles.recallButtonTablet]}
+                style={[styles.recallButton, isTablet && styles.recallButtonTablet, { backgroundColor: colors.warning }]}
                 onPress={openRecallModal}
                 activeOpacity={0.7}
               >
@@ -691,23 +705,23 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
             {/* Inline Calendar */}
             {isCalendarOpen && (
               <View
-                style={[styles.calendarContainer, isTablet && styles.calendarContainerTablet]}
+                style={[styles.calendarContainer, isTablet && styles.calendarContainerTablet, { backgroundColor: colors.card, borderColor: colors.border }]}
               >
                 <View style={styles.calendarHeader}>
-                  <TouchableOpacity onPress={goToPrevMonth} style={styles.calendarNavButton}>
-                    <ChevronLeftIcon size={20} color="#6B7280" />
+                  <TouchableOpacity onPress={goToPrevMonth} style={[styles.calendarNavButton, { backgroundColor: colors.iconButtonBg }]}>
+                    <ChevronLeftIcon size={20} color={colors.textSecondary} />
                   </TouchableOpacity>
-                  <Text style={[styles.calendarTitle, isTablet && styles.calendarTitleTablet]}>
+                  <Text style={[styles.calendarTitle, isTablet && styles.calendarTitleTablet, { color: colors.text }]}>
                     {calendarYear}년 {calendarMonth + 1}월
                   </Text>
-                  <TouchableOpacity onPress={goToNextMonth} style={styles.calendarNavButton}>
-                    <ChevronRightIcon size={20} color="#6B7280" />
+                  <TouchableOpacity onPress={goToNextMonth} style={[styles.calendarNavButton, { backgroundColor: colors.iconButtonBg }]}>
+                    <ChevronRightIcon size={20} color={colors.textSecondary} />
                   </TouchableOpacity>
                 </View>
                 <View style={styles.calendarWeekdays}>
                   {WEEKDAYS.map((day) => (
                     <View key={day} style={[styles.calendarCell, { height: cellSize * 0.7 }]}>
-                      <Text style={[styles.calendarWeekdayText, isTablet && styles.calendarWeekdayTextTablet]}>
+                      <Text style={[styles.calendarWeekdayText, isTablet && styles.calendarWeekdayTextTablet, { color: colors.textTertiary }]}>
                         {day}
                       </Text>
                     </View>
@@ -728,13 +742,14 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                         <View style={[
                           styles.calendarDayInner,
                           { width: cellSize - 4, height: cellSize - 4, borderRadius: (cellSize - 4) / 2 },
-                          selected && styles.calendarDaySelected,
-                          isToday && !selected && styles.calendarDayToday,
+                          selected && [styles.calendarDaySelected, { backgroundColor: colors.primary }],
+                          isToday && !selected && [styles.calendarDayToday, { borderColor: colors.primary }],
                         ]}>
                           <Text style={[
                             styles.calendarDayText,
                             isTablet && styles.calendarDayTextTablet,
-                            !item.currentMonth && styles.calendarDayTextDisabled,
+                            { color: colors.calendarDayText },
+                            !item.currentMonth && { color: colors.calendarDayDisabled },
                             selected && styles.calendarDayTextSelected,
                           ]}>
                             {item.day}
@@ -755,12 +770,12 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                 onPress={() => setRegisterScheduleChecked(!registerScheduleChecked)}
                 activeOpacity={0.7}
               >
-                <View style={[styles.checkbox, registerScheduleChecked && styles.checkboxChecked]}>
+                <View style={[styles.checkbox, { borderColor: colors.placeholder, backgroundColor: colors.card }, registerScheduleChecked && { borderColor: colors.primary, backgroundColor: colors.primary }]}>
                   {registerScheduleChecked && (
                     <Text style={styles.checkmark}>✓</Text>
                   )}
                 </View>
-                <Text style={styles.checkboxLabel}>일정 등록</Text>
+                <Text style={[styles.checkboxLabel, { color: colors.textSecondary }]}>일정 등록</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -769,23 +784,23 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
           <View style={[styles.sectionContainer, isTablet && styles.sectionContainerTablet]}>
             <View style={{ marginBottom: 12 }}>
               {isDirectInput ? (
-                <View style={[styles.inputBox, isTablet && styles.inputBoxTablet]}>
+                <View style={[styles.inputBox, isTablet && styles.inputBoxTablet, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
                   <TextInput
-                    style={[styles.inputText, isTablet && styles.inputTextTablet, { flex: 1 }]}
+                    style={[styles.inputText, isTablet && styles.inputTextTablet, { flex: 1, color: colors.text }]}
                     value={amount}
                     onChangeText={setAmount}
                     keyboardType="number-pad"
                     placeholder="금액을 입력하세요"
-                    placeholderTextColor="#D1D5DB"
+                    placeholderTextColor={colors.placeholder}
                     autoFocus
                     onFocus={scrollToEnd}
                     returnKeyType="done"
                     onSubmitEditing={() => Keyboard.dismiss()}
                   />
-                  <Text style={[styles.inputText, { marginLeft: 8 }]}>만원</Text>
+                  <Text style={[styles.inputText, { marginLeft: 8, color: colors.text }]}>만원</Text>
                 </View>
               ) : (
-                <Text style={[styles.amountDisplay, isTablet && styles.amountDisplayTablet]}>
+                <Text style={[styles.amountDisplay, isTablet && styles.amountDisplayTablet, { color: colors.text }]}>
                   ₩ {amount} 만원
                 </Text>
               )}
@@ -797,6 +812,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                   key={index}
                   style={[
                     styles.quickAmountButton,
+                    { borderColor: colors.primary, backgroundColor: colors.card },
                     isTablet && styles.quickAmountButtonTablet,
                   ]}
                   onPress={() => handleQuickAmount(quickAmount)}
@@ -805,6 +821,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                   <Text
                     style={[
                       styles.quickAmountText,
+                      { color: colors.primary },
                       isTablet && styles.quickAmountTextTablet,
                     ]}
                   >
@@ -815,7 +832,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               <TouchableOpacity
                 style={[
                   styles.quickAmountButton,
-                  isDirectInput && styles.quickAmountButtonActive,
+                  { borderColor: colors.primary, backgroundColor: colors.card },
+                  isDirectInput && { backgroundColor: colors.primaryLight },
                   isTablet && styles.quickAmountButtonTablet,
                 ]}
                 onPress={handleDirectInputMode}
@@ -824,7 +842,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                 <Text
                   style={[
                     styles.quickAmountText,
-                    isDirectInput && styles.quickAmountTextActive,
+                    { color: colors.primary },
                     isTablet && styles.quickAmountTextTablet,
                   ]}
                 >
@@ -834,6 +852,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               <TouchableOpacity
                 style={[
                   styles.amountResetButton,
+                  { borderColor: colors.placeholder, backgroundColor: colors.card },
                   isTablet && styles.quickAmountButtonTablet,
                 ]}
                 onPress={() => { setAmount('0'); setIsDirectInput(false); }}
@@ -842,6 +861,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                 <Text
                   style={[
                     styles.amountResetText,
+                    { color: colors.textSecondary },
                     isTablet && styles.quickAmountTextTablet,
                   ]}
                 >
@@ -853,13 +873,13 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
 
           {/* Memo */}
           <View style={[styles.sectionContainer, isTablet && styles.sectionContainerTablet]}>
-            <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet]}>
+            <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet, { color: colors.text }]}>
               메모를 남겨보세요
             </Text>
             <TextInput
-              style={[styles.memoInput, isTablet && styles.memoInputTablet]}
+              style={[styles.memoInput, isTablet && styles.memoInputTablet, { backgroundColor: colors.card, borderColor: colors.borderLight, color: colors.text }]}
               placeholder="메모를 남겨보세요"
-              placeholderTextColor="#D1D5DB"
+              placeholderTextColor={colors.placeholder}
               multiline
               numberOfLines={3}
               value={memo}
@@ -873,7 +893,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
           {/* Reset + Save Buttons */}
           <View style={{ marginBottom: 40, flexDirection: 'row', gap: 10 }}>
             <TouchableOpacity
-              style={[styles.resetButton, isTablet && styles.resetButtonTablet, { flex: 1 }]}
+              style={[styles.resetButton, isTablet && styles.resetButtonTablet, { flex: 1, backgroundColor: colors.iconButtonBg }]}
               onPress={() => {
                 setEventName('');
                 setPhone('');
@@ -893,7 +913,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               }}
               activeOpacity={0.7}
             >
-              <Text style={[styles.resetButtonText, isTablet && styles.resetButtonTextTablet]}>
+              <Text style={[styles.resetButtonText, isTablet && styles.resetButtonTextTablet, { color: colors.textSecondary }]}>
                 초기화
               </Text>
             </TouchableOpacity>
@@ -901,6 +921,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               style={[
                 styles.saveButton,
                 styles.saveButtonStandalone,
+                { backgroundColor: colors.primary },
                 !isValid && styles.saveButtonDisabled,
                 isTablet && styles.saveButtonTablet,
                 { flex: 1 },
@@ -930,14 +951,14 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
         presentationStyle={isMobile ? 'pageSheet' : 'fullScreen'}
         onRequestClose={() => setRecallModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>일정 불러오기</Text>
+        <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
+          <View style={[styles.modalHeader, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>일정 불러오기</Text>
             <TouchableOpacity
               onPress={() => setRecallModalVisible(false)}
               activeOpacity={0.7}
             >
-              <Text style={styles.modalCloseText}>닫기</Text>
+              <Text style={[styles.modalCloseText, { color: colors.primary }]}>닫기</Text>
             </TouchableOpacity>
           </View>
           <FlatList
@@ -945,7 +966,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <TouchableOpacity
-                style={styles.scheduleItem}
+                style={[styles.scheduleItem, { borderBottomColor: colors.borderLight }]}
                 onPress={() => handleScheduleSelect(item)}
                 activeOpacity={0.6}
               >
@@ -953,19 +974,19 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                   {getScheduleIcon(item.type)}
                 </View>
                 <View style={styles.scheduleItemLeft}>
-                  <Text style={styles.scheduleItemName}>{item.name}</Text>
-                  <Text style={styles.scheduleItemMeta}>
+                  <Text style={[styles.scheduleItemName, { color: colors.text }]}>{item.name}</Text>
+                  <Text style={[styles.scheduleItemMeta, { color: colors.textSecondary }]}>
                     {getEventTypeLabel(resolveEventType(item.type))}{item.relationship ? ` · ${item.relationship}` : ''}
                   </Text>
                 </View>
-                <Text style={styles.scheduleItemDate}>
+                <Text style={[styles.scheduleItemDate, { color: colors.textTertiary }]}>
                   {item.date.replace(/-/g, '.')}
                 </Text>
               </TouchableOpacity>
             )}
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>등록된 일정이 없습니다</Text>
+                <Text style={[styles.emptyText, { color: colors.textTertiary }]}>등록된 일정이 없습니다</Text>
               </View>
             }
             contentContainerStyle={styles.contactList}
@@ -992,22 +1013,22 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
           presentationStyle="pageSheet"
           onRequestClose={() => setContactModalVisible(false)}
         >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>연락처 선택</Text>
+          <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
+            <View style={[styles.modalHeader, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>연락처 선택</Text>
               <TouchableOpacity
                 onPress={() => setContactModalVisible(false)}
                 activeOpacity={0.7}
               >
-                <Text style={styles.modalCloseText}>닫기</Text>
+                <Text style={[styles.modalCloseText, { color: colors.primary }]}>닫기</Text>
               </TouchableOpacity>
             </View>
-            <View style={styles.modalSearchContainer}>
+            <View style={[styles.modalSearchContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <Text style={styles.modalSearchIcon}>🔍</Text>
               <TextInput
-                style={styles.modalSearchInput}
+                style={[styles.modalSearchInput, { color: colors.text }]}
                 placeholder="이름 검색..."
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.textTertiary}
                 value={contactSearch}
                 onChangeText={setContactSearch}
                 autoFocus
@@ -1018,19 +1039,19 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               keyExtractor={(item) => item.id ?? Math.random().toString()}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={styles.contactItem}
+                  style={[styles.contactItem, { borderBottomColor: colors.borderLight }]}
                   onPress={() => selectContact(item)}
                   activeOpacity={0.6}
                 >
-                  <View style={styles.contactAvatar}>
-                    <Text style={styles.contactAvatarText}>
+                  <View style={[styles.contactAvatar, { backgroundColor: colors.primaryLight }]}>
+                    <Text style={[styles.contactAvatarText, { color: colors.primary }]}>
                       {item.name?.charAt(0) || '?'}
                     </Text>
                   </View>
                   <View style={styles.contactInfo}>
-                    <Text style={styles.contactName}>{item.name || '이름 없음'}</Text>
+                    <Text style={[styles.contactName, { color: colors.text }]}>{item.name || '이름 없음'}</Text>
                     {item.phoneNumbers && item.phoneNumbers.length > 0 && (
-                      <Text style={styles.contactPhone}>
+                      <Text style={[styles.contactPhone, { color: colors.textSecondary }]}>
                         {item.phoneNumbers[0].number}
                       </Text>
                     )}
@@ -1039,7 +1060,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               )}
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyText}>검색 결과가 없습니다</Text>
+                  <Text style={[styles.emptyText, { color: colors.textTertiary }]}>검색 결과가 없습니다</Text>
                 </View>
               }
               contentContainerStyle={styles.contactList}

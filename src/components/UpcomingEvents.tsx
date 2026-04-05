@@ -15,6 +15,7 @@ import {
   ChevronRightIcon,
   PlusIcon,
 } from './Icons';
+import { useTheme } from '../theme/ThemeContext';
 
 export type EventType = 'wedding' | 'funeral' | 'birthday' | 'firstBirthday' | 'birth' | 'custom' | 'other';
 
@@ -75,6 +76,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+  const { colors } = useTheme();
 
   const getEventIcon = (type: EventType) => {
     if (type === 'wedding') return <WeddingIcon size={isTablet ? 28 : 24} color="#EC4899" />;
@@ -85,11 +87,11 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
   };
 
   const getEventStyle = (type: EventType) => {
-    if (type === 'wedding') return { iconBg: '#FDF2F8' };
-    if (type === 'funeral') return { iconBg: '#EFF6FF' };
-    if (type === 'birthday') return { iconBg: '#FFFBEB' };
-    if (type === 'firstBirthday') return { iconBg: '#FFFBEB' };
-    return { iconBg: '#F5F3FF' };
+    if (type === 'wedding') return { iconBg: colors.eventWeddingBg };
+    if (type === 'funeral') return { iconBg: colors.eventFuneralBg };
+    if (type === 'birthday') return { iconBg: colors.eventBirthdayBg };
+    if (type === 'firstBirthday') return { iconBg: colors.eventBirthdayBg };
+    return { iconBg: colors.eventOtherBg };
   };
 
   const getEventTypeLabel = (type: EventType) => {
@@ -108,15 +110,15 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
         activeOpacity={0.7}
       >
         <View style={styles.headerLeft}>
-          <CalendarIcon size={isTablet ? 22 : 18} color="#6B7280" />
-          <Text style={[styles.title, isTablet && styles.titleTablet]}>
+          <CalendarIcon size={isTablet ? 22 : 18} color={colors.textSecondary} />
+          <Text style={[styles.title, isTablet && styles.titleTablet, { color: colors.text }]}>
             다가오는 경조사
           </Text>
         </View>
         {events.length > 0 ? (
-          <ChevronRightIcon size={isTablet ? 28 : 24} color="#9CA3AF" />
+          <ChevronRightIcon size={isTablet ? 28 : 24} color={colors.textTertiary} />
         ) : (
-          <PlusIcon size={isTablet ? 28 : 24} color="#9CA3AF" />
+          <PlusIcon size={isTablet ? 28 : 24} color={colors.textTertiary} />
         )}
       </TouchableOpacity>
 
@@ -133,7 +135,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
           return (
             <TouchableOpacity
               key={event.id}
-              style={[styles.eventCard, isTablet && styles.eventCardTablet]}
+              style={[styles.eventCard, isTablet && styles.eventCardTablet, { backgroundColor: colors.card }]}
               onPress={() => onEventPress?.(event)}
               activeOpacity={0.7}
             >
@@ -149,13 +151,13 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
                 </View>
                 <View style={styles.eventInfo}>
                   <Text
-                    style={[styles.eventName, isTablet && styles.eventNameTablet]}
+                    style={[styles.eventName, isTablet && styles.eventNameTablet, { color: colors.text }]}
                     numberOfLines={1}
                   >
                     {event.name} {getEventTypeLabel(event.type)}
                   </Text>
                   <Text
-                    style={[styles.eventDate, isTablet && styles.eventDateTablet]}
+                    style={[styles.eventDate, isTablet && styles.eventDateTablet, { color: colors.textTertiary }]}
                   >
                     {event.date}
                   </Text>
@@ -170,6 +172,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
                       style={[
                         styles.badgeText,
                         isTablet && styles.badgeTextTablet,
+                        { color: colors.text },
                       ]}
                     >
                       D-{event.daysLeft}
