@@ -12,6 +12,7 @@ import {
   Modal,
   FlatList,
   KeyboardAvoidingView,
+  SafeAreaView,
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon, WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
@@ -812,7 +813,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                   key={index}
                   style={[
                     styles.quickAmountButton,
-                    { borderColor: colors.primary, backgroundColor: colors.card },
+                    { borderColor: colors.border, backgroundColor: colors.card },
                     isTablet && styles.quickAmountButtonTablet,
                   ]}
                   onPress={() => handleQuickAmount(quickAmount)}
@@ -832,7 +833,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               <TouchableOpacity
                 style={[
                   styles.quickAmountButton,
-                  { borderColor: colors.primary, backgroundColor: colors.card },
+                  { borderColor: colors.border, backgroundColor: colors.card },
                   isDirectInput && { backgroundColor: colors.primaryLight },
                   isTablet && styles.quickAmountButtonTablet,
                 ]}
@@ -893,7 +894,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
           {/* Reset + Save Buttons */}
           <View style={{ marginBottom: 40, flexDirection: 'row', gap: 10 }}>
             <TouchableOpacity
-              style={[styles.resetButton, isTablet && styles.resetButtonTablet, { flex: 1, backgroundColor: colors.iconButtonBg }]}
+              style={[styles.resetButton, isTablet && styles.resetButtonTablet, { flex: 1, backgroundColor: colors.border }]}
               onPress={() => {
                 setEventName('');
                 setPhone('');
@@ -948,10 +949,10 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
       <Modal
         visible={recallModalVisible}
         animationType="slide"
-        presentationStyle={isMobile ? 'pageSheet' : 'fullScreen'}
+        presentationStyle="fullScreen"
         onRequestClose={() => setRecallModalVisible(false)}
       >
-        <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
+        <SafeAreaView style={[styles.modalContainer, { backgroundColor: colors.background }]}>
           <View style={[styles.modalHeader, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
             <Text style={[styles.modalTitle, { color: colors.text }]}>일정 불러오기</Text>
             <TouchableOpacity
@@ -991,7 +992,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
             }
             contentContainerStyle={styles.contactList}
           />
-        </View>
+        </SafeAreaView>
       </Modal>
 
       <CustomAlert
@@ -1450,13 +1451,13 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
   },
   amountDisplay: {
-    fontSize: 19,
+    fontSize: 16,
     fontWeight: '700',
     color: '#1F2937',
     marginBottom: 10,
   },
   amountDisplayTablet: {
-    fontSize: 20,
+    fontSize: 17,
     marginBottom: 12,
   },
   quickAmountContainer: {
@@ -1467,8 +1468,8 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 9,
     borderRadius: 10,
-    borderWidth: 1.5,
-    borderColor: '#6366F1',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1497,7 +1498,7 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     paddingHorizontal: 12,
     borderRadius: 10,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: '#D1D5DB',
     backgroundColor: '#FFFFFF',
     alignItems: 'center',

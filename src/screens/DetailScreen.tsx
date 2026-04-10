@@ -224,7 +224,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
               <View style={styles.balanceRow}>
                 <View style={styles.balanceItem}>
                   <Text style={[styles.balanceLabel, isTablet && styles.balanceLabelTablet, { color: colors.textSecondary }]}>
-                    내가 줌:
+                    보낸 금액:
                   </Text>
                   <Text
                     style={[
@@ -240,7 +240,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
               <View style={styles.balanceRow}>
                 <View style={styles.balanceItem}>
                   <Text style={[styles.balanceLabel, isTablet && styles.balanceLabelTablet, { color: colors.textSecondary }]}>
-                    내가 받음:
+                    받은 금액:
                   </Text>
                   <Text
                     style={[
@@ -250,23 +250,6 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
                     ]}
                   >
                     +{receivedAmount.toLocaleString()} 원
-                  </Text>
-                </View>
-              </View>
-              <View style={[styles.divider, { backgroundColor: colors.border }]} />
-              <View style={styles.balanceRow}>
-                <View style={styles.balanceItem}>
-                  <Text style={[styles.balanceLabel, isTablet && styles.balanceLabelTablet, { color: colors.textSecondary }]}>
-                    차액:
-                  </Text>
-                  <Text
-                    style={[
-                      styles.balanceAmount,
-                      isTablet && styles.balanceAmountTablet,
-                      { color: colors.danger },
-                    ]}
-                  >
-                    {balance > 0 ? '-' : '+'}{Math.abs(balance).toLocaleString()} 원
                   </Text>
                 </View>
               </View>

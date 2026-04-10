@@ -182,6 +182,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
     isToggle = false,
     toggleValue = false,
     onToggleChange,
+    showArrow = true,
   }: {
     icon: React.ReactNode;
     label: string;
@@ -190,6 +191,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
     isToggle?: boolean;
     toggleValue?: boolean;
     onToggleChange?: (value: boolean) => void;
+    showArrow?: boolean;
   }) => (
     <TouchableOpacity
       style={[styles.settingItem, isTablet && styles.settingItemTablet, { borderTopColor: colors.borderLight }]}
@@ -218,7 +220,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
               {value}
             </Text>
           )}
-          <ChevronRightIcon size={isTablet ? 22 : 20} color={colors.placeholder} />
+          {showArrow && <ChevronRightIcon size={isTablet ? 22 : 20} color={colors.placeholder} />}
         </>
       )}
     </TouchableOpacity>
@@ -343,12 +345,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
             <Text style={[styles.sectionTitle, isTablet && styles.sectionTitleTablet, { color: colors.text }]}>
               앱 설정
             </Text>
-            <SettingItem
-              icon={<Text style={styles.sectionIcon}>💱</Text>}
-              label="통화 단위"
-              value="원 ( ₩ )"
-            />
-            <SettingItem
+<SettingItem
               icon={<Text style={styles.sectionIcon}>🌙</Text>}
               label="다크모드"
               isToggle={true}
@@ -368,17 +365,17 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
 
           {/* Info Section */}
           <View style={[styles.section, isTablet && styles.sectionTablet, { backgroundColor: colors.card }]}>
-            <SettingItem icon={<Text style={styles.sectionIcon}>ℹ️</Text>} label="앱 정보" />
+            <SettingItem icon={<Text style={styles.sectionIcon}>ℹ️</Text>} label="앱 버전" value="1.0" showArrow={false} />
           </View>
 
           {/* Reset Button */}
           <View style={[styles.section, { marginBottom: 100 }, isTablet && styles.sectionTablet, { backgroundColor: colors.card }]}>
             <TouchableOpacity
-              style={[styles.resetButton, isTablet && styles.resetButtonTablet, { backgroundColor: colors.iconButtonBg }]}
+              style={[styles.resetButton, isTablet && styles.resetButtonTablet, { backgroundColor: colors.border }]}
               onPress={() => setResetConfirmAlert(true)}
               activeOpacity={0.7}
             >
-              <Text style={[styles.resetButtonText, isTablet && styles.resetButtonTextTablet, { color: colors.textTertiary }]}>
+              <Text style={[styles.resetButtonText, isTablet && styles.resetButtonTextTablet, { color: colors.textSecondary }]}>
                 초기화
               </Text>
             </TouchableOpacity>

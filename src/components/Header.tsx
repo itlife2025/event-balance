@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { BellIcon, ChevronLeftIcon } from './Icons';
+import { useTheme } from '../theme/ThemeContext';
 
 interface HeaderProps {
   title?: string;
@@ -15,29 +16,30 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+  const { colors } = useTheme();
 
   return (
-    <View style={[styles.container, isTablet && styles.containerTablet]}>
+    <View style={[styles.container, isTablet && styles.containerTablet, { backgroundColor: colors.card }]}>
       {onBackPress ? (
         <TouchableOpacity
-          style={[styles.iconButton, isTablet && styles.iconButtonTablet]}
+          style={[styles.iconButton, isTablet && styles.iconButtonTablet, { backgroundColor: colors.iconButtonBg }]}
           onPress={onBackPress}
           activeOpacity={0.7}
         >
-          <ChevronLeftIcon size={isTablet ? 28 : 24} color="#6B7280" />
+          <ChevronLeftIcon size={isTablet ? 28 : 24} color={colors.textSecondary} />
         </TouchableOpacity>
       ) : (
         <View style={[styles.iconButton, isTablet && styles.iconButtonTablet, styles.placeholder]} />
       )}
 
-      <Text style={[styles.title, isTablet && styles.titleTablet]}>{title}</Text>
+      <Text style={[styles.title, isTablet && styles.titleTablet, { color: colors.text }]}>{title}</Text>
 
       <TouchableOpacity
-        style={[styles.iconButton, isTablet && styles.iconButtonTablet]}
+        style={[styles.iconButton, isTablet && styles.iconButtonTablet, { backgroundColor: colors.iconButtonBg }]}
         onPress={onNotificationPress}
         activeOpacity={0.7}
       >
-        <BellIcon size={isTablet ? 28 : 24} color="#6B7280" />
+        <BellIcon size={isTablet ? 28 : 24} color={colors.textSecondary} />
       </TouchableOpacity>
     </View>
   );
