@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   useWindowDimensions,
 } from 'react-native';
-import { ChevronRightIcon, ChevronLeftIcon, WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
+import { ChevronRightIcon, ChevronLeftIcon, WeddingIcon, FuneralIcon, BirthIcon, BirthdayIcon, FirstBirthdayIcon, OtherIcon } from '../components/Icons';
 import { Header } from '../components/Header';
 import { useTheme } from '../theme/ThemeContext';
 import { getUpcomingEvents, type UpcomingEvent } from '../database/queries';
@@ -155,16 +155,17 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
   };
 
   const getEventIcon = (type: EventTypeKey) => {
-    const size = isTablet ? 24 : 20;
-    if (type === 'wedding') return <WeddingIcon size={size} color="#EC4899" />;
-    if (type === 'funeral') return <FuneralIcon size={size} color="#3B82F6" />;
-    return <GiftIcon size={size} color="#F59E0B" />;
+    const s = isTablet ? 48 : 40;
+    if (type === 'wedding') return <WeddingIcon size={s} />;
+    if (type === 'funeral') return <FuneralIcon size={s} />;
+    if (type === 'birthday') return <BirthdayIcon size={s} />;
+    if (type === 'firstBirthday') return <FirstBirthdayIcon size={s} />;
+    if (type === 'birth') return <BirthIcon size={s} />;
+    return <OtherIcon size={s} />;
   };
 
-  const getEventIconBg = (type: EventTypeKey) => {
-    if (type === 'wedding') return colors.eventWeddingBg;
-    if (type === 'funeral') return colors.eventFuneralBg;
-    return colors.eventBirthdayBg;
+  const getEventIconBg = (_type: EventTypeKey) => {
+    return 'transparent';
   };
 
   const cellSize = 32;

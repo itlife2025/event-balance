@@ -13,10 +13,11 @@ import {
   AppStateStatus,
   Modal,
   FlatList,
+  Image,
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import * as Notifications from 'expo-notifications';
-import { ChevronRightIcon, BellIcon } from '../components/Icons';
+import { ChevronRightIcon, BellIconColored } from '../components/Icons';
 import { Header } from '../components/Header';
 import { CustomAlert } from '../components/CustomAlert';
 import { resetDatabase } from '../database/database';
@@ -244,9 +245,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
           {/* Profile Section */}
           <View style={[styles.section, isTablet && styles.sectionTablet, { backgroundColor: colors.card }]}>
             <TouchableOpacity style={[styles.profileCard, isTablet && styles.profileCardTablet]} onPress={handleEditProfileName}>
-              <View style={[styles.profileAvatar, isTablet && styles.profileAvatarTablet, { backgroundColor: colors.profileAvatarBg }]}>
-                <Text style={[styles.profileInitial, { color: colors.primary }]}>{profileName.charAt(0) || '?'}</Text>
-              </View>
+              <Image
+                source={require('../../assets/profile-icon.png')}
+                style={[styles.profileAvatar, isTablet && styles.profileAvatarTablet]}
+                resizeMode="contain"
+              />
               <View style={styles.profileInfo}>
                 <Text style={[styles.profileName, isTablet && styles.profileNameTablet, { color: colors.text }]}>
                   {profileName}
@@ -265,7 +268,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
               알림 설정
             </Text>
             <SettingItem
-              icon={<BellIcon size={isTablet ? 22 : 20} color={colors.primary} />}
+              icon={<BellIconColored size={isTablet ? 22 : 20} color={colors.primary} />}
               label="알림 설정"
               isToggle={true}
               toggleValue={notificationEnabled}

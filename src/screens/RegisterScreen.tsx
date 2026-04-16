@@ -13,9 +13,10 @@ import {
   FlatList,
   KeyboardAvoidingView,
   SafeAreaView,
+  Image,
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
-import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon, WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
+import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon, WeddingIcon, FuneralIcon, BirthIcon, BirthdayIcon, FirstBirthdayIcon, OtherIcon } from '../components/Icons';
 import { Header } from '../components/Header';
 import { CustomAlert } from '../components/CustomAlert';
 import { EventType } from '../components/UpcomingEvents';
@@ -283,17 +284,16 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
 
   const getScheduleIcon = (type: string) => {
     const t = resolveEventType(type);
-    if (t === 'wedding') return <WeddingIcon size={20} color="#EC4899" />;
-    if (t === 'funeral') return <FuneralIcon size={20} color="#3B82F6" />;
-    return <GiftIcon size={20} color={t === 'birthday' || t === 'firstBirthday' ? '#F59E0B' : '#8B5CF6'} />;
+    if (t === 'wedding') return <WeddingIcon size={36} />;
+    if (t === 'funeral') return <FuneralIcon size={36} />;
+    if (t === 'birthday') return <BirthdayIcon size={36} />;
+    if (t === 'firstBirthday') return <FirstBirthdayIcon size={36} />;
+    if (t === 'birth') return <BirthIcon size={36} />;
+    return <OtherIcon size={36} />;
   };
 
-  const getScheduleIconBg = (type: string): string => {
-    const t = resolveEventType(type);
-    if (t === 'wedding') return colors.eventWeddingBg;
-    if (t === 'funeral') return colors.eventFuneralBg;
-    if (t === 'birthday' || t === 'firstBirthday') return colors.eventBirthdayBg;
-    return colors.eventOtherBg;
+  const getScheduleIconBg = (_type: string): string => {
+    return 'transparent';
   };
 
   const openRecallModal = async () => {
@@ -531,10 +531,10 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
             />
             {isMobile ? (
               <TouchableOpacity onPress={openContactPicker} activeOpacity={0.6} style={styles.searchIconRight}>
-                <Text style={styles.searchIconText}>🔍</Text>
+                <Image source={require('../../assets/search-icon.png')} style={styles.searchIconImage} resizeMode="contain" />
               </TouchableOpacity>
             ) : (
-              <Text style={[styles.searchIconText, styles.searchIconRight]}>🔍</Text>
+              <Image source={require('../../assets/search-icon.png')} style={[styles.searchIconImage, styles.searchIconRight]} resizeMode="contain" />
             )}
           </View>
 
@@ -1025,7 +1025,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               </TouchableOpacity>
             </View>
             <View style={[styles.modalSearchContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Text style={styles.modalSearchIcon}>🔍</Text>
+              <Image source={require('../../assets/search-icon.png')} style={styles.modalSearchIcon} resizeMode="contain" />
               <TextInput
                 style={[styles.modalSearchInput, { color: colors.text }]}
                 placeholder="이름 검색..."
@@ -1164,8 +1164,9 @@ const styles = StyleSheet.create({
   searchIconRight: {
     marginLeft: 8,
   },
-  searchIconText: {
-    fontSize: 17,
+  searchIconImage: {
+    width: 20,
+    height: 20,
   },
   searchInput: {
     flex: 1,
@@ -1641,7 +1642,8 @@ const styles = StyleSheet.create({
     height: 42,
   },
   modalSearchIcon: {
-    fontSize: 17,
+    width: 20,
+    height: 20,
     marginRight: 8,
   },
   modalSearchInput: {

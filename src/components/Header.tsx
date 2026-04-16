@@ -35,11 +35,11 @@ export const Header: React.FC<HeaderProps> = ({
       <Text style={[styles.title, isTablet && styles.titleTablet, { color: colors.text }]}>{title}</Text>
 
       <TouchableOpacity
-        style={[styles.iconButton, isTablet && styles.iconButtonTablet, { backgroundColor: colors.iconButtonBg }]}
+        style={[styles.iconButton, isTablet && styles.iconButtonTablet, { backgroundColor: 'transparent' }]}
         onPress={onNotificationPress}
         activeOpacity={0.7}
       >
-        <BellIcon size={isTablet ? 28 : 24} color={colors.textSecondary} />
+        <BellIcon size={isTablet ? 40 : 34} color={colors.textSecondary} />
       </TouchableOpacity>
     </View>
   );

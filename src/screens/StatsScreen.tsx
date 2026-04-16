@@ -15,7 +15,7 @@ import {
 import { useTheme } from '../theme/ThemeContext';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { Header } from '../components/Header';
-import { WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
+import { WeddingIcon, FuneralIcon, BirthIcon, BirthdayIcon, FirstBirthdayIcon, OtherIcon } from '../components/Icons';
 import { NavTabKey } from '../types/navigation';
 import { getMonthlyStats, getYearlyStats, getAllStats, getAvailableYears, type MonthlyStats } from '../database/queries';
 import { type EventTypeKey } from '../constants/eventTypes';
@@ -205,15 +205,17 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
   const strokeWidth = isTablet ? 28 : 24;
 
   const getCategoryIcon = (type: EventTypeKey) => {
-    if (type === 'wedding') return <WeddingIcon size={isTablet ? 24 : 20} color="#EC4899" />;
-    if (type === 'funeral') return <FuneralIcon size={isTablet ? 24 : 20} color="#3B82F6" />;
-    return <GiftIcon size={isTablet ? 24 : 20} color="#F59E0B" />;
+    const s = isTablet ? 48 : 40;
+    if (type === 'wedding') return <WeddingIcon size={s} />;
+    if (type === 'funeral') return <FuneralIcon size={s} />;
+    if (type === 'birthday') return <BirthdayIcon size={s} />;
+    if (type === 'firstBirthday') return <FirstBirthdayIcon size={s} />;
+    if (type === 'birth') return <BirthIcon size={s} />;
+    return <OtherIcon size={s} />;
   };
 
-  const getCategoryIconBg = (type: EventTypeKey) => {
-    if (type === 'wedding') return colors.eventWeddingBg;
-    if (type === 'funeral') return colors.eventFuneralBg;
-    return colors.eventBirthdayBg;
+  const getCategoryIconBg = (_type: EventTypeKey) => {
+    return 'transparent';
   };
 
   const svgCx = chartSize / 2;

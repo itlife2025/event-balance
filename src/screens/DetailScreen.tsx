@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { Swipeable } from 'react-native-gesture-handler';
-import { WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
+import { WeddingIcon, FuneralIcon, BirthIcon, BirthdayIcon, FirstBirthdayIcon, OtherIcon } from '../components/Icons';
 import { Header } from '../components/Header';
 import { CustomAlert } from '../components/CustomAlert';
 import { getEventsByPhone, getEventsByNameAndPhone, deleteEvent, type PersonDetail } from '../database/queries';
@@ -135,9 +135,13 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
   const records = data?.records ?? [];
 
   const getEventIcon = (type: EventTypeKey) => {
-    if (type === 'wedding') return <WeddingIcon size={isTablet ? 32 : 28} color="#EC4899" />;
-    if (type === 'funeral') return <FuneralIcon size={isTablet ? 32 : 28} color="#3B82F6" />;
-    return <GiftIcon size={isTablet ? 32 : 28} color="#F59E0B" />;
+    const s = isTablet ? 48 : 40;
+    if (type === 'wedding') return <WeddingIcon size={s} />;
+    if (type === 'funeral') return <FuneralIcon size={s} />;
+    if (type === 'birthday') return <BirthdayIcon size={s} />;
+    if (type === 'firstBirthday') return <FirstBirthdayIcon size={s} />;
+    if (type === 'birth') return <BirthIcon size={s} />;
+    return <OtherIcon size={s} />;
   };
 
   const getAmountColor = (isSent: boolean) => {
@@ -296,7 +300,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
                           style={[
                             styles.recordIcon,
                             isTablet && styles.recordIconTablet,
-                            { backgroundColor: colors.iconButtonBg },
+                            { backgroundColor: 'transparent' },
                           ]}
                         >
                           {getEventIcon(record.type)}

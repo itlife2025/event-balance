@@ -12,7 +12,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
-import { WeddingIcon, FuneralIcon, GiftIcon } from '../components/Icons';
+import { WeddingIcon, FuneralIcon, BirthIcon, BirthdayIcon, FirstBirthdayIcon, OtherIcon, SearchIcon } from '../components/Icons';
 import { EventType } from '../components/UpcomingEvents';
 import { Header } from '../components/Header';
 import { NavTabKey } from '../types/navigation';
@@ -139,15 +139,17 @@ export const ListScreen: React.FC<ListScreenProps> = ({
   ];
 
   const getIcon = (type: EventType) => {
-    if (type === 'wedding') return <WeddingIcon size={isTablet ? 24 : 20} color="#EC4899" />;
-    if (type === 'funeral') return <FuneralIcon size={isTablet ? 24 : 20} color="#3B82F6" />;
-    return <GiftIcon size={isTablet ? 24 : 20} color="#F59E0B" />;
+    const s = isTablet ? 48 : 40;
+    if (type === 'wedding') return <WeddingIcon size={s} />;
+    if (type === 'funeral') return <FuneralIcon size={s} />;
+    if (type === 'birthday') return <BirthdayIcon size={s} />;
+    if (type === 'firstBirthday') return <FirstBirthdayIcon size={s} />;
+    if (type === 'birth') return <BirthIcon size={s} />;
+    return <OtherIcon size={s} />;
   };
 
-  const getIconBg = (type: EventType) => {
-    if (type === 'wedding') return colors.eventWeddingBg;
-    if (type === 'funeral') return colors.eventFuneralBg;
-    return colors.eventBirthdayBg;
+  const getIconBg = (_type: EventType) => {
+    return 'transparent';
   };
 
   return (
@@ -224,6 +226,7 @@ export const ListScreen: React.FC<ListScreenProps> = ({
               </TouchableOpacity>
             </View>
             <View style={[styles.searchBox, { backgroundColor: colors.iconButtonBg }]}>
+              <SearchIcon size={18} color={colors.textSecondary} />
               <TextInput
                 style={[styles.searchInput, isTablet && styles.searchInputTablet, { color: colors.text }]}
                 placeholder="이름 검색"
@@ -231,7 +234,6 @@ export const ListScreen: React.FC<ListScreenProps> = ({
                 value={searchQuery}
                 onChangeText={setSearchQuery}
               />
-              <Text style={styles.searchIcon}>🔍</Text>
             </View>
           </View>
 
@@ -394,22 +396,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F3F4F6',
     borderRadius: 20,
-    padding: 6,
+    paddingVertical: 6,
+    paddingLeft: 10,
+    paddingRight: 6,
+    gap: 2,
   },
   searchInput: {
     fontSize: 17,
     fontWeight: '600',
     color: '#1F2937',
-    paddingHorizontal: 12,
+    paddingLeft: 6,
+    paddingRight: 12,
     height: 34,
     minWidth: 80,
   },
   searchInputTablet: {
     fontSize: 19,
-  },
-  searchIcon: {
-    fontSize: 17,
-    paddingHorizontal: 10,
   },
   dateSelector: {
     flexDirection: 'row',

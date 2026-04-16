@@ -25,6 +25,8 @@ export interface ThemeColors {
   eventWeddingBg: string;
   eventFuneralBg: string;
   eventBirthdayBg: string;
+  eventFirstBirthdayBg: string;
+  eventBirthBg: string;
   eventOtherBg: string;
 }
 
@@ -51,8 +53,10 @@ export const lightColors: ThemeColors = {
   calendarDayText: '#1F2937',
   calendarDayDisabled: '#D1D5DB',
   eventWeddingBg: '#FDF2F8',
-  eventFuneralBg: '#EFF6FF',
+  eventFuneralBg: '#EDE9F5',
   eventBirthdayBg: '#FFFBEB',
+  eventFirstBirthdayBg: '#DCFCE7',
+  eventBirthBg: '#DBEAFE',
   eventOtherBg: '#F5F3FF',
 };
 
@@ -79,7 +83,9 @@ export const darkColors: ThemeColors = {
   calendarDayText: '#F9FAFB',
   calendarDayDisabled: '#4B5563',
   eventWeddingBg: '#3D1C32',
-  eventFuneralBg: '#1C2E4A',
+  eventFuneralBg: '#2C2040',
   eventBirthdayBg: '#3D2E1C',
+  eventFirstBirthdayBg: '#14532D',
+  eventBirthBg: '#1E3A5F',
   eventOtherBg: '#2D2552',
 };

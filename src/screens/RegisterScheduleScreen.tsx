@@ -8,6 +8,7 @@ import {
   TextInput,
   useWindowDimensions,
   Keyboard,
+  Image,
 } from 'react-native';
 import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon } from '../components/Icons';
 import { Header } from '../components/Header';
@@ -238,7 +239,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
               이름
             </Text>
             <View style={[styles.searchContainer, isTablet && styles.searchContainerTablet, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
-              <Text style={styles.searchIcon}>🔍</Text>
+              <Image source={require('../../assets/search-icon.png')} style={styles.searchIcon} resizeMode="contain" />
               <TextInput
                 style={[styles.searchInput, { color: colors.text }]}
                 placeholder="이름을 입력하세요"
@@ -574,7 +575,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   searchIcon: {
-    fontSize: 17,
+    width: 20,
+    height: 20,
     marginRight: 8,
   },
   searchInput: {

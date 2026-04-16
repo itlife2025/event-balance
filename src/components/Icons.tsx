@@ -1,44 +1,29 @@
 import React from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
+import Svg, { Path, Rect, Ellipse } from 'react-native-svg';
 
 interface IconProps {
   size?: number;
   color?: string;
 }
 
-// Profile/User Icon
-export const ProfileIcon: React.FC<IconProps> = ({ size = 24, color = '#6B7280' }) => (
-  <View style={[styles.iconContainer, { width: size, height: size }]}>
-    <View style={[styles.profileHead, {
-      width: size * 0.4,
-      height: size * 0.4,
-      borderRadius: size * 0.2,
-      backgroundColor: color,
-      top: size * 0.1
-    }]} />
-    <View style={[styles.profileBody, {
-      width: size * 0.7,
-      height: size * 0.35,
-      borderTopLeftRadius: size * 0.35,
-      borderTopRightRadius: size * 0.35,
-      backgroundColor: color,
-      bottom: 0
-    }]} />
-  </View>
+// Profile/User Icon (PNG)
+export const ProfileIcon: React.FC<IconProps> = ({ size = 24 }) => (
+  <Image
+    source={require('../../assets/profile-icon.png')}
+    style={{ width: size, height: size }}
+    resizeMode="contain"
+  />
 );
 
 // Plus Icon
 export const PlusIcon: React.FC<IconProps> = ({ size = 24, color = '#6B7280' }) => (
   <View style={[styles.iconContainer, { width: size, height: size }]}>
     <View style={[styles.plusHorizontal, {
-      width: size * 0.6,
-      height: size * 0.12,
-      backgroundColor: color,
+      width: size * 0.6, height: size * 0.12, backgroundColor: color,
     }]} />
     <View style={[styles.plusVertical, {
-      width: size * 0.12,
-      height: size * 0.6,
-      backgroundColor: color,
+      width: size * 0.12, height: size * 0.6, backgroundColor: color,
     }]} />
   </View>
 );
@@ -71,22 +56,13 @@ export const HomeIcon: React.FC<IconProps> = ({ size = 24, color = '#6B7280' }) 
 export const ChartIcon: React.FC<IconProps> = ({ size = 24, color = '#6B7280' }) => (
   <View style={[styles.chartContainer, { width: size, height: size }]}>
     <View style={[styles.chartBar, {
-      width: size * 0.2,
-      height: size * 0.4,
-      backgroundColor: color,
-      left: size * 0.1,
+      width: size * 0.2, height: size * 0.4, backgroundColor: color, left: size * 0.1,
     }]} />
     <View style={[styles.chartBar, {
-      width: size * 0.2,
-      height: size * 0.65,
-      backgroundColor: color,
-      left: size * 0.4,
+      width: size * 0.2, height: size * 0.65, backgroundColor: color, left: size * 0.4,
     }]} />
     <View style={[styles.chartBar, {
-      width: size * 0.2,
-      height: size * 0.5,
-      backgroundColor: color,
-      left: size * 0.7,
+      width: size * 0.2, height: size * 0.5, backgroundColor: color, left: size * 0.7,
     }]} />
   </View>
 );
@@ -136,38 +112,68 @@ export const CalendarIcon: React.FC<IconProps> = ({ size = 24, color = '#6B7280'
       }]} />
     </View>
     <View style={[styles.calendarHook, {
-      width: 2,
-      height: size * 0.15,
-      backgroundColor: color,
-      left: size * 0.25,
-      top: size * 0.05
+      width: 2, height: size * 0.15, backgroundColor: color,
+      left: size * 0.25, top: size * 0.05
     }]} />
     <View style={[styles.calendarHook, {
-      width: 2,
-      height: size * 0.15,
-      backgroundColor: color,
-      right: size * 0.25,
-      top: size * 0.05
+      width: 2, height: size * 0.15, backgroundColor: color,
+      right: size * 0.25, top: size * 0.05
     }]} />
   </View>
 );
 
-// Wedding/Heart Icon
-export const WeddingIcon: React.FC<IconProps> = ({ size = 24, color = '#F472B6' }) => (
-  <View style={[styles.iconContainer, { width: size, height: size }]}>
-    <Text style={{ fontSize: size * 0.8, color, lineHeight: size }}>
-      ♥
-    </Text>
-  </View>
+// Wedding Icon (PNG)
+export const WeddingIcon: React.FC<IconProps> = ({ size = 24 }) => (
+  <Image
+    source={require('../../assets/wedding-icon.png')}
+    style={{ width: size, height: size }}
+    resizeMode="contain"
+  />
 );
 
-// Funeral/Condolence Icon
-export const FuneralIcon: React.FC<IconProps> = ({ size = 24, color = '#60A5FA' }) => (
-  <View style={[styles.iconContainer, { width: size, height: size }]}>
-    <Text style={{ fontSize: size * 0.8, color, lineHeight: size }}>
-      ✟
-    </Text>
-  </View>
+// Funeral Icon (PNG)
+export const FuneralIcon: React.FC<IconProps> = ({ size = 24 }) => (
+  <Image
+    source={require('../../assets/funeral-icon.png')}
+    style={{ width: size, height: size }}
+    resizeMode="contain"
+  />
+);
+
+// Birth Icon (PNG)
+export const BirthIcon: React.FC<IconProps> = ({ size = 24 }) => (
+  <Image
+    source={require('../../assets/birth-icon.png')}
+    style={{ width: size, height: size }}
+    resizeMode="contain"
+  />
+);
+
+// Birthday Icon (PNG)
+export const BirthdayIcon: React.FC<IconProps> = ({ size = 24 }) => (
+  <Image
+    source={require('../../assets/birthday-icon.png')}
+    style={{ width: size, height: size }}
+    resizeMode="contain"
+  />
+);
+
+// First Birthday Icon (PNG)
+export const FirstBirthdayIcon: React.FC<IconProps> = ({ size = 24 }) => (
+  <Image
+    source={require('../../assets/firstBirthday-icon.png')}
+    style={{ width: size, height: size }}
+    resizeMode="contain"
+  />
+);
+
+// Other/Etc Icon (PNG)
+export const OtherIcon: React.FC<IconProps> = ({ size = 24 }) => (
+  <Image
+    source={require('../../assets/etc-icon.png')}
+    style={{ width: size, height: size }}
+    resizeMode="contain"
+  />
 );
 
 // Arrow Up Icon
@@ -182,89 +188,37 @@ export const ArrowUpIcon: React.FC<IconProps> = ({ size = 16, color = '#22C55E' 
   </View>
 );
 
-// Bell Icon
-export const BellIcon: React.FC<IconProps> = ({ size = 24, color = '#6B7280' }) => (
-  <View style={[styles.iconContainer, { width: size, height: size }]}>
-    <View style={[styles.bellBody, {
-      width: size * 0.55,
-      height: size * 0.5,
-      backgroundColor: color,
-      borderTopLeftRadius: size * 0.275,
-      borderTopRightRadius: size * 0.275,
-      top: size * 0.1,
-    }]} />
-    <View style={[styles.bellBottom, {
-      width: size * 0.7,
-      height: size * 0.12,
-      backgroundColor: color,
-      borderRadius: size * 0.06,
-      top: size * 0.58,
-    }]} />
-    <View style={[styles.bellClapper, {
-      width: size * 0.15,
-      height: size * 0.15,
-      backgroundColor: color,
-      borderRadius: size * 0.075,
-      top: size * 0.72,
-    }]} />
-  </View>
+// Bell Icon (PNG)
+export const BellIcon: React.FC<IconProps> = ({ size = 24 }) => (
+  <Image
+    source={require('../../assets/bell-off-icon.png')}
+    style={{ width: size, height: size }}
+    resizeMode="contain"
+  />
 );
 
-// Gift Icon
-export const GiftIcon: React.FC<IconProps> = ({ size = 24, color = '#6366F1' }) => (
-  <View style={[styles.iconContainer, { width: size, height: size }]}>
-    <View style={{
-      width: size * 0.7,
-      height: size * 0.45,
-      backgroundColor: color,
-      borderRadius: 3,
-      position: 'absolute',
-      bottom: size * 0.05,
-    }} />
-    <View style={{
-      width: size * 0.8,
-      height: size * 0.25,
-      backgroundColor: color,
-      borderRadius: 3,
-      position: 'absolute',
-      top: size * 0.25,
-    }} />
-    <View style={{
-      width: size * 0.1,
-      height: size * 0.7,
-      backgroundColor: '#FFFFFF',
-      position: 'absolute',
-      bottom: size * 0.05,
-    }} />
-    <View style={{
-      width: size * 0.3,
-      height: size * 0.2,
-      borderWidth: size * 0.06,
-      borderColor: color,
-      backgroundColor: 'transparent',
-      borderRadius: size * 0.1,
-      position: 'absolute',
-      top: size * 0.02,
-      left: size * 0.05,
-    }} />
-    <View style={{
-      width: size * 0.3,
-      height: size * 0.2,
-      borderWidth: size * 0.06,
-      borderColor: color,
-      backgroundColor: 'transparent',
-      borderRadius: size * 0.1,
-      position: 'absolute',
-      top: size * 0.02,
-      right: size * 0.05,
-    }} />
-  </View>
+// Bell Icon Colored (SVG) - for settings menu
+export const BellIconColored: React.FC<IconProps> = ({ size = 24, color = '#6B7280' }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Path d="M11 4C11 2.5 13 2.5 13 4" stroke={color} strokeWidth={1.8} fill="none" strokeLinecap="round" />
+    <Path d="M12 4.5C7.5 4.5 4 8.5 4 14V16.5H20V14C20 8.5 16.5 4.5 12 4.5Z" fill={color} />
+    <Rect x={2.5} y={16.5} width={19} height={2} rx={1} fill={color} />
+    <Ellipse cx={12} cy={21} rx={2.2} ry={1.8} fill={color} />
+  </Svg>
 );
 
-// Schedule List Icon — calendar with list lines (common "recall/load schedule" icon)
+// Search Icon (PNG) - magnifying glass
+export const SearchIcon: React.FC<IconProps> = ({ size = 24 }) => (
+  <Image
+    source={require('../../assets/search-icon.png')}
+    style={{ width: size, height: size }}
+    resizeMode="contain"
+  />
+);
+
+// Schedule List Icon — calendar with list lines
 export const ScheduleListIcon: React.FC<IconProps> = ({ size = 24, color = '#6B7280' }) => (
   <View style={[styles.iconContainer, { width: size, height: size }]}>
-    {/* Calendar body with clipped inner content */}
     <View style={{
       position: 'absolute',
       width: size * 0.78,
@@ -275,9 +229,7 @@ export const ScheduleListIcon: React.FC<IconProps> = ({ size = 24, color = '#6B7
       bottom: size * 0.02,
       overflow: 'hidden',
     }}>
-      {/* Header bar */}
       <View style={{ backgroundColor: color, height: size * 0.21, width: '100%' }} />
-      {/* List line 1 */}
       <View style={{
         position: 'absolute',
         width: '64%',
@@ -287,7 +239,6 @@ export const ScheduleListIcon: React.FC<IconProps> = ({ size = 24, color = '#6B7
         top: size * 0.28,
         left: '13%',
       }} />
-      {/* List line 2 */}
       <View style={{
         position: 'absolute',
         width: '46%',
@@ -298,7 +249,6 @@ export const ScheduleListIcon: React.FC<IconProps> = ({ size = 24, color = '#6B7
         left: '13%',
       }} />
     </View>
-    {/* Left hook */}
     <View style={{
       position: 'absolute',
       width: size * 0.08,
@@ -308,7 +258,6 @@ export const ScheduleListIcon: React.FC<IconProps> = ({ size = 24, color = '#6B7
       left: size * 0.23,
       top: size * 0.03,
     }} />
-    {/* Right hook */}
     <View style={{
       position: 'absolute',
       width: size * 0.08,
@@ -352,12 +301,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-  },
-  profileHead: {
-    position: 'absolute',
-  },
-  profileBody: {
-    position: 'absolute',
   },
   plusHorizontal: {
     position: 'absolute',
@@ -416,15 +359,6 @@ const styles = StyleSheet.create({
   arrowUp: {
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-  },
-  bellBody: {
-    position: 'absolute',
-  },
-  bellBottom: {
-    position: 'absolute',
-  },
-  bellClapper: {
-    position: 'absolute',
   },
   chevronLeft: {
     transform: [{ rotate: '45deg' }],

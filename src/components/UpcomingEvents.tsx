@@ -11,7 +11,10 @@ import {
   CalendarIcon,
   WeddingIcon,
   FuneralIcon,
-  GiftIcon,
+  BirthIcon,
+  BirthdayIcon,
+  FirstBirthdayIcon,
+  OtherIcon,
   ChevronRightIcon,
   PlusIcon,
 } from './Icons';
@@ -79,19 +82,17 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
   const { colors } = useTheme();
 
   const getEventIcon = (type: EventType) => {
-    if (type === 'wedding') return <WeddingIcon size={isTablet ? 28 : 24} color="#EC4899" />;
-    if (type === 'funeral') return <FuneralIcon size={isTablet ? 28 : 24} color="#3B82F6" />;
-    if (type === 'birthday') return <GiftIcon size={isTablet ? 28 : 24} color="#F59E0B" />;
-    if (type === 'firstBirthday') return <GiftIcon size={isTablet ? 28 : 24} color="#F59E0B" />;
-    return <GiftIcon size={isTablet ? 28 : 24} color="#8B5CF6" />;
+    const s = isTablet ? 44 : 36;
+    if (type === 'wedding') return <WeddingIcon size={s} />;
+    if (type === 'funeral') return <FuneralIcon size={s} />;
+    if (type === 'birthday') return <BirthdayIcon size={s} />;
+    if (type === 'firstBirthday') return <FirstBirthdayIcon size={s} />;
+    if (type === 'birth') return <BirthIcon size={s} />;
+    return <OtherIcon size={s} />;
   };
 
-  const getEventStyle = (type: EventType) => {
-    if (type === 'wedding') return { iconBg: colors.eventWeddingBg };
-    if (type === 'funeral') return { iconBg: colors.eventFuneralBg };
-    if (type === 'birthday') return { iconBg: colors.eventBirthdayBg };
-    if (type === 'firstBirthday') return { iconBg: colors.eventBirthdayBg };
-    return { iconBg: colors.eventOtherBg };
+  const getEventStyle = (_type: EventType) => {
+    return { iconBg: 'transparent' };
   };
 
   const getEventTypeLabel = (type: EventType) => {

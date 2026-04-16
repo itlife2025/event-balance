@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
-import { ListIcon, WeddingIcon, FuneralIcon, GiftIcon, ChevronRightIcon } from './Icons';
+import { ListIcon, WeddingIcon, FuneralIcon, BirthIcon, BirthdayIcon, FirstBirthdayIcon, OtherIcon, ChevronRightIcon } from './Icons';
 import { useTheme } from '../theme/ThemeContext';
 import { EventType } from './UpcomingEvents';
 
@@ -55,19 +55,17 @@ export const RecentRecords: React.FC<RecentRecordsProps> = ({
   };
 
   const getRecordIcon = (type: EventType) => {
-    if (type === 'wedding') return <WeddingIcon size={isTablet ? 24 : 20} color="#EC4899" />;
-    if (type === 'funeral') return <FuneralIcon size={isTablet ? 24 : 20} color="#3B82F6" />;
-    if (type === 'birthday') return <GiftIcon size={isTablet ? 24 : 20} color="#F59E0B" />;
-    if (type === 'firstBirthday') return <GiftIcon size={isTablet ? 24 : 20} color="#F59E0B" />;
-    return <GiftIcon size={isTablet ? 24 : 20} color="#8B5CF6" />;
+    const s = isTablet ? 48 : 40;
+    if (type === 'wedding') return <WeddingIcon size={s} />;
+    if (type === 'funeral') return <FuneralIcon size={s} />;
+    if (type === 'birthday') return <BirthdayIcon size={s} />;
+    if (type === 'firstBirthday') return <FirstBirthdayIcon size={s} />;
+    if (type === 'birth') return <BirthIcon size={s} />;
+    return <OtherIcon size={s} />;
   };
 
-  const getIconBgColor = (type: EventType) => {
-    if (type === 'wedding') return colors.eventWeddingBg;
-    if (type === 'funeral') return colors.eventFuneralBg;
-    if (type === 'birthday') return colors.eventBirthdayBg;
-    if (type === 'firstBirthday') return colors.eventBirthdayBg;
-    return colors.eventOtherBg;
+  const getIconBgColor = (_type: EventType) => {
+    return 'transparent';
   };
 
   const getEventTypeLabel = (type: EventType) => {
