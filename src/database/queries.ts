@@ -689,3 +689,16 @@ export async function insertSchedule(schedule: ScheduleInput): Promise<void> {
     [schedule.name, normalizePhone(schedule.phone || ''), schedule.type, schedule.date, schedule.relationship || '', schedule.memo || '']
   );
 }
+
+export async function updateSchedule(id: string, schedule: ScheduleInput): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync(
+    'UPDATE schedules SET name = ?, phone = ?, type = ?, date = ?, relationship = ?, memo = ? WHERE id = ?',
+    [schedule.name, normalizePhone(schedule.phone || ''), schedule.type, schedule.date, schedule.relationship || '', schedule.memo || '', id]
+  );
+}
+
+export async function deleteSchedule(id: string): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync('DELETE FROM schedules WHERE id = ?', [id]);
+}

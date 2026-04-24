@@ -357,15 +357,6 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
             />
           </View>
 
-          {/* Data Section */}
-          <View style={[styles.section, isTablet && styles.sectionTablet, { backgroundColor: colors.card }]}>
-            <Text style={[styles.sectionTitle, isTablet && styles.sectionTitleTablet, { color: colors.text }]}>
-              데이터
-            </Text>
-            <SettingItem icon={<Text style={styles.sectionIcon}>☁️</Text>} label="데이터" />
-            <SettingItem icon={<Text style={styles.sectionIcon}>💾</Text>} label="데이터 백업하기" />
-          </View>
-
           {/* Info Section */}
           <View style={[styles.section, isTablet && styles.sectionTablet, { backgroundColor: colors.card }]}>
             <SettingItem icon={<Text style={styles.sectionIcon}>ℹ️</Text>} label="앱 버전" value="1.0" showArrow={false} />

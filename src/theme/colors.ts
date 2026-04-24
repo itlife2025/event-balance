@@ -67,7 +67,7 @@ export const darkColors: ThemeColors = {
   text: '#F9FAFB',
   textSecondary: '#D1D5DB',
   textTertiary: '#9CA3AF',
-  placeholder: '#6B7280',
+  placeholder: '#9CA3AF',
   border: '#374151',
   borderLight: '#374151',
   primary: '#818CF8',

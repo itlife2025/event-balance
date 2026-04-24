@@ -154,6 +154,7 @@ export const HomeScreen: React.FC = () => {
   const handleEventPress = (event: Event) => {
     pushNavState();
     setScheduleInitialData({
+      id: event.id,
       name: event.name,
       phone: event.phone,
       type: event.type,
@@ -212,6 +213,7 @@ export const HomeScreen: React.FC = () => {
           onEventPress={(event) => {
             pushNavState();
             setScheduleInitialData({
+              id: event.id,
               name: event.name,
               phone: event.phone,
               type: event.type,

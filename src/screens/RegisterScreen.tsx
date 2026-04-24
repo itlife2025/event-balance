@@ -14,9 +14,10 @@ import {
   KeyboardAvoidingView,
   SafeAreaView,
   Image,
+  Pressable,
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
-import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon, WeddingIcon, FuneralIcon, BirthIcon, BirthdayIcon, FirstBirthdayIcon, OtherIcon } from '../components/Icons';
+import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon, WeddingIcon, FuneralIcon, BirthIcon, BirthdayIcon, FirstBirthdayIcon, OtherIcon, SearchIcon, PhoneIcon } from '../components/Icons';
 import { Header } from '../components/Header';
 import { CustomAlert } from '../components/CustomAlert';
 import { EventType } from '../components/UpcomingEvents';
@@ -62,6 +63,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   const { colors } = useTheme();
 
   const scrollViewRef = useRef<ScrollView>(null);
+  const nameInputRef = useRef<TextInput>(null);
+  const phoneInputRef = useRef<TextInput>(null);
 
   const scrollToEnd = () => {
     setTimeout(() => {
@@ -95,6 +98,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
     return '0';
   });
   const [isDirectInput, setIsDirectInput] = useState(false);
+  const [selectedQuickAmount, setSelectedQuickAmount] = useState<number | null>(null);
   const [phone, setPhone] = useState(initialData?.phone || '');
   const [relation, setRelation] = useState(initialData?.relationship || '');
   const [memo, setMemo] = useState(initialData?.memo || '');
@@ -356,6 +360,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
 
   const handleQuickAmount = (quickAmount: number) => {
     setIsDirectInput(false);
+    setSelectedQuickAmount(quickAmount);
     setAmount((prev) => {
       const current = parseInt(prev) || 0;
       return String(current + quickAmount);
@@ -364,6 +369,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
 
   const handleDirectInputMode = () => {
     setIsDirectInput(true);
+    setSelectedQuickAmount(null);
     setAmount(''); // Clear for direct input
   };
 
@@ -422,6 +428,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
           setRelation('');
           setMemo('');
           setIsDirectInput(false);
+          setSelectedQuickAmount(null);
           setIsEventTypeDirectInput(false);
           setCustomEventType('');
           setIsRelationDirectInput(false);
@@ -521,26 +528,39 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
           </View>
 
           {/* Search Bar */}
-          <View style={[styles.searchContainer, isTablet && styles.searchContainerTablet, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+          <Pressable
+            style={[styles.searchContainer, isTablet && styles.searchContainerTablet, { backgroundColor: colors.card, borderColor: colors.borderLight }]}
+            onPress={() => nameInputRef.current?.focus()}
+          >
+            {isMobile ? (
+              <TouchableOpacity onPress={openContactPicker} activeOpacity={0.6} style={styles.searchIconLeft}>
+                <SearchIcon size={20} color={colors.textSecondary} />
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.searchIconLeft}>
+                <SearchIcon size={20} color={colors.textSecondary} />
+              </View>
+            )}
             <TextInput
+              ref={nameInputRef}
               style={[styles.searchInput, { color: colors.text }]}
               placeholder="이름을 입력하세요"
               placeholderTextColor={colors.placeholder}
               value={eventName}
               onChangeText={setEventName}
             />
-            {isMobile ? (
-              <TouchableOpacity onPress={openContactPicker} activeOpacity={0.6} style={styles.searchIconRight}>
-                <Image source={require('../../assets/search-icon.png')} style={styles.searchIconImage} resizeMode="contain" />
-              </TouchableOpacity>
-            ) : (
-              <Image source={require('../../assets/search-icon.png')} style={[styles.searchIconImage, styles.searchIconRight]} resizeMode="contain" />
-            )}
-          </View>
+          </Pressable>
 
           {/* Phone */}
-          <View style={[styles.searchContainer, isTablet && styles.searchContainerTablet, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+          <Pressable
+            style={[styles.searchContainer, isTablet && styles.searchContainerTablet, { backgroundColor: colors.card, borderColor: colors.borderLight }]}
+            onPress={() => phoneInputRef.current?.focus()}
+          >
+            <View style={styles.searchIconLeft}>
+              <PhoneIcon size={20} color={colors.textSecondary} />
+            </View>
             <TextInput
+              ref={phoneInputRef}
               style={[styles.searchInput, { color: colors.text }]}
               placeholder="전화번호를 입력하세요"
               placeholderTextColor={colors.placeholder}
@@ -548,8 +568,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               onChangeText={setPhone}
               keyboardType="phone-pad"
             />
-            <Text style={[styles.searchIconText, styles.searchIconRight]}>📞</Text>
-          </View>
+          </Pressable>
 
           {/* Relation */}
           <View style={[styles.sectionContainer, isTablet && styles.sectionContainerTablet]}>
@@ -814,6 +833,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                   style={[
                     styles.quickAmountButton,
                     { borderColor: colors.border, backgroundColor: colors.card },
+                    selectedQuickAmount === quickAmount && { borderColor: colors.primary, backgroundColor: colors.primaryLight },
                     isTablet && styles.quickAmountButtonTablet,
                   ]}
                   onPress={() => handleQuickAmount(quickAmount)}
@@ -822,7 +842,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                   <Text
                     style={[
                       styles.quickAmountText,
-                      { color: colors.primary },
+                      { color: colors.textSecondary },
+                      selectedQuickAmount === quickAmount && { color: colors.primary, fontWeight: '600' },
                       isTablet && styles.quickAmountTextTablet,
                     ]}
                   >
@@ -834,7 +855,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                 style={[
                   styles.quickAmountButton,
                   { borderColor: colors.border, backgroundColor: colors.card },
-                  isDirectInput && { backgroundColor: colors.primaryLight },
+                  isDirectInput && { borderColor: colors.primary, backgroundColor: colors.primaryLight },
                   isTablet && styles.quickAmountButtonTablet,
                 ]}
                 onPress={handleDirectInputMode}
@@ -843,7 +864,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                 <Text
                   style={[
                     styles.quickAmountText,
-                    { color: colors.primary },
+                    { color: colors.textSecondary },
+                    isDirectInput && { color: colors.primary, fontWeight: '600' },
                     isTablet && styles.quickAmountTextTablet,
                   ]}
                 >
@@ -856,7 +878,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                   { borderColor: colors.placeholder, backgroundColor: colors.card },
                   isTablet && styles.quickAmountButtonTablet,
                 ]}
-                onPress={() => { setAmount('0'); setIsDirectInput(false); }}
+                onPress={() => { setAmount('0'); setIsDirectInput(false); setSelectedQuickAmount(null); }}
                 activeOpacity={0.7}
               >
                 <Text
@@ -902,6 +924,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                 setRelation('');
                 setMemo('');
                 setIsDirectInput(false);
+                setSelectedQuickAmount(null);
                 setIsEventTypeDirectInput(false);
                 setCustomEventType('');
                 setIsRelationDirectInput(false);
@@ -934,6 +957,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               <Text
                 style={[
                   styles.saveButtonText,
+                  { color: '#FFFFFF' },
                   !isValid && styles.saveButtonTextDisabled,
                   isTablet && styles.saveButtonTextTablet,
                 ]}
@@ -1025,7 +1049,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               </TouchableOpacity>
             </View>
             <View style={[styles.modalSearchContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Image source={require('../../assets/search-icon.png')} style={styles.modalSearchIcon} resizeMode="contain" />
+              <SearchIcon size={20} color={colors.textSecondary} />
               <TextInput
                 style={[styles.modalSearchInput, { color: colors.text }]}
                 placeholder="이름 검색..."
@@ -1161,8 +1185,8 @@ const styles = StyleSheet.create({
     height: 44,
     paddingHorizontal: 14,
   },
-  searchIconRight: {
-    marginLeft: 8,
+  searchIconLeft: {
+    marginRight: 8,
   },
   searchIconImage: {
     width: 20,
@@ -1171,7 +1195,6 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#1F2937',
   },
   sectionContainer: {
     marginBottom: 18,
@@ -1182,7 +1205,6 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1F2937',
     marginBottom: 8,
   },
   sectionLabelTablet: {
@@ -1214,7 +1236,6 @@ const styles = StyleSheet.create({
   typeButtonText: {
     fontSize: 15,
     fontWeight: '500',
-    color: '#6B7280',
   },
   typeButtonTextActive: {
     color: '#6366F1',
@@ -1222,14 +1243,11 @@ const styles = StyleSheet.create({
   },
   relationDirectInput: {
     marginTop: 10,
-    backgroundColor: '#FFFFFF',
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderWidth: 1,
-    borderColor: '#6366F1',
     fontSize: 16,
-    color: '#1F2937',
     height: 40,
   },
   // Calendar styles
@@ -1267,7 +1285,6 @@ const styles = StyleSheet.create({
   calendarTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1F2937',
   },
   calendarTitleTablet: {
     fontSize: 20,
@@ -1284,7 +1301,6 @@ const styles = StyleSheet.create({
   calendarWeekdayText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#9CA3AF',
   },
   calendarWeekdayTextTablet: {
     fontSize: 16,
@@ -1307,7 +1323,6 @@ const styles = StyleSheet.create({
   calendarDayText: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#1F2937',
   },
   calendarDayTextTablet: {
     fontSize: 17,
@@ -1406,16 +1421,13 @@ const styles = StyleSheet.create({
   scheduleItemName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1F2937',
   },
   scheduleItemMeta: {
     fontSize: 15,
-    color: '#6B7280',
     marginTop: 2,
   },
   scheduleItemDate: {
     fontSize: 16,
-    color: '#9CA3AF',
     marginLeft: 12,
   },
   inputBox: {
@@ -1441,7 +1453,6 @@ const styles = StyleSheet.create({
   },
   inputText: {
     fontSize: 16,
-    color: '#1F2937',
     fontWeight: '500',
   },
   inputTextTablet: {
@@ -1449,12 +1460,10 @@ const styles = StyleSheet.create({
   },
   placeholderText: {
     fontSize: 16,
-    color: '#9CA3AF',
   },
   amountDisplay: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1F2937',
     marginBottom: 10,
   },
   amountDisplayTablet: {
@@ -1490,10 +1499,8 @@ const styles = StyleSheet.create({
   quickAmountText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#6366F1',
   },
   quickAmountTextActive: {
-    color: '#6366F1',
   },
   amountResetButton: {
     paddingVertical: 9,
@@ -1508,20 +1515,16 @@ const styles = StyleSheet.create({
   amountResetText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#6B7280',
   },
   quickAmountTextTablet: {
     fontSize: 16,
   },
   memoInput: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
     fontSize: 16,
-    color: '#1F2937',
     textAlignVertical: 'top',
     minHeight: 80,
     shadowColor: '#000',
@@ -1565,7 +1568,6 @@ const styles = StyleSheet.create({
   resetButtonText: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#6B7280',
   },
   resetButtonTextTablet: {
     fontSize: 18,
@@ -1596,10 +1598,8 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#FFFFFF',
   },
   saveButtonTextDisabled: {
-    color: '#9CA3AF',
   },
   saveButtonTextTablet: {
     fontSize: 18,
@@ -1622,12 +1622,10 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1F2937',
   },
   modalCloseText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#6366F1',
   },
   modalSearchContainer: {
     flexDirection: 'row',
@@ -1649,7 +1647,6 @@ const styles = StyleSheet.create({
   modalSearchInput: {
     flex: 1,
     fontSize: 17,
-    color: '#1F2937',
   },
   contactList: {
     paddingHorizontal: 16,
@@ -1673,7 +1670,6 @@ const styles = StyleSheet.create({
   contactAvatarText: {
     fontSize: 19,
     fontWeight: '600',
-    color: '#6366F1',
   },
   contactInfo: {
     flex: 1,
@@ -1681,11 +1677,9 @@ const styles = StyleSheet.create({
   contactName: {
     fontSize: 18,
     fontWeight: '500',
-    color: '#1F2937',
   },
   contactPhone: {
     fontSize: 16,
-    color: '#6B7280',
     marginTop: 2,
   },
   emptyContainer: {
@@ -1694,6 +1688,5 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 17,
-    color: '#9CA3AF',
   },
 });

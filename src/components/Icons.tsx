@@ -207,13 +207,37 @@ export const BellIconColored: React.FC<IconProps> = ({ size = 24, color = '#6B72
   </Svg>
 );
 
-// Search Icon (PNG) - magnifying glass
-export const SearchIcon: React.FC<IconProps> = ({ size = 24 }) => (
-  <Image
-    source={require('../../assets/search-icon.png')}
-    style={{ width: size, height: size }}
-    resizeMode="contain"
-  />
+// Search Icon (SVG) - magnifying glass with theme color support
+export const SearchIcon: React.FC<IconProps> = ({ size = 24, color = '#6B7280' }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Path
+      d="M10 4C6.68629 4 4 6.68629 4 10C4 13.3137 6.68629 16 10 16C13.3137 16 16 13.3137 16 10C16 6.68629 13.3137 4 10 4Z"
+      stroke={color}
+      strokeWidth={2}
+      fill="none"
+      strokeLinecap="round"
+    />
+    <Path
+      d="M14.5 14.5L20 20"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+    />
+  </Svg>
+);
+
+// Phone Icon (SVG) - phone with theme color support
+export const PhoneIcon: React.FC<IconProps> = ({ size = 24, color = '#6B7280' }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Path
+      d="M5 4H9L11 9L8.5 10.5C9.57096 12.6715 11.3285 14.429 13.5 15.5L15 13L20 15V19C20 19.5304 19.7893 20.0391 19.4142 20.4142C19.0391 20.7893 18.5304 21 18 21C14.0993 20.763 10.4202 19.1065 7.65683 16.3432C4.8935 13.5798 3.23705 9.90074 3 6C3 5.46957 3.21071 4.96086 3.58579 4.58579C3.96086 4.21071 4.46957 4 5 4Z"
+      stroke={color}
+      strokeWidth={2}
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
 );
 
 // Schedule List Icon — calendar with list lines

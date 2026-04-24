@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,14 +9,16 @@ import {
   useWindowDimensions,
   Keyboard,
   Image,
+  Pressable,
 } from 'react-native';
-import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon } from '../components/Icons';
+import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon, SearchIcon, PhoneIcon } from '../components/Icons';
 import { Header } from '../components/Header';
 import { useTheme } from '../theme/ThemeContext';
 import { EventType } from '../components/UpcomingEvents';
-import { insertSchedule } from '../database/queries';
+import { insertSchedule, updateSchedule } from '../database/queries';
 
 export interface ScheduleData {
+  id?: string;
   name: string;
   phone?: string;
   type: EventType;
@@ -81,6 +83,11 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
   const isTablet = width >= 768;
   const { colors } = useTheme();
 
+  const isEditMode = !!initialData?.id;
+
+  const nameInputRef = useRef<TextInput>(null);
+  const phoneInputRef = useRef<TextInput>(null);
+
   const today = useMemo(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -113,6 +120,8 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
     return !!initialData?.relationship && !preset.includes(initialData.relationship);
   });
   const [memo, setMemo] = useState(initialData?.memo || '');
+  const [isEventTypeDirectInput, setIsEventTypeDirectInput] = useState(false);
+  const [customEventType, setCustomEventType] = useState('');
 
   const relationOptions = ['본인', '배우자', '자녀', '부친', '모친', '조부', '조모', '빙부', '빙모'];
 
@@ -124,6 +133,18 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
   const handleRelationDirectInput = () => {
     setIsRelationDirectInput(true);
     setRelation('');
+  };
+
+  const handleEventTypeSelect = (key: EventType) => {
+    setSelectedType(key);
+    setIsEventTypeDirectInput(false);
+    setCustomEventType('');
+  };
+
+  const handleEventTypeDirectInput = () => {
+    setIsEventTypeDirectInput(true);
+    setSelectedType(null);
+    setCustomEventType('');
   };
 
   const calendarDays = useMemo(
@@ -177,10 +198,10 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
 
   const eventTypes = [
     { key: 'wedding', label: '결혼' },
-    { key: 'funeral', label: '장례' },
-    { key: 'birthday', label: '생일' },
+    { key: 'birth', label: '출산' },
     { key: 'firstBirthday', label: '돌잔치' },
-    { key: 'other', label: '기타' },
+    { key: 'birthday', label: '생일' },
+    { key: 'funeral', label: '장례' },
   ] as const;
 
   const typeToKorean: Record<string, string> = {
@@ -191,10 +212,14 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
     other: '기타',
   };
 
-  const isValid = Boolean(eventName && phone && selectedType && selectedDate);
+  const isValid = Boolean(eventName && selectedDate && (selectedType || (isEventTypeDirectInput && customEventType.trim())));
 
   const handleSave = async () => {
     if (!isValid) return;
+
+    const eventType = isEventTypeDirectInput
+      ? (customEventType.trim() || 'other')
+      : (selectedType || 'other');
 
     try {
       const y = selectedDate.getFullYear();
@@ -202,14 +227,20 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
       const d = String(selectedDate.getDate()).padStart(2, '0');
       const dbDate = `${y}-${m}-${d}`;
 
-      await insertSchedule({
+      const scheduleData = {
         name: eventName,
         phone,
-        type: selectedType ? (typeToKorean[selectedType] || selectedType) : '기타',
+        type: eventType,
         date: dbDate,
         relationship: relation,
         memo,
-      });
+      };
+
+      if (isEditMode && initialData?.id) {
+        await updateSchedule(initialData.id, scheduleData);
+      } else {
+        await insertSchedule(scheduleData);
+      }
 
       onSaved?.();
       onClose?.();
@@ -222,7 +253,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Header title="일정 등록" />
+      <Header title={isEditMode ? "일정 수정" : "일정 등록"} />
 
       <View style={styles.contentArea}>
         <ScrollView
@@ -238,16 +269,22 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
             <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet, { color: colors.text }]}>
               이름
             </Text>
-            <View style={[styles.searchContainer, isTablet && styles.searchContainerTablet, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
-              <Image source={require('../../assets/search-icon.png')} style={styles.searchIcon} resizeMode="contain" />
+            <Pressable
+              style={[styles.searchContainer, isTablet && styles.searchContainerTablet, { backgroundColor: colors.card, borderColor: colors.borderLight }]}
+              onPress={() => nameInputRef.current?.focus()}
+            >
+              <View style={styles.searchIconLeft}>
+                <SearchIcon size={20} color={colors.textSecondary} />
+              </View>
               <TextInput
+                ref={nameInputRef}
                 style={[styles.searchInput, { color: colors.text }]}
                 placeholder="이름을 입력하세요"
                 placeholderTextColor={colors.placeholder}
                 value={eventName}
                 onChangeText={setEventName}
               />
-            </View>
+            </Pressable>
           </View>
 
           {/* Phone Input */}
@@ -255,9 +292,15 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
             <Text style={[styles.sectionLabel, isTablet && styles.sectionLabelTablet, { color: colors.text }]}>
               전화번호
             </Text>
-            <View style={[styles.searchContainer, isTablet && styles.searchContainerTablet, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
-              <Text style={styles.searchIcon}>📞</Text>
+            <Pressable
+              style={[styles.searchContainer, isTablet && styles.searchContainerTablet, { backgroundColor: colors.card, borderColor: colors.borderLight }]}
+              onPress={() => phoneInputRef.current?.focus()}
+            >
+              <View style={styles.searchIconLeft}>
+                <PhoneIcon size={20} color={colors.textSecondary} />
+              </View>
               <TextInput
+                ref={phoneInputRef}
                 style={[styles.searchInput, { color: colors.text }]}
                 placeholder="전화번호를 입력하세요"
                 placeholderTextColor={colors.placeholder}
@@ -265,7 +308,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
                 onChangeText={setPhone}
                 keyboardType="phone-pad"
               />
-            </View>
+            </Pressable>
           </View>
 
           {/* Event Type Selection */}
@@ -280,23 +323,54 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
                   style={[
                     styles.typeButton,
                     { borderColor: colors.placeholder, backgroundColor: colors.card },
-                    selectedType === type.key && { borderColor: colors.primary, backgroundColor: colors.primaryLight },
+                    selectedType === type.key && !isEventTypeDirectInput && { borderColor: colors.primary, backgroundColor: colors.primaryLight },
                   ]}
-                  onPress={() => setSelectedType(type.key as EventType)}
+                  onPress={() => handleEventTypeSelect(type.key as EventType)}
                   activeOpacity={0.7}
                 >
                   <Text
                     style={[
                       styles.typeButtonText,
                       { color: colors.textSecondary },
-                      selectedType === type.key && { color: colors.primary, fontWeight: '600' },
+                      selectedType === type.key && !isEventTypeDirectInput && { color: colors.primary, fontWeight: '600' },
                     ]}
                   >
                     {type.label}
                   </Text>
                 </TouchableOpacity>
               ))}
+              <TouchableOpacity
+                style={[
+                  styles.typeButton,
+                  { borderColor: colors.placeholder, backgroundColor: colors.card },
+                  isEventTypeDirectInput && { borderColor: colors.primary, backgroundColor: colors.primaryLight },
+                ]}
+                onPress={handleEventTypeDirectInput}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.typeButtonText,
+                    { color: colors.textSecondary },
+                    isEventTypeDirectInput && { color: colors.primary, fontWeight: '600' },
+                  ]}
+                >
+                  직접입력
+                </Text>
+              </TouchableOpacity>
             </View>
+            {isEventTypeDirectInput && (
+              <TextInput
+                style={[styles.relationDirectInput, isTablet && styles.inputTextTablet, { backgroundColor: colors.card, color: colors.text, borderColor: colors.primary }]}
+                placeholder="종류를 입력하세요"
+                placeholderTextColor={colors.placeholder}
+                value={customEventType}
+                onChangeText={setCustomEventType}
+                autoFocus
+                returnKeyType="done"
+                onSubmitEditing={() => Keyboard.dismiss()}
+              />
+            )}
           </View>
 
           {/* Date */}
@@ -479,6 +553,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
               <Text
                 style={[
                   styles.saveButtonText,
+                  { color: '#FFFFFF' },
                   !isValid && styles.saveButtonTextDisabled,
                   isTablet && styles.saveButtonTextTablet,
                 ]}
@@ -574,15 +649,12 @@ const styles = StyleSheet.create({
     height: 44,
     paddingHorizontal: 14,
   },
-  searchIcon: {
-    width: 20,
-    height: 20,
+  searchIconLeft: {
     marginRight: 8,
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#1F2937',
   },
   typeButtonsContainer: {
     flexDirection: 'row',
