@@ -73,6 +73,7 @@ export const RecentRecords: React.FC<RecentRecordsProps> = ({
     if (type === 'funeral') return '장례';
     if (type === 'birthday') return '생일';
     if (type === 'firstBirthday') return '돌잔치';
+    if (type === 'birth') return '출산';
     return '기타';
   };
 
