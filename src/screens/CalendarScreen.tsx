@@ -6,7 +6,9 @@ import {
   ScrollView,
   TouchableOpacity,
   useWindowDimensions,
+  Alert,
 } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { ChevronRightIcon, ChevronLeftIcon, WeddingIcon, FuneralIcon, BirthIcon, BirthdayIcon, FirstBirthdayIcon, OtherIcon } from '../components/Icons';
 import { Header } from '../components/Header';
 import { useTheme } from '../theme/ThemeContext';
@@ -17,6 +19,7 @@ interface CalendarScreenProps {
   onBackPress?: () => void;
   onRegisterSchedule?: () => void;
   onEventPress?: (event: UpcomingEvent) => void;
+  onEventDelete?: (eventId: string) => void;
 }
 
 const WEEKDAYS = ['월', '화', '수', '목', '금', '토', '일'];
@@ -51,6 +54,7 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
   onBackPress,
   onRegisterSchedule,
   onEventPress,
+  onEventDelete,
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -168,6 +172,36 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
     return 'transparent';
   };
 
+  const handleDeleteEvent = (eventId: string) => {
+    Alert.alert(
+      '일정 삭제',
+      '이 일정을 삭제하시겠습니까?',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: () => {
+            onEventDelete?.(eventId);
+            setEvents(prev => prev.filter(e => e.id !== eventId));
+          },
+        },
+      ],
+    );
+  };
+
+  const renderRightActions = (eventId: string) => {
+    return (
+      <TouchableOpacity
+        style={styles.swipeDeleteButton}
+        onPress={() => handleDeleteEvent(eventId)}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.swipeDeleteText}>삭제</Text>
+      </TouchableOpacity>
+    );
+  };
+
   const cellSize = 32;
 
   return (
@@ -271,36 +305,41 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
             </View>
           ) : (
             selectedDateEvents.map((event) => (
-              <TouchableOpacity
+              <Swipeable
                 key={event.id}
-                style={[styles.eventItem, isTablet && styles.eventItemTablet, { backgroundColor: colors.card }]}
-                onPress={() => onEventPress?.(event)}
-                activeOpacity={0.7}
+                renderRightActions={() => renderRightActions(event.id)}
+                overshootRight={false}
               >
-                <View style={[
-                  styles.eventIcon,
-                  isTablet && styles.eventIconTablet,
-                  { backgroundColor: getEventIconBg(event.type) },
-                ]}>
-                  {getEventIcon(event.type)}
-                </View>
-                <View style={styles.eventInfo}>
-                  <Text style={[styles.eventName, isTablet && styles.eventNameTablet, { color: colors.text }]} numberOfLines={1}>
-                    {event.name}
-                  </Text>
-                  <Text style={[styles.eventDate, isTablet && styles.eventDateTablet, { color: colors.textTertiary }]}>
-                    {event.date}{event.relationship ? ` · ${event.relationship}` : ''}
-                  </Text>
-                  {!!event.memo && (
-                    <Text style={[styles.eventMemo, isTablet && styles.eventMemoTablet, { color: colors.textTertiary }]} numberOfLines={2}>
-                      {event.memo}
+                <TouchableOpacity
+                  style={[styles.eventItem, isTablet && styles.eventItemTablet, { backgroundColor: colors.card }]}
+                  onPress={() => onEventPress?.(event)}
+                  activeOpacity={0.7}
+                >
+                  <View style={[
+                    styles.eventIcon,
+                    isTablet && styles.eventIconTablet,
+                    { backgroundColor: getEventIconBg(event.type) },
+                  ]}>
+                    {getEventIcon(event.type)}
+                  </View>
+                  <View style={styles.eventInfo}>
+                    <Text style={[styles.eventName, isTablet && styles.eventNameTablet, { color: colors.text }]} numberOfLines={1}>
+                      {event.name}
                     </Text>
-                  )}
-                </View>
-                <View style={[styles.eventBadge, { backgroundColor: getEventIconBg(event.type) }]}>
-                  <Text style={[styles.eventBadgeText, { color: colors.text }]}>D-{event.daysLeft}</Text>
-                </View>
-              </TouchableOpacity>
+                    <Text style={[styles.eventDate, isTablet && styles.eventDateTablet, { color: colors.textTertiary }]}>
+                      {event.date}{event.relationship ? ` · ${event.relationship}` : ''}
+                    </Text>
+                    {!!event.memo && (
+                      <Text style={[styles.eventMemo, isTablet && styles.eventMemoTablet, { color: colors.textTertiary }]} numberOfLines={2}>
+                        {event.memo}
+                      </Text>
+                    )}
+                  </View>
+                  <View style={[styles.eventBadge, { backgroundColor: getEventIconBg(event.type) }]}>
+                    <Text style={[styles.eventBadgeText, { color: colors.text }]}>D-{event.daysLeft}</Text>
+                  </View>
+                </TouchableOpacity>
+              </Swipeable>
             ))
           )}
         </View>
@@ -542,5 +581,19 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: '#1F2937',
+  },
+  swipeDeleteButton: {
+    backgroundColor: '#EF4444',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 72,
+    borderRadius: 12,
+    marginBottom: 8,
+    marginLeft: 8,
+  },
+  swipeDeleteText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

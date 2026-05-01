@@ -5,6 +5,7 @@ import {
   ScrollView,
   SafeAreaView,
   StatusBar,
+  Alert,
   useWindowDimensions,
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
@@ -20,7 +21,7 @@ import { DetailScreen } from './DetailScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { ListScreen } from './ListScreen';
 import { StatsScreen } from './StatsScreen';
-import { getYearlyTotals, getMonthlyBreakdown, getRecentRecords, getUpcomingEvents, type MonthlyData, type RecentRecord, type UpcomingEvent } from '../database/queries';
+import { getYearlyTotals, getMonthlyBreakdown, getRecentRecords, getUpcomingEvents, deleteSchedule, unlinkEventsByScheduleId, type MonthlyData, type RecentRecord, type UpcomingEvent } from '../database/queries';
 import type { PeriodFilter } from './StatsScreen';
 
 const refreshUpcomingEvents = async (setter: (events: UpcomingEvent[]) => void) => {
@@ -151,6 +152,29 @@ export const HomeScreen: React.FC = () => {
     // Notification pressed
   };
 
+  const handleDeleteSchedule = (id: string) => {
+    Alert.alert(
+      '일정 삭제',
+      '이 일정을 삭제하시겠습니까?',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await unlinkEventsByScheduleId(id);
+              await deleteSchedule(id);
+              refreshHomeData();
+            } catch (error) {
+              console.error('Failed to delete schedule:', error);
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const handleEventPress = (event: Event) => {
     pushNavState();
     setScheduleInitialData({
@@ -204,6 +228,15 @@ export const HomeScreen: React.FC = () => {
       return (
         <CalendarScreen
           onBackPress={goBack}
+          onEventDelete={async (eventId) => {
+            try {
+              await unlinkEventsByScheduleId(eventId);
+              await deleteSchedule(eventId);
+              refreshHomeData();
+            } catch (error) {
+              console.error('Failed to delete schedule:', error);
+            }
+          }}
           onRegisterSchedule={() => {
             pushNavState();
             setShowCalendar(false);
@@ -236,9 +269,22 @@ export const HomeScreen: React.FC = () => {
             refreshUpcomingEvents(setUpcomingEvents);
           }}
           initialData={scheduleInitialData}
+          onDelete={async (id) => {
+            try {
+              await unlinkEventsByScheduleId(id);
+              await deleteSchedule(id);
+              refreshHomeData();
+              goBack();
+            } catch (error) {
+              console.error('Failed to delete schedule:', error);
+            }
+          }}
           onRegisterEvent={(data) => {
             pushNavState();
-            setRegisterInitialData(data);
+            setRegisterInitialData({
+              ...data,
+              scheduleId: data.id,
+            });
             setShowRegisterSchedule(false);
             setScheduleInitialData(undefined);
             setActiveTab('register');
@@ -329,6 +375,7 @@ export const HomeScreen: React.FC = () => {
                 <UpcomingEvents
                   events={upcomingEvents}
                   onEventPress={handleEventPress}
+                  onEventLongPress={(event) => handleDeleteSchedule(event.id)}
                   onAddPress={() => {
                     pushNavState();
                     setScheduleInitialData(undefined);

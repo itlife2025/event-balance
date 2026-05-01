@@ -19,6 +19,7 @@ import {
   PlusIcon,
 } from './Icons';
 import { useTheme } from '../theme/ThemeContext';
+import { getEventTypeLabel } from '../constants/eventTypes';
 
 export type EventType = 'wedding' | 'funeral' | 'birthday' | 'firstBirthday' | 'birth' | 'custom' | 'other';
 
@@ -36,6 +37,7 @@ export interface Event {
 interface UpcomingEventsProps {
   events?: Event[];
   onEventPress?: (event: Event) => void;
+  onEventLongPress?: (event: Event) => void;
   onMorePress?: () => void;
   onAddPress?: () => void;
 }
@@ -74,6 +76,7 @@ const defaultEvents: Event[] = [
 export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
   events = defaultEvents,
   onEventPress,
+  onEventLongPress,
   onMorePress,
   onAddPress,
 }) => {
@@ -93,14 +96,6 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
 
   const getEventStyle = (_type: EventType) => {
     return { iconBg: 'transparent' };
-  };
-
-  const getEventTypeLabel = (type: EventType) => {
-    if (type === 'wedding') return '결혼';
-    if (type === 'funeral') return '장례';
-    if (type === 'birthday') return '생일';
-    if (type === 'firstBirthday') return '돌잔치';
-    return '기타';
   };
 
   return (
@@ -138,6 +133,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
               key={event.id}
               style={[styles.eventCard, isTablet && styles.eventCardTablet, { backgroundColor: colors.card }]}
               onPress={() => onEventPress?.(event)}
+              onLongPress={() => onEventLongPress?.(event)}
               activeOpacity={0.7}
             >
               <View style={styles.eventContent}>

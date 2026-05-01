@@ -10,12 +10,13 @@ import {
   Keyboard,
   Image,
   Pressable,
+  Alert,
 } from 'react-native';
 import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon, SearchIcon, PhoneIcon } from '../components/Icons';
 import { Header } from '../components/Header';
 import { useTheme } from '../theme/ThemeContext';
 import { EventType } from '../components/UpcomingEvents';
-import { insertSchedule, updateSchedule } from '../database/queries';
+import { insertSchedule, updateSchedule, updateEventsByScheduleId } from '../database/queries';
 
 export interface ScheduleData {
   id?: string;
@@ -32,6 +33,7 @@ interface RegisterScheduleScreenProps {
   onSaved?: () => void;
   initialData?: ScheduleData;
   onRegisterEvent?: (data: ScheduleData) => void;
+  onDelete?: (id: string) => void;
 }
 
 const WEEKDAYS = ['월', '화', '수', '목', '금', '토', '일'];
@@ -78,6 +80,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
   onSaved,
   initialData,
   onRegisterEvent,
+  onDelete,
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -238,6 +241,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
 
       if (isEditMode && initialData?.id) {
         await updateSchedule(initialData.id, scheduleData);
+        await updateEventsByScheduleId(initialData.id, scheduleData);
       } else {
         await insertSchedule(scheduleData);
       }
@@ -539,28 +543,54 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
 
           {/* Buttons */}
           <View style={{ marginBottom: 40, gap: 10 }}>
-            <TouchableOpacity
-              style={[
-                styles.saveButton,
-                { backgroundColor: colors.primary },
-                !isValid && styles.saveButtonDisabled,
-                isTablet && styles.saveButtonTablet,
-              ]}
-              onPress={handleSave}
-              activeOpacity={0.7}
-              disabled={!isValid}
-            >
-              <Text
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              {isEditMode && onDelete && initialData?.id && (
+                <TouchableOpacity
+                  style={[styles.deleteButton, isTablet && styles.deleteButtonTablet, { flex: 1 }]}
+                  onPress={() => {
+                    Alert.alert(
+                      '일정 삭제',
+                      '이 일정을 삭제하시겠습니까?',
+                      [
+                        { text: '취소', style: 'cancel' },
+                        {
+                          text: '삭제',
+                          style: 'destructive',
+                          onPress: () => onDelete(initialData.id!),
+                        },
+                      ],
+                    );
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.deleteButtonText, isTablet && styles.deleteButtonTextTablet]}>
+                    삭제하기
+                  </Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity
                 style={[
-                  styles.saveButtonText,
-                  { color: '#FFFFFF' },
-                  !isValid && styles.saveButtonTextDisabled,
-                  isTablet && styles.saveButtonTextTablet,
+                  styles.saveButton,
+                  { flex: 1, backgroundColor: colors.primary },
+                  !isValid && styles.saveButtonDisabled,
+                  isTablet && styles.saveButtonTablet,
                 ]}
+                onPress={handleSave}
+                activeOpacity={0.7}
+                disabled={!isValid}
               >
-                저장하기
-              </Text>
-            </TouchableOpacity>
+                <Text
+                  style={[
+                    styles.saveButtonText,
+                    { color: '#FFFFFF' },
+                    !isValid && styles.saveButtonTextDisabled,
+                    isTablet && styles.saveButtonTextTablet,
+                  ]}
+                >
+                  저장하기
+                </Text>
+              </TouchableOpacity>
+            </View>
             {initialData && onRegisterEvent && (
               <TouchableOpacity
                 style={[styles.registerEventButton, isTablet && styles.registerEventButtonTablet]}
@@ -569,6 +599,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
                   const dayName = days[selectedDate.getDay()];
                   const dateStr = `${formatDisplayDate(selectedDate)} (${dayName})`;
                   onRegisterEvent({
+                    id: initialData?.id,
                     name: eventName,
                     phone,
                     type: selectedType || 'other',
@@ -910,6 +941,26 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
   },
   saveButtonTextTablet: {
+    fontSize: 18,
+  },
+  deleteButton: {
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#EF4444',
+  },
+  deleteButtonTablet: {
+    paddingVertical: 14,
+    borderRadius: 12,
+  },
+  deleteButtonText: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#EF4444',
+  },
+  deleteButtonTextTablet: {
     fontSize: 18,
   },
 });

@@ -21,7 +21,7 @@ import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon, WeddingIcon, FuneralIc
 import { Header } from '../components/Header';
 import { CustomAlert } from '../components/CustomAlert';
 import { EventType } from '../components/UpcomingEvents';
-import { insertEvent, updateEvent, insertSchedule, getAllSchedules, ScheduleRecord } from '../database/queries';
+import { insertEvent, updateEvent, insertSchedule, getAllSchedules, ScheduleRecord, updateScheduleByEventLink } from '../database/queries';
 import { getDatabase } from '../database/database';
 import { resolveEventType, getEventTypeLabel } from '../constants/eventTypes';
 
@@ -43,6 +43,7 @@ export interface RegisterInitialData {
   editId?: string;
   amount?: number;       // in won (DB value)
   amountType?: 'send' | 'received';
+  scheduleId?: string;
 }
 
 interface RegisterScreenProps {
@@ -397,14 +398,25 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
         amountType,
         relationship: relation,
         memo,
+        scheduleId: initialData?.scheduleId,
       };
 
       if (isEditMode && initialData?.editId) {
         await updateEvent(initialData.editId, eventData);
+        // Sync shared fields to the linked schedule
+        await updateScheduleByEventLink(initialData.editId, {
+          name: eventName.trim(),
+          phone,
+          type: eventType,
+          date: dbDate,
+          relationship: relation,
+          memo,
+        });
       } else {
         await insertEvent(eventData);
 
-        if (registerScheduleChecked) {
+        // Only create a new schedule if not already linked to one
+        if (registerScheduleChecked && !initialData?.scheduleId) {
           await insertSchedule({
             name: eventName,
             phone,

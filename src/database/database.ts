@@ -46,6 +46,15 @@ export async function initDatabase(): Promise<void> {
       memo TEXT DEFAULT ''
     );
   `);
+
+  // Migration: add schedule_id column to events (links event to schedule)
+  try {
+    await database.execAsync(
+      'ALTER TABLE events ADD COLUMN schedule_id INTEGER DEFAULT NULL'
+    );
+  } catch {
+    // Column already exists — ignore
+  }
 }
 
 export async function resetDatabase(): Promise<void> {

@@ -381,21 +381,22 @@ export interface EventInput {
   amountType: 'send' | 'received';
   relationship: string;
   memo?: string;
+  scheduleId?: string;
 }
 
 export async function insertEvent(event: EventInput): Promise<void> {
   const db = await getDatabase();
   await db.runAsync(
-    'INSERT INTO events (name, phone, type, date, amount, amountType, relationship, eventRole, memo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    [event.name, normalizePhone(event.phone || ''), event.type, event.date, event.amount, event.amountType, event.relationship, '', event.memo || '']
+    'INSERT INTO events (name, phone, type, date, amount, amountType, relationship, eventRole, memo, schedule_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [event.name, normalizePhone(event.phone || ''), event.type, event.date, event.amount, event.amountType, event.relationship, '', event.memo || '', event.scheduleId ? Number(event.scheduleId) : null]
   );
 }
 
 export async function updateEvent(id: string, event: EventInput): Promise<void> {
   const db = await getDatabase();
   await db.runAsync(
-    'UPDATE events SET name = ?, phone = ?, type = ?, date = ?, amount = ?, amountType = ?, relationship = ?, memo = ? WHERE id = ?',
-    [event.name, normalizePhone(event.phone || ''), event.type, event.date, event.amount, event.amountType, event.relationship, event.memo || '', id]
+    'UPDATE events SET name = ?, phone = ?, type = ?, date = ?, amount = ?, amountType = ?, relationship = ?, memo = ?, schedule_id = ? WHERE id = ?',
+    [event.name, normalizePhone(event.phone || ''), event.type, event.date, event.amount, event.amountType, event.relationship, event.memo || '', event.scheduleId ? Number(event.scheduleId) : null, id]
   );
 }
 
@@ -701,4 +702,54 @@ export async function updateSchedule(id: string, schedule: ScheduleInput): Promi
 export async function deleteSchedule(id: string): Promise<void> {
   const db = await getDatabase();
   await db.runAsync('DELETE FROM schedules WHERE id = ?', [id]);
+}
+
+// --- Schedule ↔ Event linking functions ---
+
+/** Update shared fields on all events linked to a schedule */
+export async function updateEventsByScheduleId(
+  scheduleId: string,
+  fields: { name: string; phone?: string; type: string; date: string; relationship?: string; memo?: string }
+): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync(
+    'UPDATE events SET name = ?, phone = ?, type = ?, date = ?, relationship = ?, memo = ? WHERE schedule_id = ?',
+    [fields.name, normalizePhone(fields.phone || ''), fields.type, fields.date, fields.relationship || '', fields.memo || '', Number(scheduleId)]
+  );
+}
+
+/** Unlink events from a schedule (set schedule_id to NULL) — used when deleting a schedule */
+export async function unlinkEventsByScheduleId(scheduleId: string): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync(
+    'UPDATE events SET schedule_id = NULL WHERE schedule_id = ?',
+    [Number(scheduleId)]
+  );
+}
+
+/** Update the linked schedule when an event's shared fields change */
+export async function updateScheduleByEventLink(
+  eventId: string,
+  fields: { name: string; phone?: string; type: string; date: string; relationship?: string; memo?: string }
+): Promise<void> {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<{ schedule_id: number | null }>(
+    'SELECT schedule_id FROM events WHERE id = ?',
+    [eventId]
+  );
+  if (!row?.schedule_id) return;
+  await db.runAsync(
+    'UPDATE schedules SET name = ?, phone = ?, type = ?, date = ?, relationship = ?, memo = ? WHERE id = ?',
+    [fields.name, normalizePhone(fields.phone || ''), fields.type, fields.date, fields.relationship || '', fields.memo || '', row.schedule_id]
+  );
+}
+
+/** Get the schedule_id linked to an event */
+export async function getScheduleIdByEventId(eventId: string): Promise<string | null> {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<{ schedule_id: number | null }>(
+    'SELECT schedule_id FROM events WHERE id = ?',
+    [eventId]
+  );
+  return row?.schedule_id ? String(row.schedule_id) : null;
 }
