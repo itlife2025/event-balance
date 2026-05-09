@@ -189,9 +189,16 @@ export const ArrowUpIcon: React.FC<IconProps> = ({ size = 16, color = '#22C55E' 
 );
 
 // Bell Icon (PNG)
-export const BellIcon: React.FC<IconProps> = ({ size = 24 }) => (
+interface BellIconProps extends IconProps {
+  hasNotification?: boolean;
+}
+export const BellIcon: React.FC<BellIconProps> = ({ size = 24, hasNotification = false }) => (
   <Image
-    source={require('../../assets/bell-off-icon.png')}
+    source={
+      hasNotification
+        ? require('../../assets/bell-on-icon.png')
+        : require('../../assets/bell-off-icon.png')
+    }
     style={{ width: size, height: size }}
     resizeMode="contain"
   />

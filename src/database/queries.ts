@@ -107,7 +107,7 @@ export interface RecentRecord {
   isSent: boolean;
 }
 
-function formatDate(dateStr: string): string {
+export function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
   const days = ['일', '월', '화', '수', '목', '금', '토'];
   const y = d.getFullYear();
@@ -410,7 +410,7 @@ export interface ScheduleRecord {
   memo: string;
 }
 
-export async function getAllSchedules(): Promise<ScheduleRecord[]> {
+export async function getAllSchedules(fromDate?: string): Promise<ScheduleRecord[]> {
   const db = await getDatabase();
   const rows = await db.getAllAsync<{
     id: number;
@@ -421,7 +421,10 @@ export async function getAllSchedules(): Promise<ScheduleRecord[]> {
     relationship: string;
     memo: string;
   }>(
-    'SELECT id, name, phone, type, date, relationship, memo FROM schedules ORDER BY date ASC'
+    fromDate
+      ? 'SELECT id, name, phone, type, date, relationship, memo FROM schedules WHERE date >= ? ORDER BY date ASC'
+      : 'SELECT id, name, phone, type, date, relationship, memo FROM schedules ORDER BY date ASC',
+    fromDate ? [fromDate] : []
   );
   return rows.map(row => ({
     id: String(row.id),
@@ -432,6 +435,32 @@ export async function getAllSchedules(): Promise<ScheduleRecord[]> {
     relationship: row.relationship || '',
     memo: row.memo || '',
   }));
+}
+
+export async function getScheduleById(id: string): Promise<ScheduleRecord | null> {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<{
+    id: number;
+    name: string;
+    phone: string;
+    type: string;
+    date: string;
+    relationship: string;
+    memo: string;
+  }>(
+    'SELECT id, name, phone, type, date, relationship, memo FROM schedules WHERE id = ?',
+    [id]
+  );
+  if (!row) return null;
+  return {
+    id: String(row.id),
+    name: row.name,
+    phone: row.phone || '',
+    type: row.type,
+    date: row.date,
+    relationship: row.relationship || '',
+    memo: row.memo || '',
+  };
 }
 
 export async function getSetting(key: string): Promise<string | null> {

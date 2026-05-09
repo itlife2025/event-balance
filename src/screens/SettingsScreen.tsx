@@ -22,6 +22,7 @@ import { Header } from '../components/Header';
 import { CustomAlert } from '../components/CustomAlert';
 import { resetDatabase } from '../database/database';
 import { getSetting, setSetting } from '../database/queries';
+import { scheduleAllNotifications } from '../services/NotificationService';
 
 type TimingKey = 'd7' | 'd1' | 'dday';
 
@@ -31,12 +32,13 @@ const TIMING_OPTIONS: { key: TimingKey; label: string }[] = [
   { key: 'dday', label: '당일' },
 ];
 
-const HOUR_OPTIONS = Array.from({ length: 17 }, (_, i) => i + 6); // 6~22
+const TIME_OPTIONS = Array.from({ length: 288 }, (_, i) => ({
+  hour: Math.floor(i / 12),
+  minute: (i % 12) * 5,
+}));
 
-function formatHour(h: number): string {
-  if (h < 12) return `오전 ${h}시`;
-  if (h === 12) return `오후 12시`;
-  return `오후 ${h - 12}시`;
+function formatTime(h: number, m: number): string {
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
 interface SettingsScreenProps {
@@ -55,9 +57,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
   const [profileName, setProfileName] = useState('');
 
   // Notification time settings
-  const [repeatYearly, setRepeatYearly] = useState(true);
+  const [repeatYearly, setRepeatYearly] = useState(false);
   const [notifTimings, setNotifTimings] = useState<TimingKey[]>(['dday']);
   const [notifHour, setNotifHour] = useState(9);
+  const [notifMinute, setNotifMinute] = useState(0);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
   // Alerts
@@ -76,19 +79,21 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
 
   useEffect(() => {
     (async () => {
-      const [notif, dark, name, repeat, timings, hour] = await Promise.all([
+      const [notif, dark, name, repeat, timings, hour, minute] = await Promise.all([
         getSetting('notification_enabled'),
         getSetting('dark_mode_enabled'),
         getSetting('profile_name'),
         getSetting('notif_repeat_yearly'),
         getSetting('notif_timings'),
         getSetting('notif_hour'),
+        getSetting('notif_minute'),
       ]);
       if (dark !== null) setDarkModeEnabled(dark === '1');
       setProfileName(name || '사용자');
       if (repeat !== null) setRepeatYearly(repeat === '1');
       if (timings) setNotifTimings(timings.split(',') as TimingKey[]);
       if (hour) setNotifHour(parseInt(hour, 10));
+      if (minute) setNotifMinute(parseInt(minute, 10));
 
       const granted = await checkPermission();
       if (notif !== null) setNotificationEnabled(notif === '1' && granted);
@@ -113,7 +118,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
       }
     }
     setNotificationEnabled(value);
-    setSetting('notification_enabled', value ? '1' : '0');
+    await setSetting('notification_enabled', value ? '1' : '0');
+    scheduleAllNotifications().catch(() => {});
   };
 
   const handleOpenNotificationSettings = () => {
@@ -125,24 +131,31 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
     }
   };
 
-  const handleRepeatToggle = (value: boolean) => {
+  const handleRepeatToggle = async (value: boolean) => {
     setRepeatYearly(value);
-    setSetting('notif_repeat_yearly', value ? '1' : '0');
+    await setSetting('notif_repeat_yearly', value ? '1' : '0');
+    scheduleAllNotifications().catch(() => {});
   };
 
-  const toggleTiming = (key: TimingKey) => {
+  const toggleTiming = async (key: TimingKey) => {
     const next = notifTimings.includes(key)
       ? notifTimings.filter(t => t !== key)
       : [...notifTimings, key];
-    if (next.length === 0) return; // at least one must be selected
+    if (next.length === 0) return;
     setNotifTimings(next);
-    setSetting('notif_timings', next.join(','));
+    await setSetting('notif_timings', next.join(','));
+    scheduleAllNotifications().catch(() => {});
   };
 
-  const handleSelectHour = (h: number) => {
+  const handleSelectTime = async (h: number, m: number) => {
     setNotifHour(h);
-    setSetting('notif_hour', String(h));
+    setNotifMinute(m);
+    await Promise.all([
+      setSetting('notif_hour', String(h)),
+      setSetting('notif_minute', String(m)),
+    ]);
     setShowTimePicker(false);
+    scheduleAllNotifications().catch(() => {});
   };
 
   const handleDarkModeToggle = (value: boolean) => {
@@ -335,7 +348,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
                     </Text>
                   </View>
                   <Text style={[styles.settingValue, isTablet && styles.settingValueTablet, { color: colors.textTertiary }]}>
-                    {formatHour(notifHour)}
+                    {formatTime(notifHour, notifMinute)}
                   </Text>
                   <ChevronRightIcon size={isTablet ? 22 : 20} color={colors.placeholder} />
                 </TouchableOpacity>
@@ -380,24 +393,29 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
       {/* Time Picker Modal */}
       <Modal transparent visible={showTimePicker} animationType="fade" onRequestClose={() => setShowTimePicker(false)}>
         <TouchableOpacity style={[styles.modalOverlay, { backgroundColor: colors.overlay }]} activeOpacity={1} onPress={() => setShowTimePicker(false)}>
-          <View style={[styles.pickerContainer, { backgroundColor: colors.card }]}>
-            <FlatList
-              data={HOUR_OPTIONS}
-              keyExtractor={(item) => String(item)}
-              initialScrollIndex={Math.max(0, HOUR_OPTIONS.indexOf(notifHour))}
-              getItemLayout={(_, index) => ({ length: 50, offset: 50 * index, index })}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={[styles.pickerItem, item === notifHour && { backgroundColor: colors.primaryLight }]}
-                  onPress={() => handleSelectHour(item)}
-                >
-                  <Text style={[styles.pickerItemText, { color: colors.text }, item === notifHour && { color: colors.primary, fontWeight: '700' }]}>
-                    {formatHour(item)}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
+          <TouchableOpacity activeOpacity={1} onPress={() => {}}>
+            <View style={[styles.pickerContainer, { backgroundColor: colors.card }]}>
+              <FlatList
+                data={TIME_OPTIONS}
+                keyExtractor={(item) => `${item.hour}-${item.minute}`}
+                initialScrollIndex={Math.max(0, TIME_OPTIONS.findIndex(t => t.hour === notifHour && t.minute === notifMinute))}
+                getItemLayout={(_, index) => ({ length: 50, offset: 50 * index, index })}
+                renderItem={({ item }) => {
+                  const selected = item.hour === notifHour && item.minute === notifMinute;
+                  return (
+                    <TouchableOpacity
+                      style={[styles.pickerItem, selected && { backgroundColor: colors.primaryLight }]}
+                      onPress={() => handleSelectTime(item.hour, item.minute)}
+                    >
+                      <Text style={[styles.pickerItemText, { color: colors.text }, selected && { color: colors.primary, fontWeight: '700' }]}>
+                        {formatTime(item.hour, item.minute)}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                }}
+              />
+            </View>
+          </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
 
@@ -587,7 +605,7 @@ const styles = StyleSheet.create({
   pickerContainer: {
     backgroundColor: '#FFFFFF',
     borderRadius: 14,
-    width: 180,
+    width: 160,
     maxHeight: 300,
     overflow: 'hidden',
     shadowColor: '#000',
@@ -601,17 +619,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 20,
   },
-  pickerItemSelected: {
-    backgroundColor: '#EEF2FF',
-  },
   pickerItemText: {
     fontSize: 18,
     color: '#374151',
     textAlign: 'center',
-  },
-  pickerItemTextSelected: {
-    color: '#6366F1',
-    fontWeight: '700',
   },
 
   profileCard: {
@@ -629,7 +640,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#E0E7FF',
     justifyContent: 'center',
     alignItems: 'center',
   },

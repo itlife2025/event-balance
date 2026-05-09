@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'r
 import { ListIcon, WeddingIcon, FuneralIcon, BirthIcon, BirthdayIcon, FirstBirthdayIcon, OtherIcon, ChevronRightIcon } from './Icons';
 import { useTheme } from '../theme/ThemeContext';
 import { EventType } from './UpcomingEvents';
+import { getEventTypeLabel } from '../constants/eventTypes';
 
 export interface Record {
   id: string;
@@ -68,14 +69,6 @@ export const RecentRecords: React.FC<RecentRecordsProps> = ({
     return 'transparent';
   };
 
-  const getEventTypeLabel = (type: EventType) => {
-    if (type === 'wedding') return '결혼';
-    if (type === 'funeral') return '장례';
-    if (type === 'birthday') return '생일';
-    if (type === 'firstBirthday') return '돌잔치';
-    if (type === 'birth') return '출산';
-    return '기타';
-  };
 
   return (
     <View style={[styles.container, isTablet && styles.containerTablet]}>
@@ -116,7 +109,7 @@ export const RecentRecords: React.FC<RecentRecordsProps> = ({
             </View>
             <View style={styles.recordInfo}>
               <Text style={[styles.recordName, isTablet && styles.recordNameTablet, { color: colors.text }]}>
-                {record.name} {getEventTypeLabel(record.type)}
+                {record.name} {getEventTypeLabel(record.type, '기타')}
               </Text>
               <Text style={[styles.recordDate, isTablet && styles.recordDateTablet, { color: colors.textTertiary }]}>
                 {record.date}

@@ -17,6 +17,7 @@ import { Header } from '../components/Header';
 import { useTheme } from '../theme/ThemeContext';
 import { EventType } from '../components/UpcomingEvents';
 import { insertSchedule, updateSchedule, updateEventsByScheduleId } from '../database/queries';
+import { scheduleAllNotifications } from '../services/NotificationService';
 
 export interface ScheduleData {
   id?: string;
@@ -246,6 +247,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
         await insertSchedule(scheduleData);
       }
 
+      scheduleAllNotifications().catch(() => {});
       onSaved?.();
       onClose?.();
     } catch (error) {

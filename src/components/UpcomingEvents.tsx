@@ -21,7 +21,7 @@ import {
 import { useTheme } from '../theme/ThemeContext';
 import { getEventTypeLabel } from '../constants/eventTypes';
 
-export type EventType = 'wedding' | 'funeral' | 'birthday' | 'firstBirthday' | 'birth' | 'custom' | 'other';
+export type EventType = 'wedding' | 'funeral' | 'birthday' | 'firstBirthday' | 'birth' | 'other';
 
 export interface Event {
   id: string;
@@ -151,7 +151,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
                     style={[styles.eventName, isTablet && styles.eventNameTablet, { color: colors.text }]}
                     numberOfLines={1}
                   >
-                    {event.name} {getEventTypeLabel(event.type)}
+                    {event.name} {getEventTypeLabel(event.type, '기타')}
                   </Text>
                   <Text
                     style={[styles.eventDate, isTablet && styles.eventDateTablet, { color: colors.textTertiary }]}

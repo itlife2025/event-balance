@@ -21,9 +21,9 @@ export function resolveEventType(raw: string): EventTypeKey {
   return KOREAN_TO_TYPE[raw] ?? 'other';
 }
 
-/** type 문자열 → 표시용 라벨 (알려진 키면 한글, 직접입력이면 그대로) */
-export function getEventTypeLabel(type: string): string {
+/** type 문자열 → 표시용 라벨 (알려진 키면 한글, 직접입력이면 그대로 또는 fallback) */
+export function getEventTypeLabel(type: string, fallback?: string): string {
   if (type in EVENT_TYPE_LABELS) return EVENT_TYPE_LABELS[type as EventTypeKey];
   if (type in KOREAN_TO_TYPE) return type; // 이미 한글
-  return type; // 직접입력 값 그대로 반환
+  return fallback !== undefined ? fallback : type;
 }

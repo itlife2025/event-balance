@@ -21,8 +21,10 @@ import { DetailScreen } from './DetailScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { ListScreen } from './ListScreen';
 import { StatsScreen } from './StatsScreen';
-import { getYearlyTotals, getMonthlyBreakdown, getRecentRecords, getUpcomingEvents, deleteSchedule, unlinkEventsByScheduleId, type MonthlyData, type RecentRecord, type UpcomingEvent } from '../database/queries';
+import { getYearlyTotals, getMonthlyBreakdown, getRecentRecords, getUpcomingEvents, getScheduleById, formatDate, deleteSchedule, unlinkEventsByScheduleId, type MonthlyData, type RecentRecord, type UpcomingEvent } from '../database/queries';
 import type { PeriodFilter } from './StatsScreen';
+import { useNotifications, type NotificationItem } from '../context/NotificationContext';
+import { NotificationPanel } from '../components/NotificationPanel';
 
 const refreshUpcomingEvents = async (setter: (events: UpcomingEvent[]) => void) => {
   const events = await getUpcomingEvents();
@@ -73,6 +75,7 @@ export const HomeScreen: React.FC = () => {
   const [statsSelectedYearTab, setStatsSelectedYearTab] = useState(today.getFullYear());
   const [statsAmountTab, setStatsAmountTab] = useState<'sent' | 'received'>('sent');
   const [navHistory, setNavHistory] = useState<NavState[]>([]);
+  const { notifications, isPanelOpen, closePanel, clearAll, dismissNotification } = useNotifications();
 
   const pushNavState = () => {
     setNavHistory(prev => [...prev, {
@@ -148,8 +151,22 @@ export const HomeScreen: React.FC = () => {
     }
   }, [activeTab, showDetailScreen, showRegisterSchedule, showCalendar]);
 
-  const handleNotificationPress = () => {
-    // Notification pressed
+  const handleNotificationItemPress = async (item: NotificationItem) => {
+    if (!item.scheduleId) return;
+    dismissNotification(item.id);
+    const record = await getScheduleById(item.scheduleId);
+    if (!record) return;
+    pushNavState();
+    setScheduleInitialData({
+      id: record.id,
+      name: record.name,
+      phone: record.phone,
+      type: record.type as import('../components/UpcomingEvents').EventType,
+      date: formatDate(record.date),
+      relationship: record.relationship,
+      memo: record.memo,
+    });
+    setShowRegisterSchedule(true);
   };
 
   const handleDeleteSchedule = (id: string) => {
@@ -357,7 +374,7 @@ export const HomeScreen: React.FC = () => {
         // 기본 홈 화면 컨텐츠
         return (
           <View style={[styles.container, isTablet && styles.containerTablet, { backgroundColor: colors.background }]}>
-            <Header onNotificationPress={handleNotificationPress} />
+            <Header />
             <ScrollView
               style={styles.scrollView}
               contentContainerStyle={[
@@ -434,6 +451,14 @@ export const HomeScreen: React.FC = () => {
           />
         </>
       )}
+
+      <NotificationPanel
+        visible={isPanelOpen}
+        notifications={notifications}
+        onClose={closePanel}
+        onClearAll={clearAll}
+        onNotificationPress={handleNotificationItemPress}
+      />
     </SafeAreaView>
   );
 };

@@ -2,21 +2,21 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { BellIcon, ChevronLeftIcon } from './Icons';
 import { useTheme } from '../theme/ThemeContext';
+import { useNotifications } from '../context/NotificationContext';
 
 interface HeaderProps {
   title?: string;
-  onNotificationPress?: () => void;
   onBackPress?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   title = '경조사 관리',
-  onNotificationPress,
   onBackPress,
 }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
   const { colors } = useTheme();
+  const { hasUnread, openPanel } = useNotifications();
 
   return (
     <View style={[styles.container, isTablet && styles.containerTablet, { backgroundColor: colors.card }]}>
@@ -36,10 +36,10 @@ export const Header: React.FC<HeaderProps> = ({
 
       <TouchableOpacity
         style={[styles.iconButton, isTablet && styles.iconButtonTablet, { backgroundColor: 'transparent' }]}
-        onPress={onNotificationPress}
+        onPress={openPanel}
         activeOpacity={0.7}
       >
-        <BellIcon size={isTablet ? 40 : 34} color={colors.textSecondary} />
+        <BellIcon size={isTablet ? 40 : 34} color={colors.textSecondary} hasNotification={hasUnread} />
       </TouchableOpacity>
     </View>
   );
