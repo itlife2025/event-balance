@@ -58,3 +58,15 @@ npx expo start --web
 ```bash
 npx expo install expo-sqlite
 ```
+
+### EAS Development Build (Android)
+
+```bash
+eas build —profile development —platform android
+```
+
+### EAS Sever 실행
+
+```bash
+npx expo start —dev-client
+```
