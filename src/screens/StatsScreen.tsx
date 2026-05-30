@@ -4,14 +4,12 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  StatusBar,
   TouchableOpacity,
   useWindowDimensions,
   Modal,
   FlatList,
   RefreshControl,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { Header } from '../components/Header';
@@ -234,10 +232,8 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
   })();
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
-      <View style={[styles.container, isTablet && styles.containerTablet, { backgroundColor: colors.background }]}>
-        <Header title="통계" />
+    <View style={[styles.container, isTablet && styles.containerTablet, { backgroundColor: colors.background }]}>
+      <Header title="통계" />
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={[
@@ -603,16 +599,11 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({
             )}
           </View>
         </ScrollView>
-      </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
