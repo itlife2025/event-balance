@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   StatusBar,
@@ -10,6 +9,7 @@ import {
   ActivityIndicator,
   Animated,
 } from 'react-native';
+import { Text } from '../components/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { Swipeable } from 'react-native-gesture-handler';

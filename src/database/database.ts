@@ -3,15 +3,45 @@ import * as SQLite from 'expo-sqlite';
 const DB_NAME = 'event-balance.db';
 
 let db: SQLite.SQLiteDatabase | null = null;
+let openPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
 export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
   if (db) return db;
-  db = await SQLite.openDatabaseAsync(DB_NAME);
-  return db;
+  if (openPromise) return openPromise;
+  openPromise = SQLite.openDatabaseAsync(DB_NAME).then(opened => {
+    db = opened;
+    return opened;
+  }).finally(() => {
+    openPromise = null;
+  });
+  return openPromise;
+}
+
+export function invalidateDbConnection(): void {
+  db = null;
+}
+
+// NullPointerException 발생 시 연결을 재설정하고 최대 3회 재시도 (간격: 100ms, 200ms, 300ms)
+export async function withDbRetry<T>(fn: () => Promise<T>): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      return await fn();
+    } catch (e) {
+      if (!String(e).includes('NullPointerException')) throw e;
+      lastError = e;
+      invalidateDbConnection();
+      await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
+    }
+  }
+  throw lastError;
 }
 
 export async function initDatabase(): Promise<void> {
   const database = await getDatabase();
+
+  // WAL 모드: 동시 읽기 허용으로 concurrent access NPE 방지
+  await database.execAsync('PRAGMA journal_mode = WAL;');
 
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS metadata (

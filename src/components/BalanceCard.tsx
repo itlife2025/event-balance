@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, ScrollView, useWindowDimensions } from 'react-native';
+import { Text } from './Text';
 import { useTheme } from '../theme/ThemeContext';
 
 interface MonthlyData {

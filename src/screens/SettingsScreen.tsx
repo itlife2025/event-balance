@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   useWindowDimensions,
   Switch,
   Linking,
@@ -15,6 +15,7 @@ import {
   FlatList,
   Image,
 } from 'react-native';
+import { Text } from '../components/Text';
 import { useTheme } from '../theme/ThemeContext';
 import * as Notifications from 'expo-notifications';
 import { ChevronRightIcon, BellIconColored } from '../components/Icons';
@@ -148,13 +149,13 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
   };
 
   const handleSelectTime = async (h: number, m: number) => {
+    setShowTimePicker(false);
     setNotifHour(h);
     setNotifMinute(m);
     await Promise.all([
       setSetting('notif_hour', String(h)),
       setSetting('notif_minute', String(m)),
     ]);
-    setShowTimePicker(false);
     scheduleAllNotifications().catch(() => {});
   };
 
@@ -392,31 +393,33 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
 
       {/* Time Picker Modal */}
       <Modal transparent visible={showTimePicker} animationType="fade" onRequestClose={() => setShowTimePicker(false)}>
-        <TouchableOpacity style={[styles.modalOverlay, { backgroundColor: colors.overlay }]} activeOpacity={1} onPress={() => setShowTimePicker(false)}>
-          <TouchableOpacity activeOpacity={1} onPress={() => {}}>
-            <View style={[styles.pickerContainer, { backgroundColor: colors.card }]}>
-              <FlatList
-                data={TIME_OPTIONS}
-                keyExtractor={(item) => `${item.hour}-${item.minute}`}
-                initialScrollIndex={Math.max(0, TIME_OPTIONS.findIndex(t => t.hour === notifHour && t.minute === notifMinute))}
-                getItemLayout={(_, index) => ({ length: 50, offset: 50 * index, index })}
-                renderItem={({ item }) => {
-                  const selected = item.hour === notifHour && item.minute === notifMinute;
-                  return (
-                    <TouchableOpacity
-                      style={[styles.pickerItem, selected && { backgroundColor: colors.primaryLight }]}
-                      onPress={() => handleSelectTime(item.hour, item.minute)}
-                    >
-                      <Text style={[styles.pickerItemText, { color: colors.text }, selected && { color: colors.primary, fontWeight: '700' }]}>
-                        {formatTime(item.hour, item.minute)}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                }}
-              />
-            </View>
-          </TouchableOpacity>
-        </TouchableOpacity>
+        <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}>
+          {/* 배경 터치 시 닫기 — pickerContainer보다 먼저 렌더링되어 아래에 위치 */}
+          <TouchableWithoutFeedback onPress={() => setShowTimePicker(false)}>
+            <View style={StyleSheet.absoluteFillObject} />
+          </TouchableWithoutFeedback>
+          <View style={[styles.pickerContainer, { backgroundColor: colors.card }]}>
+            <FlatList
+              data={TIME_OPTIONS}
+              keyExtractor={(item) => `${item.hour}-${item.minute}`}
+              initialScrollIndex={Math.max(0, TIME_OPTIONS.findIndex(t => t.hour === notifHour && t.minute === notifMinute))}
+              getItemLayout={(_, index) => ({ length: 50, offset: 50 * index, index })}
+              renderItem={({ item }) => {
+                const selected = item.hour === notifHour && item.minute === notifMinute;
+                return (
+                  <TouchableOpacity
+                    style={[styles.pickerItem, selected && { backgroundColor: colors.primaryLight }]}
+                    onPress={() => handleSelectTime(item.hour, item.minute)}
+                  >
+                    <Text style={[styles.pickerItemText, { color: colors.text }, selected && { color: colors.primary, fontWeight: '700' }]}>
+                      {formatTime(item.hour, item.minute)}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          </View>
+        </View>
       </Modal>
 
       <CustomAlert

@@ -1,13 +1,13 @@
 import React from 'react';
 import {
   View,
-  Text,
   Modal,
   TouchableOpacity,
   TouchableWithoutFeedback,
   FlatList,
   StyleSheet,
 } from 'react-native';
+import { Text } from './Text';
 import { useTheme } from '../theme/ThemeContext';
 import { type NotificationItem } from '../context/NotificationContext';
 

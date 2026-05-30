@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { Text } from './Text';
 import { ListIcon, WeddingIcon, FuneralIcon, BirthIcon, BirthdayIcon, FirstBirthdayIcon, OtherIcon, ChevronRightIcon } from './Icons';
 import { useTheme } from '../theme/ThemeContext';
 import { EventType } from './UpcomingEvents';

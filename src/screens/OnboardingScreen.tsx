@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   StatusBar,
   TouchableOpacity,
@@ -9,6 +8,7 @@ import {
   Alert,
   Linking,
 } from 'react-native';
+import { Text } from '../components/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 let Contacts: any = null;

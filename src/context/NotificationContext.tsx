@@ -37,6 +37,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [hasUnread, setHasUnread] = useState(false);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const seenIds = useRef<Set<string>>(new Set());
+  const seenScheduleIds = useRef<Set<string>>(new Set());
   // 전체 삭제 시각 (ms). 이 시각 이전 알림은 재시작 후에도 다시 추가하지 않음.
   const clearedAt = useRef<number>(0);
 
@@ -54,6 +55,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     // 전체 삭제 이전에 수신된 알림은 무시
     if (receivedAt && receivedAt.getTime() <= clearedAt.current) return;
     seenIds.current.add(notifId);
+    seenScheduleIds.current.add(scheduleIdStr);
+    Notifications.setBadgeCountAsync(seenScheduleIds.current.size);
     const item: NotificationItem = { id: notifId, scheduleId: scheduleIdStr, title, body, receivedAt: receivedAt ?? new Date() };
     setNotifications(prev => [item, ...prev]);
     setHasUnread(true);
@@ -66,6 +69,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const openPanel = useCallback(() => {
     setHasUnread(false);
     setIsPanelOpen(true);
+    seenScheduleIds.current.clear();
+    Notifications.setBadgeCountAsync(0);
   }, []);
 
   const closePanel = useCallback(() => {
@@ -77,7 +82,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     clearedAt.current = now;
     setSetting('notif_cleared_at', String(now));
     Notifications.dismissAllNotificationsAsync();
+    Notifications.setBadgeCountAsync(0);
     seenIds.current.clear();
+    seenScheduleIds.current.clear();
     setNotifications([]);
     setHasUnread(false);
     setIsPanelOpen(false);
