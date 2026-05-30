@@ -480,7 +480,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
       {/* Content Area */}
       <KeyboardAvoidingView
         style={styles.contentArea}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         {/* ScrollView */}
         <ScrollView
@@ -1113,9 +1113,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
+    flexDirection: 'column',
   },
   contentArea: {
     flex: 1,
+    flexDirection: 'column',
   },
   scrollView: {
     flex: 1,
