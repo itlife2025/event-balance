@@ -3,11 +3,11 @@ import {
   View,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
   StatusBar,
   Alert,
   useWindowDimensions,
 } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { Header } from '../components/Header';
 import { BalanceCard } from '../components/BalanceCard';
@@ -119,6 +119,9 @@ export const HomeScreen: React.FC = () => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
   const { colors, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
+  // Nav bar height (~52) + nav bottom padding (insets.bottom or min 12)
+  const navBarHeight = 52 + 8 + Math.max(insets.bottom, isTablet ? 24 : 12);
 
   const currentYear = new Date().getFullYear();
 
@@ -439,7 +442,7 @@ export const HomeScreen: React.FC = () => {
       ) : (
         <>
           {/* Main Content Area */}
-          <View style={{ flex: 1, paddingBottom: 60 }}>
+          <View style={{ flex: 1, paddingBottom: navBarHeight }}>
             {renderContent()}
           </View>
 

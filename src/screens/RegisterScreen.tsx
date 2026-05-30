@@ -12,10 +12,10 @@ import {
   Modal,
   FlatList,
   KeyboardAvoidingView,
-  SafeAreaView,
   Image,
   Pressable,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon, WeddingIcon, FuneralIcon, BirthIcon, BirthdayIcon, FirstBirthdayIcon, OtherIcon, SearchIcon, PhoneIcon } from '../components/Icons';
 import { Header } from '../components/Header';
@@ -1186,7 +1186,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderWidth: 1,
     borderColor: '#F3F4F6',
-    height: 40,
+    minHeight: 48,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -1194,7 +1194,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   searchContainerTablet: {
-    height: 44,
+    minHeight: 52,
     paddingHorizontal: 14,
   },
   searchIconLeft: {
@@ -1260,7 +1260,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderWidth: 1,
     fontSize: 16,
-    height: 40,
+    minHeight: 48,
   },
   // Calendar styles
   calendarContainer: {
@@ -1352,7 +1352,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   recallButton: {
-    height: 40,
+    minHeight: 48,
     borderRadius: 10,
     backgroundColor: '#F59E0B',
     alignItems: 'center',
@@ -1360,7 +1360,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   recallButtonTablet: {
-    height: 44,
+    minHeight: 52,
     borderRadius: 12,
     paddingHorizontal: 14,
   },
@@ -1392,7 +1392,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     paddingHorizontal: 12,
-    height: 40,
+    minHeight: 48,
   },
   checkbox: {
     width: 18,
@@ -1452,7 +1452,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderWidth: 1,
     borderColor: '#F3F4F6',
-    height: 40,
+    minHeight: 48,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.03,
@@ -1460,7 +1460,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   inputBoxTablet: {
-    height: 44,
+    minHeight: 52,
     paddingHorizontal: 14,
   },
   inputText: {

@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
     color: '#1F2937',
     paddingLeft: 6,
     paddingRight: 12,
-    height: 34,
+    minHeight: 38,
     minWidth: 80,
   },
   searchInputTablet: {

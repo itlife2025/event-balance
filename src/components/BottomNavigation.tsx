@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavTabKey } from '../types/navigation';
 import { HomeIcon, ChartIcon, ListIcon, SettingsIcon, PlusIcon } from './Icons';
 import { useTheme } from '../theme/ThemeContext';
@@ -18,6 +19,8 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+  const bottomPadding = Math.max(insets.bottom, isTablet ? 24 : 12);
 
   const renderTab = (
     key: NavTabKey,
@@ -53,7 +56,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   };
 
   return (
-    <View style={[styles.container, isTablet && styles.containerTablet, { backgroundColor: colors.card, borderTopColor: colors.borderLight }]}>
+    <View style={[styles.container, isTablet && styles.containerTablet, { backgroundColor: colors.card, borderTopColor: colors.borderLight, paddingBottom: bottomPadding }]}>
       <View style={[styles.navigation, isTablet && styles.navigationTablet]}>
         {renderTab('home', '홈', HomeIcon)}
         {renderTab('list', '리스트', ListIcon)}
@@ -88,16 +91,13 @@ const styles = StyleSheet.create({
     right: 0,
     width: '100%',
     borderTopWidth: 1,
-    paddingBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 10,
   },
-  containerTablet: {
-    paddingBottom: 24,
-  },
+  containerTablet: {},
   navigation: {
     flexDirection: 'row',
     alignItems: 'center',
