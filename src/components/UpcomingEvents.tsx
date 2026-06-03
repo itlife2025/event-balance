@@ -1,12 +1,12 @@
 import React from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
   useWindowDimensions,
 } from 'react-native';
+import { Text } from './Text';
 import {
   CalendarIcon,
   WeddingIcon,
@@ -36,6 +36,7 @@ export interface Event {
 
 interface UpcomingEventsProps {
   events?: Event[];
+  hasSchedules?: boolean;
   onEventPress?: (event: Event) => void;
   onEventLongPress?: (event: Event) => void;
   onMorePress?: () => void;
@@ -75,6 +76,7 @@ const defaultEvents: Event[] = [
 
 export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
   events = defaultEvents,
+  hasSchedules = false,
   onEventPress,
   onEventLongPress,
   onMorePress,
@@ -102,7 +104,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
     <View style={[styles.container, isTablet && styles.containerTablet]}>
       <TouchableOpacity
         style={styles.header}
-        onPress={events.length > 0 ? onMorePress : onAddPress}
+        onPress={(events.length > 0 || hasSchedules) ? onMorePress : onAddPress}
         activeOpacity={0.7}
       >
         <View style={styles.headerLeft}>
@@ -111,7 +113,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
             다가오는 경조사
           </Text>
         </View>
-        {events.length > 0 ? (
+        {(events.length > 0 || hasSchedules) ? (
           <ChevronRightIcon size={isTablet ? 28 : 24} color={colors.textTertiary} />
         ) : (
           <PlusIcon size={isTablet ? 28 : 24} color={colors.textTertiary} />

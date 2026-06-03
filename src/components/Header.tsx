@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { Text } from './Text';
 import { BellIcon, ChevronLeftIcon } from './Icons';
 import { useTheme } from '../theme/ThemeContext';
 import { useNotifications } from '../context/NotificationContext';

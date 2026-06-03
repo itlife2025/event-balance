@@ -158,7 +158,7 @@ export interface UpcomingEvent {
   memo: string;
 }
 
-export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
+export async function getUpcomingEvents(includeAll = false): Promise<UpcomingEvent[]> {
   const db = await getDatabase();
   const today = new Date().toISOString().slice(0, 10);
 
@@ -171,10 +171,10 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
     relationship: string;
     memo: string;
   }>(
-    `SELECT id, name, phone, type, date, relationship, memo FROM schedules
-     WHERE date >= ?
-     ORDER BY date ASC`,
-    [today]
+    includeAll
+      ? `SELECT id, name, phone, type, date, relationship, memo FROM schedules ORDER BY date ASC`
+      : `SELECT id, name, phone, type, date, relationship, memo FROM schedules WHERE date >= ? ORDER BY date ASC`,
+    includeAll ? [] : [today]
   );
 
   const now = new Date();
@@ -781,4 +781,10 @@ export async function getScheduleIdByEventId(eventId: string): Promise<string | 
     [eventId]
   );
   return row?.schedule_id ? String(row.schedule_id) : null;
+}
+
+export async function hasAnySchedule(): Promise<boolean> {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<{ count: number }>('SELECT COUNT(*) as count FROM schedules');
+  return (row?.count ?? 0) > 0;
 }

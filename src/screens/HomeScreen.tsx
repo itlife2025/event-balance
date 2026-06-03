@@ -22,7 +22,8 @@ import { DetailScreen } from './DetailScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { ListScreen } from './ListScreen';
 import { StatsScreen } from './StatsScreen';
-import { getYearlyTotals, getMonthlyBreakdown, getRecentRecords, getUpcomingEvents, getScheduleById, formatDate, deleteSchedule, unlinkEventsByScheduleId, type MonthlyData, type RecentRecord, type UpcomingEvent } from '../database/queries';
+import { getYearlyTotals, getMonthlyBreakdown, getRecentRecords, getUpcomingEvents, hasAnySchedule, getScheduleById, formatDate, deleteSchedule, unlinkEventsByScheduleId, type MonthlyData, type RecentRecord, type UpcomingEvent } from '../database/queries';
+import { withDbRetry } from '../database/database';
 import type { PeriodFilter } from './StatsScreen';
 import { useNotifications, type NotificationItem } from '../context/NotificationContext';
 import { NotificationPanel } from '../components/NotificationPanel';
@@ -117,6 +118,7 @@ export const HomeScreen: React.FC = () => {
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [recentRecords, setRecentRecords] = useState<RecentRecord[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([]);
+  const [scheduleExists, setScheduleExists] = useState(false);
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
   const { colors, isDark } = useTheme();
@@ -128,17 +130,21 @@ export const HomeScreen: React.FC = () => {
 
   const refreshHomeData = async () => {
     try {
-      const [totals, monthly, records, events] = await Promise.all([
-        getYearlyTotals(currentYear),
-        getMonthlyBreakdown(currentYear),
-        getRecentRecords(3),
-        getUpcomingEvents(),
-      ]);
-      setSentAmount(totals.sentAmount);
-      setReceivedAmount(totals.receivedAmount);
-      setMonthlyData(monthly);
-      setRecentRecords(records);
-      setUpcomingEvents(events);
+      await withDbRetry(async () => {
+        const [totals, monthly, records, events, anySchedule] = await Promise.all([
+          getYearlyTotals(currentYear),
+          getMonthlyBreakdown(currentYear),
+          getRecentRecords(3),
+          getUpcomingEvents(),
+          hasAnySchedule(),
+        ]);
+        setSentAmount(totals.sentAmount);
+        setReceivedAmount(totals.receivedAmount);
+        setMonthlyData(monthly);
+        setRecentRecords(records);
+        setUpcomingEvents(events);
+        setScheduleExists(anySchedule);
+      });
     } catch (error) {
       console.error('Data refresh error:', error);
     }
@@ -414,6 +420,7 @@ export const HomeScreen: React.FC = () => {
                 />
                 <UpcomingEvents
                   events={upcomingEvents}
+                  hasSchedules={scheduleExists}
                   onEventPress={handleEventPress}
                   onEventLongPress={(event) => handleDeleteSchedule(event.id)}
                   onAddPress={() => {

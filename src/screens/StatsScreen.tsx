@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -10,6 +9,7 @@ import {
   FlatList,
   RefreshControl,
 } from 'react-native';
+import { Text } from '../components/Text';
 import { useTheme } from '../theme/ThemeContext';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { Header } from '../components/Header';

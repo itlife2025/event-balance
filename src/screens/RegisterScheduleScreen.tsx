@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -12,6 +11,7 @@ import {
   Pressable,
   Alert,
 } from 'react-native';
+import { Text } from '../components/Text';
 import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon, SearchIcon, PhoneIcon } from '../components/Icons';
 import { Header } from '../components/Header';
 import { useTheme } from '../theme/ThemeContext';

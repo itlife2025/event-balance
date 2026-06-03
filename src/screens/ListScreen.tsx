@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   useWindowDimensions,
@@ -11,6 +10,7 @@ import {
   FlatList,
   TextInput,
 } from 'react-native';
+import { Text } from '../components/Text';
 import { useTheme } from '../theme/ThemeContext';
 import { WeddingIcon, FuneralIcon, BirthIcon, BirthdayIcon, FirstBirthdayIcon, OtherIcon, SearchIcon } from '../components/Icons';
 import { EventType } from '../components/UpcomingEvents';

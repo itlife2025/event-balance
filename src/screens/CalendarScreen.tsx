@@ -1,13 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
   useWindowDimensions,
   Alert,
 } from 'react-native';
+import { Text } from '../components/Text';
 import { Swipeable } from 'react-native-gesture-handler';
 import { ChevronRightIcon, ChevronLeftIcon, WeddingIcon, FuneralIcon, BirthIcon, BirthdayIcon, FirstBirthdayIcon, OtherIcon } from '../components/Icons';
 import { Header } from '../components/Header';
@@ -73,7 +73,7 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
 
   useEffect(() => {
     (async () => {
-      const data = await getUpcomingEvents();
+      const data = await getUpcomingEvents(true);
       setEvents(data);
     })();
   }, []);
@@ -252,16 +252,15 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
               return (
                 <TouchableOpacity
                   key={index}
-                  style={[styles.calendarCell, { height: cellSize + 8 }]}
+                  style={[styles.calendarCell, { height: cellSize + 16 }]}
                   onPress={() => handleDayPress(item.day, item.currentMonth)}
                   disabled={!item.currentMonth}
                   activeOpacity={0.6}
                 >
                   <View style={[
                     styles.calendarDayInner,
-                    { width: cellSize, height: cellSize, borderRadius: cellSize / 2 },
+                    { width: cellSize, height: cellSize },
                     selected && [styles.calendarDaySelected, { backgroundColor: colors.primary }],
-                    isToday && !selected && [styles.calendarDayToday, { borderColor: colors.primary }],
                   ]}>
                     <Text style={[
                       styles.calendarDayText,
@@ -335,9 +334,11 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
                       </Text>
                     )}
                   </View>
-                  <View style={[styles.eventBadge, { backgroundColor: getEventIconBg(event.type) }]}>
-                    <Text style={[styles.eventBadgeText, { color: colors.text }]}>D-{event.daysLeft}</Text>
-                  </View>
+                  {event.daysLeft >= 0 && (
+                    <View style={[styles.eventBadge, { backgroundColor: getEventIconBg(event.type) }]}>
+                      <Text style={[styles.eventBadgeText, { color: colors.text }]}>D-{event.daysLeft}</Text>
+                    </View>
+                  )}
                 </TouchableOpacity>
               </Swipeable>
             ))
@@ -429,13 +430,11 @@ const styles = StyleSheet.create({
   calendarDayInner: {
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 100,
+    overflow: 'hidden',
   },
   calendarDaySelected: {
     backgroundColor: '#6366F1',
-  },
-  calendarDayToday: {
-    borderWidth: 1.5,
-    borderColor: '#6366F1',
   },
   calendarDayText: {
     fontSize: 16,
