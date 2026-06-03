@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   StyleSheet,
@@ -6,6 +6,7 @@ import {
   StatusBar,
   Alert,
   useWindowDimensions,
+  BackHandler,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
@@ -153,6 +154,25 @@ export const HomeScreen: React.FC = () => {
       refreshHomeData();
     }
   }, [activeTab, showDetailScreen, showRegisterSchedule, showCalendar]);
+
+  // Android 뒤로가기 버튼 처리
+  useEffect(() => {
+    const handler = BackHandler.addEventListener('hardwareBackPress', () => {
+      // 서브 화면이 열려있으면 goBack 실행
+      if (showDetailScreen || showRegisterSchedule || showCalendar || showSettingsScreen) {
+        goBack();
+        return true;
+      }
+      // 홈 탭이 아니면 홈으로 이동
+      if (activeTab !== 'home') {
+        setActiveTab('home');
+        return true;
+      }
+      // 홈 탭이면 기본 동작 (앱 종료)
+      return false;
+    });
+    return () => handler.remove();
+  }, [activeTab, showDetailScreen, showRegisterSchedule, showCalendar, showSettingsScreen]);
 
   const handleNotificationItemPress = async (item: NotificationItem) => {
     if (!item.scheduleId) return;

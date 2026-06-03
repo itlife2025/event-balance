@@ -671,7 +671,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: '#F3F4F6',
-    height: 40,
+    minHeight: 48,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -679,7 +679,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   searchContainerTablet: {
-    height: 44,
+    minHeight: 52,
     paddingHorizontal: 14,
   },
   searchIconLeft: {
@@ -730,7 +730,7 @@ const styles = StyleSheet.create({
     borderColor: '#6366F1',
     fontSize: 16,
     color: '#1F2937',
-    height: 40,
+    minHeight: 48,
   },
   inputBox: {
     flexDirection: 'row',
@@ -742,7 +742,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderWidth: 1,
     borderColor: '#F3F4F6',
-    height: 40,
+    minHeight: 48,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.03,
@@ -750,7 +750,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   inputBoxTablet: {
-    height: 44,
+    minHeight: 52,
     paddingHorizontal: 14,
   },
   inputText: {

@@ -396,10 +396,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F3F4F6',
     borderRadius: 20,
-    paddingVertical: 6,
     paddingLeft: 10,
     paddingRight: 6,
     gap: 2,
+    height: 46,
   },
   searchInput: {
     fontSize: 17,
@@ -407,6 +407,7 @@ const styles = StyleSheet.create({
     color: '#1F2937',
     paddingLeft: 6,
     paddingRight: 12,
+    paddingVertical: 0,
     minWidth: 80,
   },
   searchInputTablet: {
@@ -419,6 +420,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 4,
     paddingVertical: 6,
+    height: 46,
   },
   arrowBtn: {
     paddingHorizontal: 10,
