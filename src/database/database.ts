@@ -18,20 +18,36 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 }
 
 export function invalidateDbConnection(): void {
+  const stale = db;
   db = null;
+  if (stale) {
+    stale.closeAsync().catch(() => {});
+  }
 }
 
-// NullPointerException 발생 시 연결을 재설정하고 최대 3회 재시도 (간격: 100ms, 200ms, 300ms)
+function isTransientDbError(e: unknown): boolean {
+  const s = String(e);
+  return (
+    s.includes('NullPointerException') ||
+    s.includes('IllegalStateException') ||
+    s.includes('SQLiteDatabaseLockedException') ||
+    s.includes('database is locked') ||
+    s.includes('already-closed') ||
+    s.includes('unable to open database')
+  );
+}
+
+// 일시적인 Android SQLite 오류 발생 시 연결을 재설정하고 최대 5회 재시도 (간격: 200ms, 400ms, 600ms, 800ms, 1000ms)
 export async function withDbRetry<T>(fn: () => Promise<T>): Promise<T> {
   let lastError: unknown;
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < 5; attempt++) {
     try {
       return await fn();
     } catch (e) {
-      if (!String(e).includes('NullPointerException')) throw e;
+      if (!isTransientDbError(e)) throw e;
       lastError = e;
       invalidateDbConnection();
-      await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
+      await new Promise(resolve => setTimeout(resolve, 200 * (attempt + 1)));
     }
   }
   throw lastError;

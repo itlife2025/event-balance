@@ -46,3 +46,6 @@ yarn-error.*
 
 # Claude Code
 .claude/
+
+# Local analysis notes
+report.md

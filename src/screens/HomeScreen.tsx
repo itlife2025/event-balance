@@ -27,6 +27,7 @@ import { withDbRetry } from '../database/database';
 import type { PeriodFilter } from './StatsScreen';
 import { useNotifications, type NotificationItem } from '../context/NotificationContext';
 import { NotificationPanel } from '../components/NotificationPanel';
+import { scheduleAllNotifications, dismissScheduleNotifications } from '../services/NotificationService';
 
 const refreshUpcomingEvents = async (setter: (events: UpcomingEvent[]) => void) => {
   const events = await getUpcomingEvents();
@@ -211,6 +212,8 @@ export const HomeScreen: React.FC = () => {
             try {
               await unlinkEventsByScheduleId(id);
               await deleteSchedule(id);
+              dismissScheduleNotifications(id).catch(() => {});
+              scheduleAllNotifications().catch(() => {});
               refreshHomeData();
             } catch (error) {
               console.error('Failed to delete schedule:', error);
@@ -278,6 +281,8 @@ export const HomeScreen: React.FC = () => {
             try {
               await unlinkEventsByScheduleId(eventId);
               await deleteSchedule(eventId);
+              dismissScheduleNotifications(eventId).catch(() => {});
+              scheduleAllNotifications().catch(() => {});
               refreshHomeData();
             } catch (error) {
               console.error('Failed to delete schedule:', error);
@@ -319,6 +324,8 @@ export const HomeScreen: React.FC = () => {
             try {
               await unlinkEventsByScheduleId(id);
               await deleteSchedule(id);
+              dismissScheduleNotifications(id).catch(() => {});
+              scheduleAllNotifications().catch(() => {});
               refreshHomeData();
               goBack();
             } catch (error) {
