@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "event-balance",
+    "name": "경조금고",
     "slug": "event-balance",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -20,7 +20,8 @@
       }
     },
     "android": {
-      "package": "com.novara.eventbalance",
+      "package": "com.lazyfactory.gyeongjovault",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
