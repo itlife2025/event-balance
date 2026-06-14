@@ -41,7 +41,13 @@
       "expo-dev-client",
       "expo-sqlite",
       "@react-native-community/datetimepicker",
-      "expo-notifications"
+      "expo-notifications",
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "경조사비 기록 시 연락처에서 이름과 전화번호를 불러오기 위해 사용합니다."
+        }
+      ]
     ],
     "extra": {
       "eas": {

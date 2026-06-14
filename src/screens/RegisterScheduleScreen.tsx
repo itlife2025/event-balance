@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -10,14 +10,25 @@ import {
   Image,
   Pressable,
   Alert,
+  Platform,
+  Modal,
+  FlatList,
+  Linking,
 } from 'react-native';
 import { Text } from '../components/Text';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon, SearchIcon, PhoneIcon } from '../components/Icons';
 import { Header } from '../components/Header';
 import { useTheme } from '../theme/ThemeContext';
 import { EventType } from '../components/UpcomingEvents';
 import { insertSchedule, updateSchedule, updateEventsByScheduleId } from '../database/queries';
 import { scheduleAllNotifications } from '../services/NotificationService';
+
+// expo-contacts는 웹에서 지원하지 않으므로 모바일에서만 동적 로드
+let Contacts: any = null;
+if (Platform.OS !== 'web') {
+  Contacts = require('expo-contacts');
+}
 
 export interface ScheduleData {
   id?: string;
@@ -126,6 +137,76 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
   const [memo, setMemo] = useState(initialData?.memo || '');
   const [isEventTypeDirectInput, setIsEventTypeDirectInput] = useState(false);
   const [customEventType, setCustomEventType] = useState('');
+
+  // 연락처 관련 state (모바일 전용)
+  const isMobile = Platform.OS === 'ios' || Platform.OS === 'android';
+  const [contactModalVisible, setContactModalVisible] = useState(false);
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [contactSearch, setContactSearch] = useState('');
+  const [filteredContacts, setFilteredContacts] = useState<any[]>([]);
+
+  const openContactPicker = async () => {
+    if (!isMobile || !Contacts) return;
+
+    try {
+      const { status, canAskAgain } = await Contacts.requestPermissionsAsync();
+      if (status !== 'granted') {
+        if (canAskAgain) {
+          Alert.alert('권한 필요', '연락처에 접근하려면 권한을 허용해주세요.');
+        } else {
+          // 영구 거부 상태 — OS별 설정 경로가 다르므로 앱 설정 화면을 직접 열어준다
+          Alert.alert(
+            '권한 필요',
+            '연락처 권한이 꺼져 있습니다. 설정에서 연락처 접근을 허용해주세요.',
+            [
+              { text: '닫기', style: 'cancel' },
+              { text: '설정 열기', onPress: () => Linking.openSettings() },
+            ],
+          );
+        }
+        return;
+      }
+
+      const { data } = await Contacts.getContactsAsync({
+        fields: [Contacts.Fields.Name, Contacts.Fields.PhoneNumbers],
+        sort: Contacts.SortTypes.LastName,
+      });
+
+      if (data.length > 0) {
+        setContacts(data);
+        setFilteredContacts(data);
+        setContactSearch('');
+        setContactModalVisible(true);
+      } else {
+        Alert.alert('연락처 없음', '저장된 연락처가 없습니다.');
+      }
+    } catch (error) {
+      console.error('Failed to open contact picker:', error);
+      Alert.alert('오류', '연락처를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+    }
+  };
+
+  useEffect(() => {
+    if (contactSearch.trim() === '') {
+      setFilteredContacts(contacts);
+    } else {
+      setFilteredContacts(
+        contacts.filter((c) =>
+          c.name?.toLowerCase().includes(contactSearch.toLowerCase())
+        )
+      );
+    }
+  }, [contactSearch, contacts]);
+
+  const selectContact = (contact: any) => {
+    if (contact.name) {
+      setEventName(contact.name);
+    }
+    if (contact.phoneNumbers && contact.phoneNumbers.length > 0) {
+      setPhone(contact.phoneNumbers[0].number || '');
+    }
+    setContactModalVisible(false);
+  };
 
   const relationOptions = ['본인', '배우자', '자녀', '부친', '모친', '조부', '조모', '빙부', '빙모'];
 
@@ -279,9 +360,15 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
               style={[styles.searchContainer, isTablet && styles.searchContainerTablet, { backgroundColor: colors.card, borderColor: colors.borderLight }]}
               onPress={() => nameInputRef.current?.focus()}
             >
-              <View style={styles.searchIconLeft}>
-                <SearchIcon size={20} color={colors.textSecondary} />
-              </View>
+              {isMobile ? (
+                <TouchableOpacity onPress={openContactPicker} activeOpacity={0.6} style={styles.searchIconLeft}>
+                  <SearchIcon size={20} color={colors.textSecondary} />
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.searchIconLeft}>
+                  <SearchIcon size={20} color={colors.textSecondary} />
+                </View>
+              )}
               <TextInput
                 ref={nameInputRef}
                 style={[styles.searchInput, { color: colors.text }]}
@@ -620,6 +707,70 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
           </View>
         </ScrollView>
       </View>
+
+      {/* 연락처 선택 모달 (모바일 전용) */}
+      {isMobile && (
+        <Modal
+          visible={contactModalVisible}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={() => setContactModalVisible(false)}
+        >
+          <SafeAreaView style={[styles.modalContainer, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
+            <View style={[styles.modalHeader, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>연락처 선택</Text>
+              <TouchableOpacity
+                onPress={() => setContactModalVisible(false)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.modalCloseText, { color: colors.primary }]}>닫기</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={[styles.modalSearchContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <SearchIcon size={20} color={colors.textSecondary} />
+              <TextInput
+                style={[styles.modalSearchInput, { color: colors.text }]}
+                placeholder="이름 검색..."
+                placeholderTextColor={colors.textTertiary}
+                value={contactSearch}
+                onChangeText={setContactSearch}
+                autoFocus
+              />
+            </View>
+            <FlatList
+              data={filteredContacts}
+              keyExtractor={(item) => item.id ?? Math.random().toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[styles.contactItem, { borderBottomColor: colors.borderLight }]}
+                  onPress={() => selectContact(item)}
+                  activeOpacity={0.6}
+                >
+                  <View style={[styles.contactAvatar, { backgroundColor: colors.primaryLight }]}>
+                    <Text style={[styles.contactAvatarText, { color: colors.primary }]}>
+                      {item.name?.charAt(0) || '?'}
+                    </Text>
+                  </View>
+                  <View style={styles.contactInfo}>
+                    <Text style={[styles.contactName, { color: colors.text }]}>{item.name || '이름 없음'}</Text>
+                    {item.phoneNumbers && item.phoneNumbers.length > 0 && (
+                      <Text style={[styles.contactPhone, { color: colors.textSecondary }]}>
+                        {item.phoneNumbers[0].number}
+                      </Text>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              )}
+              ListEmptyComponent={
+                <View style={styles.emptyContainer}>
+                  <Text style={[styles.emptyText, { color: colors.textTertiary }]}>검색 결과가 없습니다</Text>
+                </View>
+              }
+              contentContainerStyle={styles.contactList}
+            />
+          </SafeAreaView>
+        </Modal>
+      )}
     </View>
   );
 };
@@ -964,5 +1115,86 @@ const styles = StyleSheet.create({
   },
   deleteButtonTextTablet: {
     fontSize: 18,
+  },
+  // 연락처 모달 스타일
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  modalCloseText: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  modalSearchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 16,
+    marginVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    height: 42,
+  },
+  modalSearchInput: {
+    flex: 1,
+    fontSize: 17,
+    marginLeft: 8,
+  },
+  contactList: {
+    paddingHorizontal: 16,
+  },
+  contactItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  contactAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#EEF2FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  contactAvatarText: {
+    fontSize: 19,
+    fontWeight: '600',
+  },
+  contactInfo: {
+    flex: 1,
+  },
+  contactName: {
+    fontSize: 18,
+    fontWeight: '500',
+  },
+  contactPhone: {
+    fontSize: 16,
+    marginTop: 2,
+  },
+  emptyContainer: {
+    paddingVertical: 40,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 17,
   },
 });

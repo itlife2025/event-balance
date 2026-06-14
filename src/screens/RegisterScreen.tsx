@@ -13,6 +13,7 @@ import {
   KeyboardAvoidingView,
   Image,
   Pressable,
+  Linking,
 } from 'react-native';
 import { Text } from '../components/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -138,24 +139,46 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   const openContactPicker = async () => {
     if (!isMobile || !Contacts) return;
 
-    const { status } = await Contacts.requestPermissionsAsync();
-    if (status !== 'granted') {
-      showAlert('권한 필요', '연락처에 접근하려면 권한을 허용해주세요.');
-      return;
-    }
+    try {
+      const { status, canAskAgain } = await Contacts.requestPermissionsAsync();
+      if (status !== 'granted') {
+        if (canAskAgain) {
+          showAlert('권한 필요', '연락처에 접근하려면 권한을 허용해주세요.');
+        } else {
+          // 영구 거부 상태 — OS별 설정 경로가 다르므로 앱 설정 화면을 직접 열어준다
+          setAlertState({
+            visible: true,
+            title: '권한 필요',
+            message: '연락처 권한이 꺼져 있습니다. 설정에서 연락처 접근을 허용해주세요.',
+            type: 'confirm',
+            confirmText: '설정 열기',
+            cancelText: '닫기',
+            onConfirm: () => {
+              setAlertState({ visible: false, title: '' });
+              Linking.openSettings();
+            },
+            onCancel: () => setAlertState({ visible: false, title: '' }),
+          });
+        }
+        return;
+      }
 
-    const { data } = await Contacts.getContactsAsync({
-      fields: [Contacts.Fields.Name, Contacts.Fields.PhoneNumbers],
-      sort: Contacts.SortTypes.LastName,
-    });
+      const { data } = await Contacts.getContactsAsync({
+        fields: [Contacts.Fields.Name, Contacts.Fields.PhoneNumbers],
+        sort: Contacts.SortTypes.LastName,
+      });
 
-    if (data.length > 0) {
-      setContacts(data);
-      setFilteredContacts(data);
-      setContactSearch('');
-      setContactModalVisible(true);
-    } else {
-      showAlert('연락처 없음', '저장된 연락처가 없습니다.');
+      if (data.length > 0) {
+        setContacts(data);
+        setFilteredContacts(data);
+        setContactSearch('');
+        setContactModalVisible(true);
+      } else {
+        showAlert('연락처 없음', '저장된 연락처가 없습니다.');
+      }
+    } catch (error) {
+      console.error('Failed to open contact picker:', error);
+      showAlert('오류', '연락처를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
     }
   };
 
@@ -276,16 +299,6 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   const [recallModalVisible, setRecallModalVisible] = useState(false);
   const [schedulesList, setSchedulesList] = useState<ScheduleRecord[]>([]);
   const [registerScheduleChecked, setRegisterScheduleChecked] = useState(false);
-
-  const typeToKorean: Record<string, string> = {
-    wedding: '결혼',
-    funeral: '장례',
-    birthday: '생일',
-    firstBirthday: '돌',
-    birth: '출산',
-    other: '기타',
-  };
-
 
   const getScheduleIcon = (type: string) => {
     const t = resolveEventType(type);
@@ -920,7 +933,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               value={memo}
               onChangeText={setMemo}
               returnKeyType="default"
-              blurOnSubmit={false}
+              submitBehavior="newline"
               onFocus={scrollToEnd}
             />
           </View>
@@ -1050,7 +1063,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
           presentationStyle="pageSheet"
           onRequestClose={() => setContactModalVisible(false)}
         >
-          <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
+          <SafeAreaView style={[styles.modalContainer, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
             <View style={[styles.modalHeader, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
               <Text style={[styles.modalTitle, { color: colors.text }]}>연락처 선택</Text>
               <TouchableOpacity
@@ -1102,7 +1115,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               }
               contentContainerStyle={styles.contactList}
             />
-          </View>
+          </SafeAreaView>
         </Modal>
       )}
     </View>
