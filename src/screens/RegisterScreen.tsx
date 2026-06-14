@@ -11,7 +11,6 @@ import {
   Modal,
   FlatList,
   KeyboardAvoidingView,
-  Image,
   Pressable,
   Linking,
 } from 'react-native';
@@ -49,14 +48,12 @@ export interface RegisterInitialData {
 
 interface RegisterScreenProps {
   onClose?: () => void;
-  onSaved?: () => void;
   onGoToList?: () => void;
   initialData?: RegisterInitialData;
 }
 
 export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   onClose,
-  onSaved,
   onGoToList,
   initialData,
 }) => {
@@ -122,11 +119,6 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
     const callback = alertState.onConfirm;
     setAlertState({ visible: false, title: '' });
     callback?.();
-  };
-
-  const dismissAll = () => {
-    Keyboard.dismiss();
-    setIsCalendarOpen(false);
   };
 
   // 연락처 관련 state (모바일 전용)

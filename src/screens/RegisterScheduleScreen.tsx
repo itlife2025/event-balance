@@ -7,7 +7,6 @@ import {
   TextInput,
   useWindowDimensions,
   Keyboard,
-  Image,
   Pressable,
   Alert,
   Platform,
@@ -288,14 +287,6 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
     { key: 'birthday', label: '생일' },
     { key: 'funeral', label: '장례' },
   ] as const;
-
-  const typeToKorean: Record<string, string> = {
-    wedding: '결혼',
-    funeral: '장례',
-    birthday: '생일',
-    firstBirthday: '돌',
-    other: '기타',
-  };
 
   const isValid = Boolean(eventName && selectedDate && (selectedType || (isEventTypeDirectInput && customEventType.trim())));
 
@@ -626,7 +617,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
               onChangeText={setMemo}
               returnKeyType="done"
               onSubmitEditing={() => Keyboard.dismiss()}
-              blurOnSubmit={true}
+              submitBehavior="blurAndSubmit"
             />
           </View>
 

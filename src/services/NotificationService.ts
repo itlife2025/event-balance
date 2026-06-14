@@ -1,7 +1,11 @@
 import * as Notifications from 'expo-notifications';
-import { Platform, Alert, Linking, PermissionsAndroid } from 'react-native';
+import { Platform } from 'react-native';
 import { getAllSchedules, getSetting } from '../database/queries';
 import { getEventTypeLabel } from '../constants/eventTypes';
+
+// 알림은 항상 오전 9시에 전송된다.
+const NOTIF_HOUR = 9;
+const NOTIF_MINUTE = 0;
 
 const CHANNEL_ID = 'event-reminders';
 
@@ -46,42 +50,12 @@ async function ensureAndroidChannel() {
   }
 }
 
-async function checkExactAlarmPermission(): Promise<void> {
-  if (Platform.OS !== 'android' || Number(Platform.Version) < 31) return;
-  try {
-    const granted = await PermissionsAndroid.check(
-      'android.permission.SCHEDULE_EXACT_ALARM' as any,
-    );
-    if (granted) return;
-    Alert.alert(
-      '정확한 알림 권한 필요',
-      '자정처럼 기기가 절전 상태일 때도 정확한 시각에 알림을 받으려면 "알람 및 미리 알림" 권한이 필요합니다.',
-      [
-        { text: '나중에', style: 'cancel' },
-        {
-          text: '설정 열기',
-          onPress: async () => {
-            try {
-              await Linking.sendIntent('android.settings.REQUEST_SCHEDULE_EXACT_ALARM');
-            } catch {
-              Linking.openSettings();
-            }
-          },
-        },
-      ],
-    );
-  } catch {
-    // 일부 기기에서 권한 확인 자체가 실패할 수 있음 — 무시
-  }
-}
-
 export async function requestNotificationPermissions(): Promise<boolean> {
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   if (existingStatus !== 'granted') {
     const { status } = await Notifications.requestPermissionsAsync();
     if (status !== 'granted') return false;
   }
-  await checkExactAlarmPermission();
   return true;
 }
 
@@ -99,11 +73,9 @@ export async function scheduleAllNotifications(): Promise<void> {
   await ensureAndroidChannel();
   await Notifications.cancelAllScheduledNotificationsAsync();
 
-  const [enabledStr, timingsStr, hourStr, minuteStr, repeatStr] = await Promise.all([
+  const [enabledStr, timingsStr, repeatStr] = await Promise.all([
     getSetting('notification_enabled'),
     getSetting('notif_timings'),
-    getSetting('notif_hour'),
-    getSetting('notif_minute'),
     getSetting('notif_repeat_yearly'),
   ]);
 
@@ -113,8 +85,8 @@ export async function scheduleAllNotifications(): Promise<void> {
   if (status !== 'granted') return;
 
   const timings = (timingsStr ? timingsStr.split(',') : ['dday']) as TimingKey[];
-  const hour = hourStr !== null ? parseInt(hourStr, 10) : 9;
-  const minute = minuteStr !== null ? parseInt(minuteStr, 10) : 0;
+  const hour = NOTIF_HOUR;
+  const minute = NOTIF_MINUTE;
   const repeatYearly = repeatStr === '1';
 
   const now = new Date();

@@ -351,9 +351,6 @@ export const HomeScreen: React.FC = () => {
         return (
           <RegisterScreen
             onClose={goBack}
-            onSaved={() => {
-              goBack();
-            }}
             onGoToList={() => {
               setActiveTab('list');
             }}

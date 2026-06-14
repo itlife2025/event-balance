@@ -4,15 +4,12 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   useWindowDimensions,
   Switch,
   Linking,
   Platform,
   AppState,
   AppStateStatus,
-  Modal,
-  FlatList,
   Image,
 } from 'react-native';
 import { Text } from '../components/Text';
@@ -33,15 +30,6 @@ const TIMING_OPTIONS: { key: TimingKey; label: string }[] = [
   { key: 'dday', label: '당일' },
 ];
 
-const TIME_OPTIONS = Array.from({ length: 288 }, (_, i) => ({
-  hour: Math.floor(i / 12),
-  minute: (i % 12) * 5,
-}));
-
-function formatTime(h: number, m: number): string {
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-}
-
 interface SettingsScreenProps {
   onBackPress?: () => void;
   onDataReset?: () => void;
@@ -57,12 +45,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
   const [profileName, setProfileName] = useState('');
 
-  // Notification time settings
+  // Notification settings
   const [repeatYearly, setRepeatYearly] = useState(false);
   const [notifTimings, setNotifTimings] = useState<TimingKey[]>(['dday']);
-  const [notifHour, setNotifHour] = useState(9);
-  const [notifMinute, setNotifMinute] = useState(0);
-  const [showTimePicker, setShowTimePicker] = useState(false);
 
   // Alerts
   const [promptAlert, setPromptAlert] = useState(false);
@@ -80,21 +65,17 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
 
   useEffect(() => {
     (async () => {
-      const [notif, dark, name, repeat, timings, hour, minute] = await Promise.all([
+      const [notif, dark, name, repeat, timings] = await Promise.all([
         getSetting('notification_enabled'),
         getSetting('dark_mode_enabled'),
         getSetting('profile_name'),
         getSetting('notif_repeat_yearly'),
         getSetting('notif_timings'),
-        getSetting('notif_hour'),
-        getSetting('notif_minute'),
       ]);
       if (dark !== null) setDarkModeEnabled(dark === '1');
       setProfileName(name || '사용자');
       if (repeat !== null) setRepeatYearly(repeat === '1');
       if (timings) setNotifTimings(timings.split(',') as TimingKey[]);
-      if (hour) setNotifHour(parseInt(hour, 10));
-      if (minute) setNotifMinute(parseInt(minute, 10));
 
       const granted = await checkPermission();
       if (notif !== null) setNotificationEnabled(notif === '1' && granted);
@@ -145,17 +126,6 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
     if (next.length === 0) return;
     setNotifTimings(next);
     await setSetting('notif_timings', next.join(','));
-    scheduleAllNotifications().catch(() => {});
-  };
-
-  const handleSelectTime = async (h: number, m: number) => {
-    setShowTimePicker(false);
-    setNotifHour(h);
-    setNotifMinute(m);
-    await Promise.all([
-      setSetting('notif_hour', String(h)),
-      setSetting('notif_minute', String(m)),
-    ]);
     scheduleAllNotifications().catch(() => {});
   };
 
@@ -334,12 +304,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
                   </View>
                 </View>
 
-                {/* Notification time */}
-                <TouchableOpacity
-                  style={[styles.settingItem, isTablet && styles.settingItemTablet, { borderTopColor: colors.borderLight }]}
-                  onPress={() => setShowTimePicker(true)}
-                  activeOpacity={0.7}
-                >
+                {/* 알림 시간 안내 (오전 9시 고정) */}
+                <View style={[styles.settingItem, isTablet && styles.settingItemTablet, { borderTopColor: colors.borderLight }]}>
                   <View style={styles.settingLeft}>
                     <View style={[styles.settingIcon, isTablet && styles.settingIconTablet, { backgroundColor: colors.iconButtonBg }]}>
                       <Text style={styles.sectionIcon}>🕐</Text>
@@ -349,10 +315,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
                     </Text>
                   </View>
                   <Text style={[styles.settingValue, isTablet && styles.settingValueTablet, { color: colors.textTertiary }]}>
-                    {formatTime(notifHour, notifMinute)}
+                    오전 9:00
                   </Text>
-                  <ChevronRightIcon size={isTablet ? 22 : 20} color={colors.placeholder} />
-                </TouchableOpacity>
+                </View>
               </>
             )}
           </View>
@@ -390,37 +355,6 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
           </View>
         </ScrollView>
       </View>
-
-      {/* Time Picker Modal */}
-      <Modal transparent visible={showTimePicker} animationType="fade" onRequestClose={() => setShowTimePicker(false)}>
-        <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}>
-          {/* 배경 터치 시 닫기 — pickerContainer보다 먼저 렌더링되어 아래에 위치 */}
-          <TouchableWithoutFeedback onPress={() => setShowTimePicker(false)}>
-            <View style={StyleSheet.absoluteFillObject} />
-          </TouchableWithoutFeedback>
-          <View style={[styles.pickerContainer, { backgroundColor: colors.card }]}>
-            <FlatList
-              data={TIME_OPTIONS}
-              keyExtractor={(item) => `${item.hour}-${item.minute}`}
-              initialScrollIndex={Math.max(0, TIME_OPTIONS.findIndex(t => t.hour === notifHour && t.minute === notifMinute))}
-              getItemLayout={(_, index) => ({ length: 50, offset: 50 * index, index })}
-              renderItem={({ item }) => {
-                const selected = item.hour === notifHour && item.minute === notifMinute;
-                return (
-                  <TouchableOpacity
-                    style={[styles.pickerItem, selected && { backgroundColor: colors.primaryLight }]}
-                    onPress={() => handleSelectTime(item.hour, item.minute)}
-                  >
-                    <Text style={[styles.pickerItemText, { color: colors.text }, selected && { color: colors.primary, fontWeight: '700' }]}>
-                      {formatTime(item.hour, item.minute)}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              }}
-            />
-          </View>
-        </View>
-      </Modal>
 
       <CustomAlert
         visible={promptAlert}
@@ -596,36 +530,6 @@ const styles = StyleSheet.create({
   },
   timingChipTextActive: {
     color: '#6366F1',
-  },
-
-  // Picker Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.35)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  pickerContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    width: 160,
-    maxHeight: 300,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  pickerItem: {
-    height: 50,
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-  },
-  pickerItemText: {
-    fontSize: 18,
-    color: '#374151',
-    textAlign: 'center',
   },
 
   profileCard: {
