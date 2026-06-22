@@ -1,4 +1,4 @@
-import { getDatabase } from './database';
+import { getDatabase, withDbRetry } from './database';
 import { EVENT_TYPE_LABELS } from '../constants/eventTypes';
 
 export interface YearlyTotals {
@@ -490,11 +490,13 @@ export async function isOnboardingCompleted(): Promise<boolean> {
 }
 
 export async function setOnboardingCompleted(): Promise<void> {
-  const db = await getDatabase();
-  await db.runAsync(
-    'INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)',
-    ['onboarding_completed', '1']
-  );
+  await withDbRetry(async () => {
+    const db = await getDatabase();
+    await db.runAsync(
+      'INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)',
+      ['onboarding_completed', '1']
+    );
+  });
 }
 
 export interface ScheduleInput {
