@@ -221,6 +221,10 @@ const styles = StyleSheet.create({
   eventsContainer: {
     flexDirection: 'row',
     gap: 12,
+    // Android에서 ScrollView가 콘텐츠를 클리핑하므로, 카드의 elevation 그림자가
+    // 잘리지 않도록 위아래 여백을 확보한다 (둥근 모서리 하단 잘림 방지).
+    paddingTop: 4,
+    paddingBottom: 10,
   },
   eventsContainerTablet: {
     gap: 16,
