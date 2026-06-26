@@ -46,6 +46,8 @@ async function ensureAndroidChannel() {
       name: '일정 알림',
       importance: Notifications.AndroidImportance.HIGH,
       sound: 'default',
+      // 앱 아이콘 뱃지를 이 채널의 활성 알림 수로 OS가 자동 집계하도록 함.
+      showBadge: true,
     });
   }
 }
@@ -157,21 +159,27 @@ export async function scheduleAllNotifications(): Promise<void> {
     }
   }
 
-  // 날짜순 정렬 후 알림(대표 일정) 수를 badge로 할당.
-  // 같은 날짜+타이밍 일정은 1개 알림으로 합쳐지므로 badge도 알림 1개당 1씩 증가.
+  // 날짜순 정렬 (이른 알림부터 등록).
   pending.sort((a, b) => a.notifDate.getTime() - b.notifDate.getTime());
 
+  // 앱 아이콘 뱃지 처리 방식이 플랫폼마다 다름:
+  // - Android: OS가 채널의 활성(미확인) 알림 수를 뱃지로 자동 집계한다.
+  //   따라서 content.badge를 박으면 안 된다. 박을 경우, 앱 실행 때마다 재예약되면서
+  //   '이미 발송된 미확인 알림'이 pending 카운트에서 빠져 badge가 1부터 다시 매겨지고,
+  //   실제 미확인 수보다 작게(이전 캡처처럼 2건인데 1로) 표시되는 버그가 생긴다.
+  // - iOS: OS가 자동 집계하지 않아 content.badge가 유일한 뱃지 수단이므로 그대로 설정한다.
   const badgeScheduleIds = new Set<string>();
   for (let i = 0; i < pending.length; i++) {
     const { identifier, content, isYearly } = pending[i];
     // 동시 전달/순서 보장을 위해 알림마다 시각을 조금씩 어긋나게(+30s, +5s 간격) 둠
     const notifDate = new Date(pending[i].notifDate.getTime() + (i * 5 + 30) * 1000);
     badgeScheduleIds.add(identifier.split('-')[0]);
-    const badge = badgeScheduleIds.size;
+    const iosBadge = Platform.OS === 'ios' ? { badge: badgeScheduleIds.size } : {};
+    const fullContent = { ...content, ...iosBadge, data: { firedAt: notifDate.getTime() } };
     if (isYearly) {
       await Notifications.scheduleNotificationAsync({
         identifier,
-        content: { ...content, badge, data: { firedAt: notifDate.getTime() } },
+        content: fullContent,
         trigger: {
           type: Notifications.SchedulableTriggerInputTypes.YEARLY,
           month: notifDate.getMonth() + 1,
@@ -184,7 +192,7 @@ export async function scheduleAllNotifications(): Promise<void> {
     } else {
       await Notifications.scheduleNotificationAsync({
         identifier,
-        content: { ...content, badge, data: { firedAt: notifDate.getTime() } },
+        content: fullContent,
         trigger: {
           type: Notifications.SchedulableTriggerInputTypes.DATE,
           date: notifDate,
