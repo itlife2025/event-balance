@@ -107,6 +107,10 @@ export async function resetDatabase(): Promise<void> {
   const database = await getDatabase();
   await database.execAsync('DROP TABLE IF EXISTS events;');
   await database.execAsync('DROP TABLE IF EXISTS schedules;');
-  await database.execAsync('DROP TABLE IF EXISTS metadata;');
+  // metadata는 DROP하지 않고 사용자 데이터만 비운다.
+  // onboarding_completed 플래그는 보존해 초기화 후에도 온보딩이 다시 뜨지 않게 한다.
+  await database.execAsync(
+    "DELETE FROM metadata WHERE key != 'onboarding_completed';"
+  );
   await initDatabase();
 }
