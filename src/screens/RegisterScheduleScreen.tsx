@@ -15,7 +15,7 @@ import {
   Linking,
 } from 'react-native';
 import { Text } from '../components/Text';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { ChevronRightIcon, ChevronLeftIcon, CalendarIcon, SearchIcon, PhoneIcon } from '../components/Icons';
 import { Header } from '../components/Header';
 import { useTheme } from '../theme/ThemeContext';
@@ -143,6 +143,17 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
   const [contacts, setContacts] = useState<any[]>([]);
   const [contactSearch, setContactSearch] = useState('');
   const [filteredContacts, setFilteredContacts] = useState<any[]>([]);
+
+  // 화면 진입 시 연락처 권한이 undetermined이면 자동으로 시스템 다이얼로그 표시
+  useEffect(() => {
+    if (!isMobile || !Contacts) return;
+    (async () => {
+      const { status } = await Contacts.getPermissionsAsync();
+      if (status === 'undetermined') {
+        await Contacts.requestPermissionsAsync();
+      }
+    })();
+  }, []);
 
   const openContactPicker = async () => {
     if (!isMobile || !Contacts) return;
@@ -707,6 +718,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
           presentationStyle="pageSheet"
           onRequestClose={() => setContactModalVisible(false)}
         >
+          <SafeAreaProvider>
           <SafeAreaView style={[styles.modalContainer, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
             <View style={[styles.modalHeader, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
               <Text style={[styles.modalTitle, { color: colors.text }]}>연락처 선택</Text>
@@ -760,6 +772,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
               contentContainerStyle={styles.contactList}
             />
           </SafeAreaView>
+          </SafeAreaProvider>
         </Modal>
       )}
     </View>
