@@ -303,21 +303,6 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBackPress, onD
                     ))}
                   </View>
                 </View>
-
-                {/* 알림 시간 안내 (오전 9시 고정) */}
-                <View style={[styles.settingItem, isTablet && styles.settingItemTablet, { borderTopColor: colors.borderLight }]}>
-                  <View style={styles.settingLeft}>
-                    <View style={[styles.settingIcon, isTablet && styles.settingIconTablet, { backgroundColor: colors.iconButtonBg }]}>
-                      <Text style={styles.sectionIcon}>🕐</Text>
-                    </View>
-                    <Text style={[styles.settingLabel, isTablet && styles.settingLabelTablet, { color: colors.text }]}>
-                      알림 시간
-                    </Text>
-                  </View>
-                  <Text style={[styles.settingValue, isTablet && styles.settingValueTablet, { color: colors.textTertiary }]}>
-                    오전 9:00
-                  </Text>
-                </View>
               </>
             )}
           </View>

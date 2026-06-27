@@ -70,6 +70,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setHasUnread(false);
     setIsPanelOpen(true);
     seenScheduleIds.current.clear();
+    // 인앱 패널에서 확인 = 읽음 처리. 상태바 알림도 함께 비워서
+    // (OS가 활성 알림 수로 집계하는) 뱃지가 0으로 유지되도록 한다.
+    Notifications.dismissAllNotificationsAsync();
     Notifications.setBadgeCountAsync(0);
   }, []);
 
