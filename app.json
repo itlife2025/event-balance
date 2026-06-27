@@ -14,7 +14,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.eventbalance.app",
+      "bundleIdentifier": "com.lazyfactory.gyeongjovault",
+      "icon": "./assets/icon-transparent.png",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
