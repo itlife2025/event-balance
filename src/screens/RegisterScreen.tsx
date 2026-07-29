@@ -93,7 +93,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   const [calendarMonth, setCalendarMonth] = useState(initialDate.getMonth());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [amount, setAmount] = useState(() => {
-    if (initialData?.amount) return String(initialData.amount / 10000);
+    if (initialData?.amount) return String(initialData.amount);
     return '0';
   });
   const [isDirectInput, setIsDirectInput] = useState(false);
@@ -380,7 +380,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
     setSelectedQuickAmount(quickAmount);
     setAmount((prev) => {
       const current = parseInt(prev) || 0;
-      return String(current + quickAmount);
+      return String(current + quickAmount * 10000);
     });
   };
 
@@ -410,7 +410,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
         phone,
         type: eventType,
         date: dbDate,
-        amount: (parseInt(amount) || 0) * 10000,
+        amount: parseInt(amount) || 0,
         amountType,
         relationship: relation,
         memo,
@@ -845,11 +845,11 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                     returnKeyType="done"
                     onSubmitEditing={() => Keyboard.dismiss()}
                   />
-                  <Text style={[styles.inputText, { marginLeft: 8, color: colors.text }]}>만원</Text>
+                  <Text style={[styles.inputText, { marginLeft: 8, color: colors.text }]}>원</Text>
                 </View>
               ) : (
                 <Text style={[styles.amountDisplay, isTablet && styles.amountDisplayTablet, { color: colors.text }]}>
-                  ₩ {amount} 만원
+                  ₩ {Number(amount).toLocaleString()} 원
                 </Text>
               )}
             </View>

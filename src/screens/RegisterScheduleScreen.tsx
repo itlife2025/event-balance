@@ -7,6 +7,7 @@ import {
   TextInput,
   useWindowDimensions,
   Keyboard,
+  KeyboardAvoidingView,
   Pressable,
   Alert,
   Platform,
@@ -99,8 +100,15 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
 
   const isEditMode = !!initialData?.id;
 
+  const scrollViewRef = useRef<ScrollView>(null);
   const nameInputRef = useRef<TextInput>(null);
   const phoneInputRef = useRef<TextInput>(null);
+
+  const scrollToEnd = () => {
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 300);
+  };
 
   const today = useMemo(() => {
     const d = new Date();
@@ -344,14 +352,21 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header title={isEditMode ? "일정 수정" : "일정 등록"} />
 
-      <View style={styles.contentArea}>
+      <KeyboardAvoidingView
+        style={styles.contentArea}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
         <ScrollView
+          ref={scrollViewRef}
           style={styles.scrollView}
           contentContainerStyle={[
             styles.scrollContent,
             isTablet && styles.scrollContentTablet,
           ]}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          onScrollBeginDrag={() => Keyboard.dismiss()}
+          keyboardDismissMode="on-drag"
         >
           {/* Name Input */}
           <View style={[styles.sectionContainer, isTablet && styles.sectionContainerTablet]}>
@@ -629,6 +644,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
               returnKeyType="done"
               onSubmitEditing={() => Keyboard.dismiss()}
               submitBehavior="blurAndSubmit"
+              onFocus={scrollToEnd}
             />
           </View>
 
@@ -708,7 +724,7 @@ export const RegisterScheduleScreen: React.FC<RegisterScheduleScreenProps> = ({
             )}
           </View>
         </ScrollView>
-      </View>
+      </KeyboardAvoidingView>
 
       {/* 연락처 선택 모달 (모바일 전용) */}
       {isMobile && (

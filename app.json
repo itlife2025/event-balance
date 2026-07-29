@@ -2,7 +2,7 @@
   "expo": {
     "name": "경조금고",
     "slug": "event-balance",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -13,7 +13,7 @@
       "backgroundColor": "#6366F1"
     },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.lazyfactory.gyeongjovault",
       "icon": "./assets/icon-transparent.png",
       "infoPlist": {
@@ -33,6 +33,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/bc0db43d-bdd1-4ff8-ac46-5d1181f7b2d1"
     },
     "plugins": [
       "expo-dev-client",

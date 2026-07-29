@@ -10,7 +10,7 @@ import {
   Animated,
 } from 'react-native';
 import { Text } from '../components/Text';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { useTheme } from '../theme/ThemeContext';
 import { Swipeable } from 'react-native-gesture-handler';
 import { WeddingIcon, FuneralIcon, BirthIcon, BirthdayIcon, FirstBirthdayIcon, OtherIcon } from '../components/Icons';
@@ -178,7 +178,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <View style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         {/* Header */}
@@ -378,7 +378,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({
         message="삭제에 실패했습니다."
         onConfirm={() => setErrorAlert(false)}
       />
-    </SafeAreaView>
+    </View>
   );
 };
 
